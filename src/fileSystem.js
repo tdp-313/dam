@@ -48,7 +48,7 @@ const read_from_handle = async () => {
     EventID = typeof (calendar_source.id) === 'number' ? calendar_source.id : 0;
     window.calendar.addEventSource(calendar_source.event);
     window.calendar.setOption('editable', true);
-    read_todayEvents(calendar_source.event);
+    worker.postMessage(JSON.stringify(calendar_source.event));
     linkStatus.data.calendar.first_read = true;
   }
 }

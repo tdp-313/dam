@@ -57,7 +57,7 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
     mainArea.replaceWith(container);*/
 });
 
-//const worker = new Worker('./src/worker.js');
+const worker = new Worker('./src/worker.js');
 
 window.onload = () => {
     disp_notificationPermisson();
@@ -66,13 +66,11 @@ window.onload = () => {
     notification_initilize();
     //mainArea.html(home_html());
 }
-/*
+
 worker.addEventListener('message', (e) => {
     console.log(e.data);
     if (linkStatus.data.calendar.first_read && linkStatus.eventChange) {
-        //worker.postMessage(JSON.stringify(window.calendar.getEvents()));
-        read_todayEvents(window.calendar.getEvents());
+        worker.postMessage(JSON.stringify(window.calendar.getEvents()));
         linkStatus.eventChange = false;
     }
   }, false);
-*/
