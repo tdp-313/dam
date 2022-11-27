@@ -63,7 +63,6 @@ window.onload = () => {
     disp_notificationPermisson();
     let mainArea = $('#renderArea');
     $('#calendarObject').addClass('displayhide');
-    notification_initilize();
     //mainArea.html(home_html());
 }
 
