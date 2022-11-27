@@ -1,0 +1,180 @@
+#calendar {
+  max-width: 1400px;
+  margin: 0rem auto;
+}
+
+#calendarObject {
+  display: flex;
+  position: relative;
+  padding-right: 4rem;
+  flex-direction: column;
+}
+
+#task_edit_sidebar {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  height: max-content;
+  width: 20rem;
+  right: -22rem;
+  border-radius: 1rem 0 0 1rem;
+  padding: 1rem;
+  z-index: 99;
+  background-color: var(--navibar-color);
+  transition: 0.3s all ease;
+  font-size: 1.15rem;
+}
+
+.mainArea_to_task_edit_sidebar_Visible {
+  padding-right: 20rem !important;
+}
+
+.taskEdit_Visible {
+  right: 0rem !important;
+}
+
+#taskEdit_close {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 1rem 1rem 1rem 0;
+  /*border-bottom: 0.2rem solid var(--third-color);*/
+  user-select: none;
+}
+
+.taskAddControlArea {
+  display: flex;
+  user-select: none;
+  margin: 1rem 0;
+  justify-content: space-around;
+}
+
+#task_add_addButton {
+  display: flex;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  width: 6rem;
+  border-radius: 0.5rem;
+  background-color: #DBE8AE;
+  box-shadow: 0px 0.2rem 0.2rem 0px rgba(0, 0, 0, 0.2);
+}
+
+#task_add_editButton {
+  display: flex;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  width: 6rem;
+  border-radius: 0.5rem;
+  background-color: #D9C1E6;
+  box-shadow: 0px 0.2rem 0.2rem 0px rgba(0, 0, 0, 0.2);
+}
+
+#task_add_deleteButton {
+  display: flex;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  width: 3rem;
+  padding: 0.3rem;
+  border-radius: 0.5rem;
+  background-color: #E6B391;
+  box-shadow: 0px 0.2rem 0.2rem 0px rgba(0, 0, 0, 0.2);
+}
+
+.taskDateInputArea {
+  display: flex;
+  justify-content: space-around;
+}
+
+#task_edit_sidebar .taskDateInput {
+  font-size: 1.5rem;
+}
+
+#task_edit_sidebar .taskTimeInput {
+  font-size: 1.5rem;
+}
+
+#textEdit_ID,
+#textEdit_Title {
+  background-color: transparent;
+  border: 0;
+  width: max-content;
+  font-size: 1.2rem;
+}
+
+#task_add_Title {
+  border: 0;
+  border-bottom: solid black;
+  font-size: 1.2rem;
+  padding: 0.1rem;
+  height: 2rem;
+}
+
+.task_edit_sidebarEndtimeArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.5rem 0;
+  user-select: none;
+}
+
+.taskAdd_editTargetDisp {
+  display: grid;
+  grid-template-columns: 3.5rem auto;
+  margin: 0.5rem 0;
+  align-items: center;
+}
+#task_add_OptionControl {
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+.task_add_Option {
+  height: 0;
+  overflow: hidden;
+}
+.task_add_Option_Visible {
+  height: max-content!important;
+}
+.task_addOptionArea {
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+.task_add_colorArea {
+  display: grid;
+  grid-template-columns: 5rem auto;
+  align-items: center;
+  justify-items: center;
+}
+#task_add_eventColor, #task_add_backgroundColor,
+#task_add_borderColor, #task_add_textColor {
+  width: 50%;
+  margin: 0.2rem 0;
+}
+#task_add_Description {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 1.1rem;
+  width: 100%;
+  resize: none;
+}
+.folderLinkArea {
+  display: flex;
+  align-items: center;
+}
+#folderLink_Open {
+  margin-bottom: 1rem;
+}
+#folderLink_Message {
+  display: flex;
+  align-items: center;
+}
+.folderLink_Open_item {
+  color: red;
+}
+.fc-day-sun ,.fc-day-sat{
+  width: 5rem;
+}

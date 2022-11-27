@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>dam</title>
+  <!--JQuery-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <!--Goole Fonts-->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,500,0,0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+  <!--IDB-Keyval-->
+  <script src="https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js"></script>
+
+  <script src='./src/fileSystem.js'></script>
+  <!--FullCalendar-->
+  <script src='./src/calendar/lib/main.js'></script>
+  <link rel="stylesheet" href="./src/calendar/lib/locales-all.js" />
+  <link rel="stylesheet" href="./src/calendar/lib/main.css" />
+
+  <script src="./src/calendar/main.js"></script>
+  <script src="./src/calendar/notification.js"></script>
+  <link rel="stylesheet" href="./src/calendar/calendar.css" />
+  <!--Grid js-->
+  <script src='https://unpkg.com/gridjs/dist/gridjs.umd.js'></script>
+  <link rel="stylesheet" href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" />
+
+  <script src='./src/calendar/calendar_history.js'></script>
+  <!--jKanban-->
+  <script src='./src/jkanban/jkanban.js'></script>
+  <script src='./src/jkanban/jkanban_main.js'></script>
+  <link rel="stylesheet" href="./src/jkanban/jkanban.css" />
+  <!--SpecBuilder-->
+  <script src='./src/specbuilder/main.js'></script>
+  <link rel="stylesheet" href="./src/specbuilder/main.css" />
+  <!--Marked js-->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!--Other-->
+  <link rel="stylesheet" href="./src/main.css" />
+  <script src='./src/index.js'></script>
+  <script src='./src/home.js'></script>
+
+</head>
+
+<body>
+  <div class="naviArea" id="naviArea">
+    <li class="navi-button hamberger">
+      <div class="folderLinkArea">
+        <span class="material-symbols-outlined fontsize_Large" id="notifications_Icon">notifications_off</span>
+      </div>
+      <div class="hambergerPosition" id="hamberger">
+        <span class="material-symbols-outlined fontsize_Large">menu</span>
+      </div>
+    </li>
+    <li class="navi-button" id="folderLink_Open">
+      <div>
+        <div id="folderLink_Message" class="folderLink_Open_item">Yet</div>
+      </div>
+      <div class="hambergerPosition">
+        <span class="material-symbols-outlined fontsize_Large folderLink_Open_item">folder_open</span>
+      </div>
+    </li>
+    <li class="navi-button" id="bnavi-home">
+      <div>Home</div>
+      <div class="hambergerPosition">
+        <span class="material-symbols-outlined fontsize_Large">home</span>
+      </div>
+    </li>
+    <li class="navi-button" id="bnavi-calendar">
+      <div>Calendar</div>
+      <div class="hambergerPosition">
+        <span class="material-symbols-outlined fontsize_Large">calendar_month</span>
+      </div>
+    </li>
+    <li class="navi-button" id="bnavi-calendar_history">
+      <div>Task Setting</div>
+      <div class="hambergerPosition">
+        <span class="material-symbols-outlined fontsize_Large">manage_history</span>
+      </div>
+    </li>
+    <li class="navi-button" id="bnavi-task">
+      <div>kanban</div>
+      <div class="hambergerPosition">
+        <span class="material-symbols-outlined fontsize_Large">task</span>
+      </div>
+    </li>
+    <li class="navi-button" id="bnavi-folder">
+      <div>Folder</div>
+      <div class="hambergerPosition">
+        <span class="material-symbols-outlined fontsize_Large">folder</span>
+      </div>
+    </li>
+  </div>
+  <div id="mainArea">
+    <div id="renderArea"></div>
+    <div id="calendarObject">
+      <div id='calendar'></div>
+      <div id="task_edit_sidebar">
+        <div id="taskEdit_close"><span class="material-symbols-outlined fontsize_Large">keyboard_arrow_right</span>閉じる
+        </div>
+        <div id='external-events'>
+          <div id='external-events-list'>
+            <div class='fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event' id='drag_add_object_color'>
+              <div class='fc-event-main' id='drag_add_object'>追加</div>
+            </div>
+          </div>
+        </div>
+        <div class="">+ Title</div>
+        <input type="text" id="task_add_Title"></input>
+        <div>Start</div>
+        <div class="taskDateInputArea"><input class="taskDateInput" id="task_add_StartDayInput"
+            type="date"></input><input class="taskTimeInput" id="task_add_StartTimeInput" type="time"
+            step="300"></input></div>
+        <div>End</div>
+        <div class="taskDateInputArea"><input class="taskDateInput" id="task_add_EndDayInput" type="date"></input><input
+            class="taskTimeInput" id="task_add_EndTimeInput" type="time" step="300"></input></div>
+        <div class="task_edit_sidebarEndtimeArea">
+          <label for="task_add_Endtime">終日設定</label>
+          <label class="switch__label">
+            <input type="checkbox" class="switch__input" id='task_add_Endtime' />
+            <span class="switch__content"></span>
+            <span class="switch__circle"></span>
+          </label>
+        </div>
+        <div>
+          <textarea id="task_add_Description" name="textarea" rows="3" placeholder="イベントの説明"></textarea>
+        </div>
+        <div class="task_addOptionArea">
+          <div id="task_add_OptionControl_Style"><span class="material-symbols-outlined">
+              arrow_drop_down
+            </span><span>表示スタイル</span></div>
+          <div id="task_add_Option_Style" class="task_add_Option">
+            <fieldset>
+              <div>
+                <input type="radio" id="task_add_dispFotmat_auto" name="task_add_dispFotmat" value="auto" checked>
+                <label for="task_add_dispFotmat_auto">auto</label>
+              </div>
+              <div>
+                <input type="radio" id="task_add_dispFotmat_block" name="task_add_dispFotmat" value="block">
+                <label for="task_add_dispFotmat_block">Block</label>
+              </div>
+              <div>
+                <input type="radio" id="task_add_dispFotmat_listitem" name="task_add_dispFotmat" value="list-item">
+                <label for="task_add_dispFotmat_listitem">List-item</label>
+              </div>
+              <div>
+                <input type="radio" id="task_add_dispFotmat_background" name="task_add_dispFotmat" value="background">
+                <label for="task_add_dispFotmat_background">background</label>
+              </div>
+            </fieldset>
+          </div>
+          <div class="task_addOptionArea">
+            <div id="task_add_OptionControl_Color"><span class="material-symbols-outlined">
+                arrow_drop_down
+              </span><span>カラー</span></div>
+            <div id="task_add_Option_Color" class="task_add_Option">
+              <fieldset>
+                <div class="task_add_colorArea">
+                  <label for="task_add_backgroundColor">背景</label>
+                  <input type="color" id="task_add_backgroundColor">
+                  <label for="task_add_borderColor">枠線</label>
+                  <input type="color" id="task_add_borderColor">
+                  <label for="task_add_textColor">文字</label>
+                  <input type="color" id="task_add_textColor">
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+
+        <div class="taskAddControlArea">
+          <div id="task_add_addButton"><span class="material-symbols-outlined fontsize_Large">library_add_check</span>追加
+          </div>
+          <div id="task_add_editButton"><span class="material-symbols-outlined fontsize_Large">edit</span>編集</div>
+          <div id="task_add_deleteButton"><span class="material-symbols-outlined fontsize_Large">delete</span></div>
+        </div>
+        <div class="taskAdd_editTargetDisp">
+          <div>ID:</div>
+          <div id="textEdit_ID"></div>
+          <div>Title:</div>
+          <div id="textEdit_Title"></div>
+        </div>
+      </div>
+      <div id='calendar2'></div>
+    </div>
+    <!--Develop Space Start-->
+    <template>
+      <div id="specBuilderSetting">
+        <h1>SpecBuilder Setting File</h1>
+        <div id="specBuilder_Contents">
+          <div>
+            <li class="specBuilder_Contents_item">
+              <div class="flex">
+                <div class="specBuilder_FolderTitle">EA-XXXXXX</div>
+                <!--div class="specBuilder_FolderDescription">あんなことやこんなこと</div-->
+              </div>
+              <div class="flex">
+                <div>2022/11/11 17:00:35</div>
+                <div class="material-symbols-outlined padding-">edit</div>
+              </div>
+            </li>
+          </div>
+        </div>
+      </div>
+    </template>
+    <!--Develop Space End-->
+  </div>
+</body>
+
+</html>
