@@ -37,6 +37,7 @@
   <!--SpecBuilder-->
   <script src='./src/specbuilder/main.js'></script>
   <link rel="stylesheet" href="./src/specbuilder/main.css" />
+  <script src="./src/screenCapture.js"></script>
   <!--Marked js-->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -44,17 +45,18 @@
   <link rel="stylesheet" href="./src/main.css" />
   <script src='./src/index.js'></script>
   <script src='./src/home.js'></script>
-
+  <script src="./src/wakelock.js"></script>
 </head>
 
 <body>
   <div class="naviArea" id="naviArea">
     <li class="navi-button hamberger">
       <div class="folderLinkArea">
-        <span class="material-symbols-outlined fontsize_Large" id="notifications_Icon">notifications_off</span>
+        <span class="material-symbols-outlined fontsize_Large padding-medium" id="notifications_Icon">notifications_off</span>
+        <span class="material-symbols-outlined" id="screenLock_Icon" style="color:red">browse_activity</span>
       </div>
       <div class="hambergerPosition" id="hamberger">
-        <span class="material-symbols-outlined fontsize_Large">menu</span>
+        <span class="material-symbols-outlined fontsize_Large padding-medium">menu</span>
       </div>
     </li>
     <li class="navi-button" id="folderLink_Open">
@@ -93,6 +95,12 @@
       <div>Folder</div>
       <div class="hambergerPosition">
         <span class="material-symbols-outlined fontsize_Large">folder</span>
+      </div>
+    </li>
+    <li class="navi-button" id="bnavi-PiP">
+      <div>PiP</div>
+      <div class="hambergerPosition">
+        <span class="material-symbols-outlined fontsize_Large">picture_in_picture_alt</span>
       </div>
     </li>
   </div>
@@ -189,25 +197,14 @@
       <div id='calendar2'></div>
     </div>
     <!--Develop Space Start-->
-    <template>
-      <div id="specBuilderSetting">
-        <h1>SpecBuilder Setting File</h1>
-        <div id="specBuilder_Contents">
-          <div>
-            <li class="specBuilder_Contents_item">
-              <div class="flex">
-                <div class="specBuilder_FolderTitle">EA-XXXXXX</div>
-                <!--div class="specBuilder_FolderDescription">あんなことやこんなこと</div-->
-              </div>
-              <div class="flex">
-                <div>2022/11/11 17:00:35</div>
-                <div class="material-symbols-outlined padding-">edit</div>
-              </div>
-            </li>
-          </div>
-        </div>
-      </div>
-    </template>
+    <div id="Picture_in_Picture" class="displayhide">
+        <h1>Picture in Picture</h1>
+        <h3>ただ画面をPiP表示できるだけ。</h3>
+        
+        <p><button id="Picture_in_Picture_start">Start Capture</button>&nbsp;<button id="Picture_in_Picture_stop">Stop Capture</button></p>
+        
+        <video id="Picture_in_Picture_video" controls autoplay playsinline muted="false" volume=0></video>
+    </div>
     <!--Develop Space End-->
   </div>
 </body>

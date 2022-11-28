@@ -66,3 +66,32 @@ $(document).on('click', 'li[id^="specBuilder_Directory_"]', async (e) => {
     }
 });
   
+class specbuilder_setting {
+    constructor(name) {
+        this.project = name;
+        this.editProgram = [];
+    }
+}
+class program_detail {
+    constructor(name) {
+        this.name = name;
+        if (name.substring(0, 1) === '#') {
+            
+        }
+        else {
+            if (name.length > 3) {
+                if (name.substring(name.length - 3, name.length) === 'DSP') {
+                    this.type = 'DSPF';
+                } else if (name.substring(name.length - 1, name.length) === 'P') {
+                    this.type = 'DDSP';
+                } else if (name.substring(name.length - 2, name.length -3 ) === 'L') {
+                    this.type = 'DSPL';
+                } else {
+                    this.type = 'RPG';   
+                }
+            } else {
+                this.type = 'RPG';       
+            }
+        }
+    }
+}

@@ -23,6 +23,7 @@ let Sidemenu_Visible = false;
 $(document).on('click', '[id^="bnavi-"]', async (e) => {
     let mainArea = $('#renderArea');
     $('#calendarObject').addClass('displayhide');
+    $('#Picture_in_Picture').addClass('displayhide');
     switch (e.currentTarget.id.substring(6,e.currentTarget.id.length)) {
         case 'home':
             mainArea.html(home_html());
@@ -42,6 +43,10 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
         case 'calendar_history':
             mainArea.html('<div id="calendar_history"></div>');
             calendar_history_start();
+            break;
+        case 'PiP':
+            mainArea.html("");
+            $('#Picture_in_Picture').removeClass('displayhide');
             break;
         default:
             break;
@@ -64,7 +69,9 @@ window.onload = () => {
     let mainArea = $('#renderArea');
     $('#calendarObject').addClass('displayhide');
     //mainArea.html(home_html());
+    video_start();
 }
+
 
 worker.addEventListener('message', (e) => {
     console.log(e.data);
@@ -72,4 +79,17 @@ worker.addEventListener('message', (e) => {
         worker.postMessage(JSON.stringify(window.calendar.getEvents()));
         linkStatus.eventChange = false;
     }
-  }, false);
+}, false);
+let screenLockToggle = false;
+$(document).on('click', '#screenLock_Icon', (e) => { 
+    if (screenLockToggle) {
+        wakelockRelease();   
+    } else {
+        wakelockRequest();
+    }
+    if (screenLockToggle) {
+        $('#screenLock_Icon').css('color', 'red');
+    } else {
+        $('#screenLock_Icon').css('color', 'green');
+    }
+});
