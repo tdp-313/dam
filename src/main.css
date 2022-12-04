@@ -148,9 +148,15 @@ li.hamberger {
 .flex {
     display: flex;
 }
+.flex_aligincenter {
+    display: flex;
+    align-items: center;
+}
 .padding-medium {
     padding: 0 0.5rem;
 }
+
+/*------------------------------**/
 #Picture_in_Picture {
     margin: 0 3rem 3rem ;
 }

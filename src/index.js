@@ -37,12 +37,12 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
             window.calendar.changeView('dayGridMonth');
             break;
         case 'task':
-            mainArea.html('<div id="myKanban"></div>')
-            Kanban_Start();
+            mainArea.html(await kanban_html());
+            await Kanban_Start();
             break;
         case 'calendar_history':
             mainArea.html('<div id="calendar_history"></div>');
-            calendar_history_start();
+            await calendar_history_start();
             break;
         case 'PiP':
             mainArea.html("");

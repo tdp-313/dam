@@ -1,5 +1,7 @@
 let defaultColor = { backgroundColor: '#3788d8', borderColor: '#216868', textColor: '#ffffff' };
 document.addEventListener('DOMContentLoaded', function () {
+  //
+  //Kanban_Start();
   //Sidebar Initialize
   $('#task_add_textColor').val(defaultColor.textColor);
   $('#task_add_borderColor').val(defaultColor.borderColor);

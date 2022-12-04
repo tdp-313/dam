@@ -1,8 +1,9 @@
-const Kanban_Start = () => {
+const Kanban_Start = async () => {
     var KanbanTest = new jKanban({
         element: "#myKanban",
-        gutter: "10px",
-        widthBoard: "450px",
+        responsivePercentage: true, // trueを選択時はカラム幅は％で指定され、gutterとwidthBoardの設定は不要
+        dragItems: true,            // trueを選択時はカードをドラッグ可能
+        dragBoards: true,            // カラムをドラッグ可能にするかどうか
         itemHandleOptions: {
             enabled: true,
         },
@@ -20,7 +21,7 @@ const Kanban_Start = () => {
             var formItem = document.createElement("form");
             formItem.setAttribute("class", "itemform");
             formItem.innerHTML =
-                '<div class="form-group"><textarea class="form-control" rows="2" autofocus></textarea></div><div class="form-group"><button type="submit" class="btn btn-primary btn-xs pull-right">Submit</button><button type="button" id="CancelBtn" class="btn btn-default btn-xs pull-right">Cancel</button></div>';
+                '<div class="form-group kanban_add"><textarea class="form-control kanban_add_textarea" rows="2" autofocus></textarea><div class="flex_aligincenter"><button type="submit" class="btn btn-primary btn-xs pull-right flex_aligincenter padding-medium"><span class="material-symbols-outlined padding-medium">add_task</span>追加</button><button type="button" id="CancelBtn" class="btn btn-default btn-xs pull-right flex_aligincenter padding-medium"><span class="material-symbols-outlined padding-medium">cancel</span>キャンセル</button><div></div>';
     
             KanbanTest.addForm(boardId, formItem);
             formItem.addEventListener("submit", function (e) {
@@ -37,9 +38,9 @@ const Kanban_Start = () => {
         },
         itemAddOptions: {
             enabled: true,
-            content: '+ Add New Card',
-            class: 'custom-button',
-            footer: true
+            content: 'note_add',
+            class: 'custom-button material-symbols-outlined',
+            footer: false
         },
         boards: [
             {
@@ -127,7 +128,6 @@ const Kanban_Start = () => {
             }
         ]);
     });
-    
     var removeBoard = document.getElementById("removeBoard");
     removeBoard.addEventListener("click", function () {
         KanbanTest.removeBoard("_done");
@@ -143,4 +143,13 @@ const Kanban_Start = () => {
         //console.log(item);
     });
     */
+}
+const kanban_html = async () => {
+    let html = '';
+    html += ' <div class="flex_aligincenter">';
+    html += '<h1 class="padding-medium">Kanban</h1>';
+    html += '<span class="material-symbols-outlined fontsize_Large" id="kanban_savebutton">save</span>';
+    html += '</div>';
+    html += '<div id="myKanban"></div>';
+    return html;
 }
