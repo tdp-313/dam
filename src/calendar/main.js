@@ -1,4 +1,4 @@
-let defaultColor = { backgroundColor: '#3788d8', borderColor: '#216868', textColor: '#ffffff' };
+let defaultColor = { backgroundColor: '#3788d8', borderColor: '#3788d8', textColor: '#ffffff' };
 document.addEventListener('DOMContentLoaded', function () {
   //
   //Kanban_Start();
@@ -196,7 +196,9 @@ $(document).on('click', '#task_add_addButton', async (e) => {
 });
 
 $(document).on('click', '#task_add_editButton', async (e) => {
-  replace_eventEditSideBar($('#textEdit_ID').text());
+  //save button
+  //replace_eventEditSideBar($('#textEdit_ID').text());
+  eventdata_updateEvent(window.calendar.getEvents());
 });
 
 $(document).on('click', '#task_add_deleteButton', async (e) => {
@@ -326,14 +328,41 @@ $(document).on('click', '#task_add_OptionControl_Color', async () => {
   if (taslEdit_option_close_color) {
     //hidden -> visible
     $('#task_add_Option_Color').addClass('task_add_Option_Visible');
+    $('#task_add_colorsync').removeClass('displayhide');
     taslEdit_option_close_color = false;
   } else {
     $('#task_add_Option_Color').removeClass('task_add_Option_Visible');
+    $('#task_add_colorsync').addClass('displayhide');
     taslEdit_option_close_color = true;
   }
 });
 
+var taskEdit_option_colorsync = true;
+$(document).on('click', '#task_add_colorsync', async () => {
+  if (taskEdit_option_colorsync) {
+    $('#task_add_colorsync_icon').text('lock_open');
+    $('#task_add_colorsync').addClass('red_color');
+    $('#task_add_colorsync_chain').addClass('transparent_border');
+    taskEdit_option_colorsync = false;
+  } else {
+
+    $('#task_add_colorsync_icon').text('lock');
+    $('#task_add_colorsync').removeClass('red_color');
+    $('#task_add_colorsync_chain').removeClass('transparent_border');
+    taskEdit_option_colorsync = true;
+  }
+});
+
 $(document).on('change', 'input[id^="task_add"]', async (e) => {
+  if (taskEdit_option_colorsync) {
+    if (e.target.id === 'task_add_backgroundColor') {
+      $('#task_add_borderColor').val($('#task_add_backgroundColor').val());
+    }
+    else if (e.target.id === 'task_add_borderColor') {
+      $('#task_add_backgroundColor').val($('#task_add_borderColor').val());
+    }
+  }
+
   //更新
   let id = $('#textEdit_ID').text();
   if (id !== '') {

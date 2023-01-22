@@ -1,5 +1,12 @@
 const Kanban_Start = async () => {
-    var KanbanTest = new jKanban({
+    await Directory_Handle_Registr();
+    let load_boards = await file_read_json('kanban.json', linkStatus.handle);
+    if (load_boards.length > 0) {
+        dispboards = load_boards;
+        console.log('load kanban');
+    }
+
+    window.Kanban = new jKanban({
         element: "#myKanban",
         responsivePercentage: true, // trueを選択時はカラム幅は％で指定され、gutterとwidthBoardの設定は不要
         dragItems: true,            // trueを選択時はカードをドラッグ可能
@@ -22,12 +29,12 @@ const Kanban_Start = async () => {
             formItem.setAttribute("class", "itemform");
             formItem.innerHTML =
                 '<div class="form-group kanban_add"><textarea class="form-control kanban_add_textarea" rows="2" autofocus></textarea><div class="flex_aligincenter"><button type="submit" class="btn btn-primary btn-xs pull-right flex_aligincenter padding-medium"><span class="material-symbols-outlined padding-medium">add_task</span>追加</button><button type="button" id="CancelBtn" class="btn btn-default btn-xs pull-right flex_aligincenter padding-medium"><span class="material-symbols-outlined padding-medium">cancel</span>キャンセル</button><div></div>';
-    
-            KanbanTest.addForm(boardId, formItem);
+
+                Kanban.addForm(boardId, formItem);
             formItem.addEventListener("submit", function (e) {
                 e.preventDefault();
                 var text = e.target[0].value;
-                KanbanTest.addElement(boardId, {
+                Kanban.addElement(boardId, {
                     title: text
                 });
                 formItem.parentNode.removeChild(formItem);
@@ -42,63 +49,8 @@ const Kanban_Start = async () => {
             class: 'custom-button material-symbols-outlined',
             footer: false
         },
-        boards: [
-            {
-                id: "_todo",
-                title: "To Do (Can drop item only in working)",
-                class: "info,good",
-                dragTo: ["_working"],
-                item: [
-                    {
-                        id: "_test_delete",
-                        title: "Try drag this (Look the console)",
-                        drag: function (el, source) {
-                            console.log("START DRAG: " + el.dataset.eid);
-                        },
-                        dragend: function (el) {
-                            console.log("END DRAG: " + el.dataset.eid);
-                        },
-                        drop: function (el) {
-                            console.log("DROPPED: " + el.dataset.eid);
-                        }
-                    },
-                    {
-                        title: "Try Click This!",
-                        click: function (el) {
-                            alert("click");
-                        },
-                        class: ["peppe", "bello"]
-                    }
-                ]
-            },
-            {
-                id: "_working",
-                title: "Working (Try drag me too)",
-                class: "warning",
-                item: [
-                    {
-                        title: "Do Something!"
-                    },
-                    {
-                        title: "Run?"
-                    }
-                ]
-            },
-            {
-                id: "_done",
-                title: "Done (Can drop item only in working)",
-                class: "success",
-                dragTo: ["_working"],
-                item: [
-                    {
-                        title: "All right"
-                    },
-                    {
-                        title: "Ok!"
-                    }
-                ]
-            }
-        ]
+        boards: dispboards,
+
     });
     /*
     var toDoButton = document.getElementById("addToDo");
@@ -143,11 +95,62 @@ const Kanban_Start = async () => {
         //console.log(item);
     });
     */
+    $(document).on('click', '#kanban_savebutton', async () => {
+        console.log('kanban saved');
+        file_save_json('kanban.json',await get_kanbandata(),linkStatus.handle);
+      });
 }
+const get_kanbandata  = async ()=> {{
+    const obj = Kanban.element;
+    let boards = []
+    obj.querySelectorAll('.kanban-board').forEach(el => {
+        let items = []
+        el.querySelectorAll('.kanban-item').forEach(i => {
+            console.log(i);
+            items.push({
+                title: i.childNodes[1].innerHTML,
+            })
+        })
+        boards.push({
+            id: el.getAttribute('data-id'),
+            title: el.querySelector('.kanban-title-board').innerHTML,
+            items,
+        })
+    })
+    return boards;
+}
+}
+let dispboards =
+    [
+        {
+            id: "_todo",
+            title: "To Do",
+            class: "info,good",
+            dragTo: ["_working"],
+            item: [{
+                title:'test'
+            }]
+        },
+        {
+            id: "_working",
+            title: "Working",
+            class: "warning",
+            item: []
+        },
+        {
+            id: "_done",
+            title: "Done",
+            class: "success",
+            dragTo: ["_working"],
+            item: []
+        }
+    ];
+
+
 const kanban_html = async () => {
     let html = '';
-    html += ' <div class="flex_aligincenter">';
-    html += '<h1 class="padding-medium">Kanban</h1>';
+    html += '<div class="flex_aligincenter" id="kanban_header">';
+    html += '<span class="padding-medium fontsize_Large">Kanban</span>';
     html += '<span class="material-symbols-outlined fontsize_Large" id="kanban_savebutton">save</span>';
     html += '</div>';
     html += '<div id="myKanban"></div>';

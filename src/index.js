@@ -24,6 +24,7 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
     let mainArea = $('#renderArea');
     $('#calendarObject').addClass('displayhide');
     $('#Picture_in_Picture').addClass('displayhide');
+    $('#mergely-root').addClass('displayhide');
     switch (e.currentTarget.id.substring(6,e.currentTarget.id.length)) {
         case 'home':
             mainArea.html(home_html());
@@ -48,6 +49,11 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
             mainArea.html("");
             $('#Picture_in_Picture').removeClass('displayhide');
             break;
+        case 'diff':
+            mainArea.html('');
+            $('#mergely-root').removeClass('displayhide');
+            $('#mergely').mergely('resize');
+            break;
         default:
             break;
     }
@@ -64,12 +70,14 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
 
 const worker = new Worker('./src/worker.js');
 
-window.onload = () => {
+window.onload = async () => {
     disp_notificationPermisson();
     let mainArea = $('#renderArea');
     $('#calendarObject').addClass('displayhide');
-    //mainArea.html(home_html());
+    $('#mergely-root').addClass('displayhide');
+    mergely_render();
     video_start();
+
 }
 
 
@@ -81,6 +89,7 @@ worker.addEventListener('message', (e) => {
     }
 }, false);
 let screenLockToggle = false;
+
 $(document).on('click', '#screenLock_Icon', (e) => { 
     if (screenLockToggle) {
         wakelockRelease();   

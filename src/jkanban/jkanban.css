@@ -1,8 +1,8 @@
 #kanban_savebutton {
   border:0.2rem solid var(--third-color);
   background-color: var(--navibar-color);
-  border-radius: 50%;
-  padding: 0.7rem;
+  border-radius: 5rem;
+  padding:0 0.5rem;
   width: 2rem;
   height: 2rem;
 }
@@ -13,6 +13,10 @@
 .kanban_add_textarea {
   font-size: 1rem;
   font-family: 'Noto Sans JP', sans-serif;
+}
+#kanban_header {
+  border-bottom: 0.2rem solid;
+  margin-bottom: 0.5rem;
 }
 /*-------------*/
 .kanban-container {

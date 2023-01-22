@@ -151,6 +151,25 @@
   align-items: center;
   justify-items: center;
 }
+.task_add_colorsync_a {
+  position: absolute;
+  user-select: none;
+}
+.task_add_colorsync_r {
+  position: relative;
+  display: flex;
+  align-items: center;
+  bottom: 5.2rem;
+  left :15rem
+}
+#task_add_colorsync_chain{
+  display: block;
+  width: 0.5rem;
+  height: 2rem;
+  border-right: 0.15rem solid;
+  border-top: 0.15rem solid;
+  border-bottom: 0.15rem solid;
+}
 #task_add_eventColor, #task_add_backgroundColor,
 #task_add_borderColor, #task_add_textColor {
   width: 50%;
@@ -178,4 +197,11 @@
 }
 .fc-day-sun ,.fc-day-sat{
   width: 5rem;
+}
+.red_color {
+  color: red;
+  border-color: red;
+}
+.transparent_border {
+  border-color: transparent!important;
 }

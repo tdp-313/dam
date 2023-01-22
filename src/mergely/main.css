@@ -1,0 +1,32 @@
+#mergely-root {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 2rem 1fr;
+  font-size: 1rem;
+}
+.mergely-toolbar {
+  display: grid;
+  height: 2rem;
+  margin-bottom: 0.2rem;
+  grid-template-columns: 1fr 0.2rem 1fr;
+  user-select: none;
+
+}
+.mergely-toolbar-centerline {
+  background-color: black;
+}
+.mergely-toolbar-left, .mergely-toolbar-right {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  grid-template-columns: 2rem 1fr 3rem;
+}
+#mergely-toolbar-left-pulldown , #mergely-toolbar-right-pulldown {
+  width: 100%;
+  height: 1.5rem;
+  font-size: 1.1rem;
+}
+.mergely-toolbar-button-color {
+  padding: 0.3rem;
+  border-radius: 0.5rem;
+}
