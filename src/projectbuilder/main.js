@@ -1,16 +1,16 @@
-const specBuilder_mainPage = async () => {
+const projectBuilder_mainPage = async () => {
     let html = '';
-    html += '<div id="specBuilderSetting">';
-    html += await specBuilder_DirectorySelect();
+    html += '<div id="projectBuilderSetting">';
+    html += await projectBuilder_DirectorySelect();
     html += '<div>';
     console.log(html);
     return (html);
 }
 let directory_handletemp = [];
-const specBuilder_DirectorySelect = async () => {
-    let html = '<div id="specBuilderSetting">';
-    html += '<h1>SpecBuilder</h1>';
-    html += '<div id="specBuilder_Contents">'
+const projectBuilder_DirectorySelect = async () => {
+    let html = '<div id="projectBuilderSetting">';
+    html += '<h1>projectBuilder</h1>';
+    html += '<div id="projectBuilder_Contents">'
     html += '<div>';
     //
     if (!linkStatus.ishandle) {
@@ -38,9 +38,9 @@ const specBuilder_DirectorySelect = async () => {
             }
             directory_handletemp.push(handle);
             let key = directory_handletemp.length - 1;
-            html += '<li class="specBuilder_Contents_item" id="specBuilder_Directory_' + key +'">';
+            html += '<li class="projectBuilder_Contents_item" id="projectBuilder_Directory_' + key +'">';
             html += '<div class="flex">';
-            html += '<div class="specBuilder_FolderTitle">' + handle.name + '</div>';
+            html += '<div class="projectBuilder_FolderTitle">' + handle.name + '</div>';
             html += '</div>';
             html += '<div class="flex">';
             html += '<div>' + lastupdate_string + '</div>';
@@ -55,7 +55,7 @@ const specBuilder_DirectorySelect = async () => {
     return (html);
 }
 let data_json_name = 'dam.json';
-$(document).on('click', 'li[id^="specBuilder_Directory_"]', async (e) => {
+$(document).on('click', 'li[id^="projectBuilder_Directory_"]', async (e) => {
     let clicked = e.currentTarget.id.substring(22, e.currentTarget.id.length);
     let handle = directory_handletemp[clicked];
     console.log(handle);
@@ -66,7 +66,7 @@ $(document).on('click', 'li[id^="specBuilder_Directory_"]', async (e) => {
     }
 });
   
-class specbuilder_setting {
+class projectbuilder_setting {
     constructor(name) {
         this.project = name;
         this.editProgram = [];

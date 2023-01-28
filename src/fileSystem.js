@@ -1,10 +1,10 @@
 $(document).on("click", "#folderLink_Open", async () => {
-  await Directory_Handle_Registr();
+  await Directory_Handle_Register();
   await mergely_folderLink_Check('left');
   await mergely_folderLink_Check('right');
 });
 
-const Directory_Handle_Registr = async () => {
+const Directory_Handle_Register = async () => {
   // Indexed Database から FileSystemDirectoryHandle オブジェクトを取得
   // なければディレクトリ選択ダイアログを表示
   linkStatus.handle = await idbKeyval.get('dir');
@@ -34,24 +34,28 @@ const Directory_Handle_Registr = async () => {
   await idbKeyval.set('dir', linkStatus.handle);
   return ('OK');
 }
-const Directory_Handle_Registr_2 = async (name) =>{
+
+const Directory_Handle_Register_2 = async (name, isNew) => {
   // Indexed Database から FileSystemDirectoryHandle オブジェクトを取得
-  // なければディレクトリ選択ダイアログを表示
   if (typeof linkStatus2[name] === 'undefined') {
     linkStatus2[name] = new linkStatusClass;
-  } 
+  }
   linkStatus2[name].handle = await idbKeyval.get(name);
   if (linkStatus2[name].handle) {
-    // すでにユーザーの許可が得られているかをチェック
-    let permission = await linkStatus2[name].handle.queryPermission({ mode: 'readwrite' });
-    if (permission !== 'granted') {
-      // ユーザーの許可が得られていないなら、許可を得る（ダイアログを出す）
-      permission = await linkStatus2[name].handle.requestPermission({ mode: 'readwrite' });
+    if (isNew) {
+      linkStatus2[name].handle = await window.showDirectoryPicker();
+    } else {
+      // すでにユーザーの許可が得られているかをチェック
+      let permission = await linkStatus2[name].handle.queryPermission({ mode: 'readwrite' });
       if (permission !== 'granted') {
-        linkStatus2[name].handle = await window.showDirectoryPicker();
-        if (!linkStatus2[name].handle) {
-          connect_dispNaviBar(false);
-          throw new Error('ユーザーの許可が得られませんでした。');
+        // ユーザーの許可が得られていないなら、許可を得る（ダイアログを出す）
+        permission = await linkStatus2[name].handle.requestPermission({ mode: 'readwrite' });
+        if (permission !== 'granted') {
+          linkStatus2[name].handle = await window.showDirectoryPicker();
+          if (!linkStatus2[name].handle) {
+            connect_dispNaviBar(false);
+            throw new Error('ユーザーの許可が得られませんでした。');
+          }
         }
       }
     }
@@ -65,7 +69,9 @@ const Directory_Handle_Registr_2 = async (name) =>{
   return ('OK');
 }
 
+
 const read_from_handle = async () => {
+  /*
   for await (const handle of linkStatus.handle.values()) {
     if (handle.kind === 'file') {
       if (linkStatus.ishandle) {
@@ -74,7 +80,7 @@ const read_from_handle = async () => {
     } else if (handle.kind === 'directory') {
       console.log(handle.name + '/');
     }
-  }
+  }*/
   //calendar Load
   if (linkStatus.ishandle && !linkStatus.data.calendar.first_read) {
     let calendar_source = await file_read_json(linkStatus.data.calendar.name, linkStatus.handle);
@@ -141,6 +147,7 @@ const file_save_json = async (writeTarget, data, handle) => {
   if (data === '') {
     return null;
   }
+  await Directory_Handle_Register();
   const blob = new Blob([JSON.stringify(data, null, '  ')], { type: 'application/json' });
 
   let file_obj = await handle.getFileHandle(writeTarget, { create: true });
@@ -150,7 +157,7 @@ const file_save_json = async (writeTarget, data, handle) => {
 }
 
 const file_save_text = async (writeTarget, data, handle_name) => {
-  
+
   if (!linkStatus2[handle_name].ishandle) {
     return null;
   }

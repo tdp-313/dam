@@ -37,7 +37,15 @@ $(document).on("click", "#mergely-toolbar-right-folderlink", async () => {
 });
 
 async function mergely_folderLink_Check(target) {
-    if (await Directory_Handle_Registr_2('mergely_' + target) === 'OK') {
+    let isNew = false;
+    if (typeof linkStatus2['mergely_' + target] !== 'undefined') {
+        //change Directory
+        if (linkStatus2['mergely_' + target].ishandle) {
+            isNew = true;
+        }
+    }
+    if (await Directory_Handle_Register_2('mergely_' + target,isNew) === 'OK') {
+        //new Directory
         console.log(target + '-Linked');
         await mergely_folderLink_pulldownCreate(target)
         await mergely_text_set_main(target, $('#mergely-toolbar-' + target + '-pulldown').val());

@@ -6,7 +6,7 @@
   cursor: not-allowed;
 }
 
-/* TODO: not attached to body. attached to specific els. move */
+/* TODO: not attached to body. attached to projectific els. move */
 .fc-unselectable {
   -webkit-user-select: none;
      -moz-user-select: none;

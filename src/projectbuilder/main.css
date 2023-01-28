@@ -1,8 +1,8 @@
-#specBuilderSetting h1 {
+#projectBuilderSetting h1 {
     border-bottom: 0.1rem solid;
     margin: 0.5rem;
 }
-.specBuilder_Contents_item{
+.projectBuilder_Contents_item{
     display: flex;
     justify-content: space-between;
     padding: 0.5rem 1rem;
@@ -11,7 +11,7 @@
     margin: 1rem;
     user-select: none;
 }
-.specBuilder_FolderTitle {
+.projectBuilder_FolderTitle {
     width: max-content;
     min-width: 8rem;
     text-overflow: ellipsis;

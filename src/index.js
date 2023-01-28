@@ -30,7 +30,7 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
             mainArea.html(home_html());
             break;
         case 'folder':
-            mainArea.html(await specBuilder_mainPage());
+            mainArea.html(await projectBuilder_mainPage());
             break;
         case 'calendar':
             mainArea.html('');
@@ -57,15 +57,6 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
         default:
             break;
     }
-
-    
-
-    /*
-    let container = mainArea.clone();
-    container.html('');
-    container.html = filesystem_html;
-    cpnsole.log()
-    mainArea.replaceWith(container);*/
 });
 
 const worker = new Worker('./src/worker.js');

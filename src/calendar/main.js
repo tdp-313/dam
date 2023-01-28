@@ -122,7 +122,7 @@ let taskEdit_close = true;
 
 const taskeditAreaToggle = async () => {
   if (!linkStatus.data.calendar.first_read) {
-    let message = await Directory_Handle_Registr();
+    let message = await Directory_Handle_Register();
     if (message !== 'OK') {
       return null;
     }
