@@ -65,7 +65,7 @@ window.onload = async () => {
     disp_notificationPermisson();
     let mainArea = $('#renderArea');
     $('#calendarObject').addClass('displayhide');
-    $('#mergely-root').addClass('displayhide');
+    //$('#mergely-root').addClass('displayhide');
     mergely_render();
     video_start();
 
@@ -74,11 +74,12 @@ window.onload = async () => {
 
 worker.addEventListener('message', (e) => {
     console.log(e.data);
-    if (linkStatus.data.calendar.first_read && linkStatus.eventChange) {
+    if (CalenderStatus.first_read && CalenderStatus.eventChange) {
         worker.postMessage(JSON.stringify(window.calendar.getEvents()));
-        linkStatus.eventChange = false;
+        CalenderStatus.eventChange = false;
     }
 }, false);
+
 let screenLockToggle = false;
 
 $(document).on('click', '#screenLock_Icon', (e) => { 

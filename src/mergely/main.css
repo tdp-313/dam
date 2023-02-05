@@ -8,25 +8,33 @@
   display: grid;
   height: 2rem;
   margin-bottom: 0.2rem;
-  grid-template-columns: 1fr 0.2rem 1fr;
+  grid-template-columns: 1fr 2rem 1fr;
   user-select: none;
 
-}
-.mergely-toolbar-centerline {
-  background-color: black;
 }
 .mergely-toolbar-left, .mergely-toolbar-right {
   display: grid;
   align-items: center;
   justify-items: center;
-  grid-template-columns: 2rem 1fr 3rem;
+  grid-template-columns: 2rem 2rem 2rem 1fr 3rem;
 }
-#mergely-toolbar-left-pulldown , #mergely-toolbar-right-pulldown {
+.mergely_toolbar_pulldownArea {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 40% 60%;
+  justify-content: space-between;
+}
+.mergely_toolbar_folder_pulldown , .mergely_toolbar_file_pulldown {
   width: 100%;
   height: 1.5rem;
   font-size: 1.1rem;
 }
-.mergely-toolbar-button-color {
-  padding: 0.3rem;
-  border-radius: 0.5rem;
+.mergely_toolbar_iconZoom {
+  transition: 0.2s ease;
+}
+.mergely_toolbar_iconZoom:hover {
+  font-size: 2rem;
+}
+.mergely_toolbar_iconRotate:active {
+  rotate: 180deg;
 }

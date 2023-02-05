@@ -113,15 +113,16 @@ const event_selectEvent = (event)=>{
 }
 const eventdata_updateEvent = (events) => {
   let data = { id: EventID, event: events }
-  console.log('save');
-  file_save_json(linkStatus.data.calendar.name, data,linkStatus.handle);
-  linkStatus.eventChange = true;
+  if (CalenderStatus.first_read) {
+    file_save_json(CalenderStatus.name, data,linkStatus[defaultFileSystemHandleName].handle);
+    CalenderStatus.eventChange = true;
+  }
 }
 let EventID = 0;
 let taskEdit_close = true;
 
 const taskeditAreaToggle = async () => {
-  if (!linkStatus.data.calendar.first_read) {
+  if (!CalenderStatus.first_read) {
     let message = await Directory_Handle_Register();
     if (message !== 'OK') {
       return null;

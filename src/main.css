@@ -148,6 +148,11 @@ li.hamberger {
 .flex {
     display: flex;
 }
+.flex_center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .flex_aligincenter {
     display: flex;
     align-items: center;

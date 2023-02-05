@@ -239,17 +239,27 @@
     <div id="mergely-root">
       <div class="mergely-toolbar">
         <div class="mergely-toolbar-left">
-          <span class="material-symbols-outlined mergely-toolbar-button-color"
-            id="mergely-toolbar-left-folderlink">folder_open</span>
-          <select id="mergely-toolbar-left-pulldown"><option>Not Linked</option></select>
-          <span class="material-symbols-outlined mergely-toolbar-button-color" id="mergely-toolbar-left-save">save_as</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom mergely_toolbar_iconRotate" id="mergely_toolbar_update_left">sync</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely_toolbar_diff_prev">keyboard_double_arrow_up</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely_toolbar_diff_next">keyboard_double_arrow_down</span>
+          <div class="mergely_toolbar_pulldownArea">
+            <select name="mergely_toolbar_left_folder" id="mergely_toolbar_left_folder" class="mergely_toolbar_folder_pulldown"></select>
+            <select name="mergely_toolbar_left_file" id="mergely_toolbar_left_file" class="mergely_toolbar_file_pulldown"></select>
+          </div>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely-toolbar-left-save">save_as</span>
         </div>
-        <div class="mergely-toolbar-centerline"></div>
+        <div class="flex_center">
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom" style="color: green;" id="mergely_toolbar_link">link</span>
+        </div>
         <div class="mergely-toolbar-right">
-          <span class="material-symbols-outlined mergely-toolbar-button-color"
-            id="mergely-toolbar-right-folderlink">folder_open</span>
-          <select id="mergely-toolbar-right-pulldown"><option>Not Linked</option></select>
-          <span class="material-symbols-outlined mergely-toolbar-button-color" id="mergely-toolbar-right-save">save_as</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom mergely_toolbar_iconRotate" id="mergely_toolbar_update_right">sync</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely_toolbar_diff_prev">keyboard_double_arrow_up</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely_toolbar_diff_next">keyboard_double_arrow_down</span>
+          <div class="mergely_toolbar_pulldownArea">
+            <select name="mergely_toolbar_right_folder" id="mergely_toolbar_right_folder" class="mergely_toolbar_folder_pulldown"></select>
+            <select name="mergely_toolbar_right_file" id="mergely_toolbar_right_file" class="mergely_toolbar_file_pulldown"></select>
+          </div>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely-toolbar-right-save">save_as</span>
         </div>
       </div>
       <div class="mergely-full-screen-8">
