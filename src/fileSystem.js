@@ -176,39 +176,48 @@ const file_read_text = async (readTarget, handle) => {
 }
 
 const file_save_json = async (writeTarget, data, handle, handle_name = defaultFileSystemHandleName) => {
-  console.log(handle);
-  if (typeof linkStatus[handle_name] === 'undefined') {
-    return null;
+  try {
+    if (typeof linkStatus[handle_name] === 'undefined') {
+      return null;
+    }
+    if (!linkStatus[handle_name].ishandle) {
+      return null;
+    }
+    if (data === '') {
+      return null;
+    }
+    await Directory_Handle_Register(handle_name);
+    const blob = new Blob([JSON.stringify(data, null, '  ')], { type: 'application/json' });
+  
+    let file_obj = await handle.getFileHandle(writeTarget, { create: true });
+    const stream = await file_obj.createWritable();
+    await stream.write(blob);
+    await stream.close();
+  } catch (error){
+    console.error(error, handle_name + '->' + writeTarget);
+    window.alert(handle_name + '->' + writeTarget);
   }
-  if (!linkStatus[handle_name].ishandle) {
-    return null;
-  }
-  if (data === '') {
-    return null;
-  }
-  await Directory_Handle_Register(handle_name);
-  const blob = new Blob([JSON.stringify(data, null, '  ')], { type: 'application/json' });
 
-  let file_obj = await handle.getFileHandle(writeTarget, { create: true });
-  const stream = await file_obj.createWritable();
-  await stream.write(blob);
-  await stream.close();
 }
 
 const file_save_text = async (writeTarget, data, handle, handle_name = defaultFileSystemHandleName) => {
-
-  if (!linkStatus[handle_name].ishandle) {
-    return null;
+  try {
+    if (!linkStatus[handle_name].ishandle) {
+      return null;
+    }
+    if (data === '') {
+      return null;
+    }
+    const blob = new Blob([data], { type: 'text/plain' });
+  
+    let file_obj = await handle.getFileHandle(writeTarget, { create: true });
+    const stream = await file_obj.createWritable();
+    await stream.write(blob);
+    await stream.close();
+  } catch (error){
+    console.error(error, handle_name + '->' + writeTarget);
+    window.alert(handle_name + '->' + writeTarget);
   }
-  if (data === '') {
-    return null;
-  }
-  const blob = new Blob([data], { type: 'text/plain' });
-
-  let file_obj = await handle.getFileHandle(writeTarget, { create: true });
-  const stream = await file_obj.createWritable();
-  await stream.write(blob);
-  await stream.close();
 }
 
 const connect_dispNaviBar = (isConnect) => {

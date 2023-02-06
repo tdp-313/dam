@@ -32,11 +32,11 @@ async function mergely_folderLink_pulldownCreate(target, L_R) {
 
 $(document).on("change", "#mergely_toolbar_left_folder", async () => {
     await mergely_folderLink_pulldownCreate($("#mergely_toolbar_left_folder").val(), 'left');
-    await mergely_text_set_main('left', $('#mergely_toolbar_left_file').val(), diff_Directory.dir[$('#mergely_toolbar_left_folder').val()].handle);
+    await mergely_text_set_main('left', backup.left.fullname, diff_Directory.dir[$('#mergely_toolbar_left_folder').val()].handle);
 });
 $(document).on("change", "#mergely_toolbar_right_folder", async () => {
     await mergely_folderLink_pulldownCreate($("#mergely_toolbar_right_folder").val(), 'right');
-    await mergely_text_set_main('right', $('#mergely_toolbar_right_file').val(), diff_Directory.dir[$('#mergely_toolbar_right_folder').val()].handle);
+    await mergely_text_set_main('right', backup.right.fullname, diff_Directory.dir[$('#mergely_toolbar_right_folder').val()].handle);
 });
 
 
