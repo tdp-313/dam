@@ -10,9 +10,9 @@
   <!--Goole Fonts-->
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,500,0,0" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&family=Roboto&display=swap" rel="stylesheet">
   <!--IDB-Keyval-->
   <script src="https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js"></script>
 
@@ -26,8 +26,8 @@
   <script src="./src/calendar/notification.js"></script>
   <link rel="stylesheet" href="./src/calendar/calendar.css" />
   <!--Grid js-->
-  <script src='https://unpkg.com/gridjs/dist/gridjs.umd.js'></script>
-  <link rel="stylesheet" href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" />
+  <!--script src='https://unpkg.com/gridjs/dist/gridjs.umd.js'></script-->
+  <!--link rel="stylesheet" href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" /-->
 
   <script src='./src/calendar/calendar_history.js'></script>
 
@@ -49,6 +49,36 @@
   <link rel="stylesheet" media="all" href="./src/mergely/lib/mergely.css" />
   <script src="./src/mergely/main.js" type="text/javascript"></script>
   <link rel="stylesheet" href="./src/mergely/main.css" />
+  <!--TOAST_UI-->
+  <link rel="stylesheet" href="./src/toast_ui/toastui-editor.css" />
+  <!--link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.min.css" /-->
+  <link rel="stylesheet" href="https://uicdn.toast.com/chart/latest/toastui-chart.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism.min.css" />
+  <link rel="stylesheet"
+    href="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.css" />
+  <link rel="stylesheet" href="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.min.css" />
+  <link rel="stylesheet"
+    href="https://uicdn.toast.com/editor-plugin-color-syntax/latest/toastui-editor-plugin-color-syntax.min.css" />
+  <link rel="stylesheet"
+    href="https://uicdn.toast.com/editor-plugin-table-merged-cell/latest/toastui-editor-plugin-table-merged-cell.min.css" />
+  <script src="https://uicdn.toast.com/chart/latest/toastui-chart.min.js"></script>
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+  <script src="https://uicdn.toast.com/editor-plugin-chart/latest/toastui-editor-plugin-chart.min.js"></script>
+
+  <script
+    src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
+  <script src="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.min.js"></script>
+  <script
+    src="https://uicdn.toast.com/editor-plugin-color-syntax/latest/toastui-editor-plugin-color-syntax.min.js"></script>
+  <script
+    src="https://uicdn.toast.com/editor-plugin-table-merged-cell/latest/toastui-editor-plugin-table-merged-cell.min.js"></script>
+  <script src="https://uicdn.toast.com/editor-plugin-uml/latest/toastui-editor-plugin-uml.min.js"></script>
+  <script src="https://uicdn.toast.com/editor/latest/i18n/ja-jp.js"></script>
+  <script src="./src/toast_ui/main.js"></script>
+  <link rel="stylesheet" href="./src/toast_ui/main.css" />
+  <!--Image Editor-->
+  <link rel="stylesheet" href="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.css" />
+  <script src="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.js"></script>
   <!--Other-->
   <link rel="stylesheet" href="./src/main.css" />
   <script src='./src/index.js'></script>
@@ -116,6 +146,18 @@
       <div>Diff</div>
       <div class="hambergerPosition">
         <span class="material-symbols-outlined fontsize_Large">difference</span>
+      </div>
+    </li>
+    <li class="navi-button" id="bnavi-editor">
+      <div>Editor</div>
+      <div class="hambergerPosition">
+        <span class="material-symbols-outlined fontsize_Large">description</span>
+      </div>
+    </li>
+    <li class="navi-button" id="bnavi-image">
+      <div>Image Edit</div>
+      <div class="hambergerPosition">
+        <span class="material-symbols-outlined fontsize_Large">wallpaper</span>
       </div>
     </li>
   </div>
@@ -239,33 +281,53 @@
     <div id="mergely-root">
       <div class="mergely-toolbar">
         <div class="mergely-toolbar-left">
-          <span class="material-symbols-outlined mergely_toolbar_iconZoom mergely_toolbar_iconRotate" id="mergely_toolbar_update_left">sync</span>
-          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely_toolbar_diff_prev">keyboard_double_arrow_up</span>
-          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely_toolbar_diff_next">keyboard_double_arrow_down</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom mergely_toolbar_iconRotate"
+            id="mergely_toolbar_update_left">sync</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom"
+            id="mergely_toolbar_diff_prev">keyboard_double_arrow_up</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom"
+            id="mergely_toolbar_diff_next">keyboard_double_arrow_down</span>
           <div class="mergely_toolbar_pulldownArea">
-            <select name="mergely_toolbar_left_folder" id="mergely_toolbar_left_folder" class="mergely_toolbar_folder_pulldown"></select>
-            <select name="mergely_toolbar_left_file" id="mergely_toolbar_left_file" class="mergely_toolbar_file_pulldown"></select>
+            <select name="mergely_toolbar_left_folder" id="mergely_toolbar_left_folder"
+              class="mergely_toolbar_folder_pulldown"></select>
+            <select name="mergely_toolbar_left_file" id="mergely_toolbar_left_file"
+              class="mergely_toolbar_file_pulldown"></select>
           </div>
           <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely-toolbar-left-save">save_as</span>
         </div>
         <div class="flex_center">
-          <span class="material-symbols-outlined mergely_toolbar_iconZoom" style="color: green;" id="mergely_toolbar_link">link</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom" style="color: green;"
+            id="mergely_toolbar_link">link</span>
         </div>
         <div class="mergely-toolbar-right">
-          <span class="material-symbols-outlined mergely_toolbar_iconZoom mergely_toolbar_iconRotate" id="mergely_toolbar_update_right">sync</span>
-          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely_toolbar_diff_prev">keyboard_double_arrow_up</span>
-          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely_toolbar_diff_next">keyboard_double_arrow_down</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom mergely_toolbar_iconRotate"
+            id="mergely_toolbar_update_right">sync</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom"
+            id="mergely_toolbar_diff_prev">keyboard_double_arrow_up</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom"
+            id="mergely_toolbar_diff_next">keyboard_double_arrow_down</span>
           <div class="mergely_toolbar_pulldownArea">
-            <select name="mergely_toolbar_right_folder" id="mergely_toolbar_right_folder" class="mergely_toolbar_folder_pulldown"></select>
-            <select name="mergely_toolbar_right_file" id="mergely_toolbar_right_file" class="mergely_toolbar_file_pulldown"></select>
+            <select name="mergely_toolbar_right_folder" id="mergely_toolbar_right_folder"
+              class="mergely_toolbar_folder_pulldown"></select>
+            <select name="mergely_toolbar_right_file" id="mergely_toolbar_right_file"
+              class="mergely_toolbar_file_pulldown"></select>
           </div>
-          <span class="material-symbols-outlined mergely_toolbar_iconZoom" id="mergely-toolbar-right-save">save_as</span>
+          <span class="material-symbols-outlined mergely_toolbar_iconZoom"
+            id="mergely-toolbar-right-save">save_as</span>
         </div>
       </div>
       <div class="mergely-full-screen-8">
         <div class="mergely-resizer">
           <div id="mergely"></div>
         </div>
+      </div>
+    </div>
+    <div id="toast_editor">
+      <div id="editor"></div>
+    </div>
+    <div id="toast_image">
+      <div id="tui-image-editor">
+        <canvas></canvas>
       </div>
     </div>
   </div>

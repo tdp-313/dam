@@ -7,7 +7,7 @@ $(document).on('click', '#hamberger', (e) => {
         Sidemenu_Visible = false;
         document.getElementById('mainArea').addEventListener('transitionend', () => {
             window.calendar.updateSize();
-          });
+        });
     } else {
         //open
         $('#naviArea').removeClass('naviArea_Visible');
@@ -16,7 +16,7 @@ $(document).on('click', '#hamberger', (e) => {
         Sidemenu_Visible = true;
         document.getElementById('mainArea').addEventListener('transitionend', () => {
             window.calendar.updateSize();
-          });
+        });
     }
 });
 let Sidemenu_Visible = false;
@@ -25,7 +25,9 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
     $('#calendarObject').addClass('displayhide');
     $('#Picture_in_Picture').addClass('displayhide');
     $('#mergely-root').addClass('displayhide');
-    switch (e.currentTarget.id.substring(6,e.currentTarget.id.length)) {
+    $('#toast_editor').addClass('displayhide');
+    $('#toast_image').addClass('displayhide');
+    switch (e.currentTarget.id.substring(6, e.currentTarget.id.length)) {
         case 'home':
             mainArea.html(home_html());
             break;
@@ -54,6 +56,14 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
             $('#mergely-root').removeClass('displayhide');
             $('#mergely').mergely('resize');
             break;
+        case 'editor':
+            mainArea.html('');
+            $('#toast_editor').removeClass('displayhide');
+            break;
+        case 'image':
+            mainArea.html('');
+            $('#toast_image').removeClass('displayhide');
+            break;
         default:
             break;
     }
@@ -65,10 +75,14 @@ window.onload = async () => {
     disp_notificationPermisson();
     let mainArea = $('#renderArea');
     $('#calendarObject').addClass('displayhide');
-    //$('#mergely-root').addClass('displayhide');
+    $('#mergely-root').addClass('displayhide');
+    //$('#toast_editor').addClass('displayhide');
+    $('#toast_image').addClass('displayhide');
     mergely_render();
     video_start();
-
+    await wakelockRequest();
+    await toast_start();
+    await toast_image_start();
 }
 
 
@@ -80,17 +94,13 @@ worker.addEventListener('message', (e) => {
     }
 }, false);
 
-let screenLockToggle = false;
+let screenLockToggle = true;
 
-$(document).on('click', '#screenLock_Icon', (e) => { 
+$(document).on('click', '#screenLock_Icon', (e) => {
     if (screenLockToggle) {
-        wakelockRelease();   
+        wakelockRelease();
     } else {
         wakelockRequest();
     }
-    if (screenLockToggle) {
-        $('#screenLock_Icon').css('color', 'red');
-    } else {
-        $('#screenLock_Icon').css('color', 'green');
-    }
+
 });

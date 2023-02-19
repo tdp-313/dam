@@ -21,8 +21,15 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 99;
+    transition: 0.05s ease;
+    border-radius: 25%;
 }
-
+.hambergerPosition:hover {
+    background-color: #e7e5a6;
+}
+.hambergerPosition:active {
+    background-color: #ebd891;
+}
 .naviArea {
     width: 16rem;
     height: 100vh;

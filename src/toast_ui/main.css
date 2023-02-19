@@ -1,0 +1,13 @@
+#toast_editor {
+    margin-right: 1rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: white;
+}
+#toast_image {
+    margin-right: 1rem;
+    height: calc(100vh - 3rem);
+}
+#toast_editor .md_autoSaveAnimation {
+    transition: 0.5s;
+    rotate: -360deg;
+}
