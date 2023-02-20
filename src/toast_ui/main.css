@@ -6,8 +6,35 @@
 #toast_image {
     margin-right: 1rem;
     height: calc(100vh - 3rem);
+<<<<<<< Updated upstream
 }
 #toast_editor .md_autoSaveAnimation {
     transition: 0.5s;
     rotate: -360deg;
+=======
+    position: relative;
+}
+#ToastImage_CopyClipboard {
+    position: absolute;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99;
+    width: 4rem;
+    height: 40px;
+    left: 1rem;
+    top:0.5rem;
+    border-radius: 20px;
+    background-color: rgb(47, 82, 11);
+    cursor : pointer;
+}
+
+#toast_editor .md_autoSaveAnimation {
+    transition: 0.5s;
+    rotate: -360deg;
+}
+.tui-image-editor-header-logo {
+display: none;
+>>>>>>> Stashed changes
 }
