@@ -11,11 +11,7 @@ const toast_start = async () => {
     language: 'ja-JP',
     plugins: [chart, codeSyntaxHighlight, colorSyntax, tableMergedCell, uml],
     theme: 'dark',
-<<<<<<< Updated upstream
-    initialValue:'# File is not Linked',
-=======
     initialValue: '# File is not Linked',
->>>>>>> Stashed changes
     events: {
       load: () => {
         get_indexedDB_markdown();
@@ -39,19 +35,11 @@ const toast_start = async () => {
         el: md_FileOpen_Button(),
         //command: 'bold',
         tooltip: 'ファイルを開く'
-<<<<<<< Updated upstream
-      },{
-        el: md_autoSave_Button(),
-        //command: 'bold',
-        tooltip: 'オートセーブ'
-      },{
-=======
       }, {
         el: md_autoSave_Button(),
         //command: 'bold',
         tooltip: 'オートセーブ'
       }, {
->>>>>>> Stashed changes
         el: md_FileSaveAs_Button(),
         //command: 'bold',
         tooltip: '保存 / 別名保存'
@@ -62,10 +50,7 @@ const toast_start = async () => {
   Editor_root = editor;
 }
 var Editor_root = null;
-<<<<<<< Updated upstream
-=======
 var Image_root = null;
->>>>>>> Stashed changes
 const { Editor } = toastui;
 const { chart } = Editor.plugin;
 const { codeSyntaxHighlight } = Editor.plugin;
@@ -80,11 +65,7 @@ const md_FileOpen_Button = () => {
   button.style.backgroundImage = 'none';
   button.style.margin = '0';
   button.innerHTML = `<i><span class="material-symbols-outlined">folder_open</span></i>`;
-<<<<<<< Updated upstream
-  button.addEventListener('click', async() => {
-=======
   button.addEventListener('click', async () => {
->>>>>>> Stashed changes
     if (await File_Handle_Register(markdown_idb_file_name, true) === 'OK') {
       let handle = linkStatus[markdown_idb_file_name].handle;
       let text = await file_read_text(handle.name, handle, false);
@@ -96,11 +77,7 @@ const md_FileOpen_Button = () => {
       }
       Editor_root.setMarkdown(text, true);
       $("#markdown_autosave").css('color', 'green');
-<<<<<<< Updated upstream
-    } 
-=======
     }
->>>>>>> Stashed changes
   });
   return button;
 }
@@ -124,21 +101,12 @@ const md_FileSaveAs_Button = () => {
     try {
       markdown_editor_Status.eventChange = true;
       let save_info = await autoSave_Clock_Process();
-<<<<<<< Updated upstream
-      window.alert('IndexedDB->' + save_info.idb +' File->' + save_info.file);
-    }
-    catch{
-      window.alert("Saveされていません。");
-    }
-    });
-=======
       window.alert('IndexedDB->' + save_info.idb + ' File->' + save_info.file);
     }
     catch {
       window.alert("Saveされていません。");
     }
   });
->>>>>>> Stashed changes
   return button;
 }
 let md_isAutosave = true;
@@ -149,42 +117,21 @@ const md_autoSave_Button = () => {
   button.style.backgroundImage = 'none';
   button.style.margin = '0';
   button.innerHTML = `<i><span id="markdown_autosave" class="material-symbols-outlined" style="color:red">sync</span></i>`;
-<<<<<<< Updated upstream
-  button.addEventListener('click', async() => {
-    if (md_isAutosave) {
-      //sync -> no-sync
-      md_autosave_set(false);
-      md_isAutosave= false;
-=======
   button.addEventListener('click', async () => {
     if (md_isAutosave) {
       //sync -> no-sync
       md_autosave_set(false);
       md_isAutosave = false;
->>>>>>> Stashed changes
 
     }
     else {
       //no-sync -> sync
       md_autosave_set(true);
-<<<<<<< Updated upstream
-      md_isAutosave= true;
-=======
       md_isAutosave = true;
->>>>>>> Stashed changes
     }
   });
   return button;
 }
-<<<<<<< Updated upstream
-const md_autosave_set = (isAutoSave) =>{
-  if (isAutoSave) {
-    $("#markdown_autosave").text('sync');
-    md_isAutosave= true;
-  } else {
-    $("#markdown_autosave").text('sync_disabled');
-    md_isAutosave= false;
-=======
 const md_autosave_set = (isAutoSave) => {
   if (isAutoSave) {
     $("#markdown_autosave").text('sync');
@@ -192,7 +139,6 @@ const md_autosave_set = (isAutoSave) => {
   } else {
     $("#markdown_autosave").text('sync_disabled');
     md_isAutosave = false;
->>>>>>> Stashed changes
   }
 }
 const get_indexedDB_markdown = async () => {
@@ -214,27 +160,15 @@ const set_indexedDB_markdown = async () => {
 const toast_image_start = async () => {
   const instance = new tui.ImageEditor(document.querySelector('#tui-image-editor'), {
     includeUI: {
-<<<<<<< Updated upstream
-      initMenu: 'filter',
-      menuBarPosition: 'bottom',
-    },
-    //cssMaxWidth: 700,
-    //cssMaxHeight: 500,
-=======
       //initMenu: 'filter',
       menuBarPosition: 'bottom',
     },
     cssMaxWidth: Math.floor(window.innerWidth * 0.9),
     cssMaxHeight: Math.floor(window.innerHeight * 0.8),
->>>>>>> Stashed changes
     selectionStyle: {
       cornerSize: 20,
       rotatingPointOffset: 70,
     },
-<<<<<<< Updated upstream
-  });
-}
-=======
     usageStatistics: false,
   });
   Image_root = instance;
@@ -269,7 +203,6 @@ $(document).on('click', '#ToastImage_CopyClipboard', async () => {
     console.log( err );
   }
 });
->>>>>>> Stashed changes
 
 const autoSave_Clock_Process = async () => {
   let save_information = { idb: false, file: false };
@@ -288,11 +221,7 @@ const autoSave_Clock_Process = async () => {
           console.debug('markdown_FileSave');
           setTimeout(() => {
             $("#markdown_autosave").removeClass('md_autoSaveAnimation');
-<<<<<<< Updated upstream
-          },1000)
-=======
           }, 1000)
->>>>>>> Stashed changes
         }
       }
     }

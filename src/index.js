@@ -28,12 +28,8 @@ $(document).on('click', '[id^="bnavi-"]', async (e) => {
     $('#mergely-root').addClass('displayhide');
     $('#toast_editor').addClass('displayhide');
     $('#toast_image').addClass('displayhide');
-<<<<<<< Updated upstream
-    switch (e.currentTarget.id.substring(6, e.currentTarget.id.length)) {
-=======
     now_menu = e.currentTarget.id.substring(6, e.currentTarget.id.length);
     switch (now_menu) {
->>>>>>> Stashed changes
         case 'home':
             mainArea.html(home_html());
             break;
@@ -86,15 +82,9 @@ window.onload = async () => {
     $('#toast_image').addClass('displayhide');
     mergely_render();
     video_start();
-<<<<<<< Updated upstream
-    await wakelockRequest();
-    await toast_start();
-    await toast_image_start();
-=======
     await toast_start();
     await toast_image_start();
     setTimeout(() => { wakelockRequest() }, 3000);
->>>>>>> Stashed changes
 }
 
 
@@ -108,14 +98,11 @@ worker.addEventListener('message', (e) => {
 
 let screenLockToggle = true;
 
-<<<<<<< Updated upstream
-=======
 window.addEventListener('resize', async () => {
     if (now_menu === 'image') {
         await toast_image_resizeEvent();
     }
 });
->>>>>>> Stashed changes
 $(document).on('click', '#screenLock_Icon', (e) => {
     if (screenLockToggle) {
         wakelockRelease();

@@ -6,12 +6,6 @@
 #toast_image {
     margin-right: 1rem;
     height: calc(100vh - 3rem);
-<<<<<<< Updated upstream
-}
-#toast_editor .md_autoSaveAnimation {
-    transition: 0.5s;
-    rotate: -360deg;
-=======
     position: relative;
 }
 #ToastImage_CopyClipboard {
@@ -36,5 +30,4 @@
 }
 .tui-image-editor-header-logo {
 display: none;
->>>>>>> Stashed changes
 }
