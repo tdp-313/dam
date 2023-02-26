@@ -1,0 +1,23 @@
+{
+  "name": "markdownsa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "tdp",
+  "license": "ISC",
+  "dependencies": {
+    "@toast-ui/editor": "^3.2.2",
+    "@toast-ui/editor-plugin-chart": "^3.0.1",
+    "@toast-ui/editor-plugin-code-syntax-highlight": "^3.1.0",
+    "@toast-ui/editor-plugin-color-syntax": "^3.1.0",
+    "@toast-ui/editor-plugin-table-merged-cell": "^3.1.0",
+    "@toast-ui/editor-plugin-uml": "^3.0.1",
+    "idb-keyval": "^6.2.0",
+    "jquery": "^3.6.3"
+  },
+  "scripts": {
+    "build": "browserify src/index.js > build/bundle.js",
+    "watch": "watchify src/index.js -o build/bundle.js"
+  }
+}

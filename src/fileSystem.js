@@ -4,38 +4,7 @@ $(document).on("click", "#folderLink_Open", async () => {
   //await mergely_folderLink_Check('left');
   //await mergely_folderLink_Check('right');
 });
-/*
-const Directory_Handle_Register = async () => {
-  // Indexed Database から FileSystemDirectoryHandle オブジェクトを取得
-  // なければディレクトリ選択ダイアログを表示
-  linkStatus.handle = await idbKeyval.get('dir');
-  if (linkStatus.handle) {
-    // すでにユーザーの許可が得られているかをチェック
-    let permission = await linkStatus.handle.queryPermission({ mode: 'readwrite' });
-    if (permission !== 'granted') {
-      // ユーザーの許可が得られていないなら、許可を得る（ダイアログを出す）
-      permission = await linkStatus.handle.requestPermission({ mode: 'readwrite' });
-      if (permission !== 'granted') {
-        linkStatus.handle = await window.showDirectoryPicker();
-        if (!linkStatus.handle) {
-          connect_dispNaviBar(false);
-          throw new Error('ユーザーの許可が得られませんでした。');
-        }
-      }
-    }
-  } else {
-    // ディレクトリ選択ダイアログを表示
-    linkStatus.handle = await window.showDirectoryPicker();
-  }
-  connect_dispNaviBar(true);
-  linkStatus.ishandle = true;
-  // Calender etc
-  read_from_handle();
-  // FileSystemDirectoryHandle オブジェクトを Indexed Database に保存
-  await idbKeyval.set('dir', linkStatus.handle);
-  return ('OK');
-}
-*/
+
 const Directory_Handle_Register = async (name = defaultFileSystemHandleName, isNew = false) => {
   // Indexed Database から FileSystemDirectoryHandle オブジェクトを取得
   if (typeof linkStatus[name] === 'undefined') {
@@ -74,6 +43,73 @@ const Directory_Handle_Register = async (name = defaultFileSystemHandleName, isN
   return ('OK');
 }
 
+const File_Handle_Register = async (name ,isNew = false) =>{
+  const pickerOpts = {
+    types: [
+      {
+        description: 'markdown',
+        accept: {
+          'md/*': ['.md'],
+        },
+      },
+    ],
+    excludeAcceptAllOption: true,
+    multiple: false,
+  };
+
+  if (typeof linkStatus[name] === 'undefined') {
+    linkStatus[name] = new linkStatusClass;
+  }
+  linkStatus[name].handle = await idbKeyval.get(name);
+  if (linkStatus[name].handle) {
+    if (isNew) {
+      linkStatus[name].handle = await window.showOpenFilePicker(pickerOpts)
+    } else {
+      // すでにユーザーの許可が得られているかをチェック
+      let permission = await linkStatus[name].handle.queryPermission({ mode: 'readwrite' });
+      if (permission !== 'granted') {
+        // ユーザーの許可が得られていないなら、許可を得る（ダイアログを出す）
+        permission = await linkStatus[name].handle.requestPermission({ mode: 'readwrite' });
+        if (permission !== 'granted') {
+          linkStatus[name].handle = await window.showOpenFilePicker(pickerOpts)
+          if (!linkStatus[name].handle) {
+            throw new Error('ユーザーの許可が得られませんでした。');
+          }
+        }
+      }
+    }
+  } else {
+    // File選択ダイアログを表示
+    linkStatus[name].handle = await window.showOpenFilePicker(pickerOpts);
+  }
+  linkStatus[name].handle = linkStatus[name].handle[0];
+  linkStatus[name].ishandle = true;
+  await idbKeyval.set(name, linkStatus[name].handle);
+  return ('OK');
+}
+
+const Save_Handle_Register = async (name ) =>{
+  const opt = {
+    types: [
+      {
+        description: 'markdown',
+        accept: {
+          'md/*': ['.md'],
+        },
+      },
+    ],
+  };
+
+  if (typeof linkStatus[name] === 'undefined') {
+    linkStatus[name] = new linkStatusClass;
+  }
+  let new_handle = await window.showSaveFilePicker(opt);
+  console.log(new_handle);
+  linkStatus[name].handle = new_handle
+  linkStatus[name].ishandle = true;
+  await idbKeyval.set(name, linkStatus[name].handle);
+  return ('OK');
+}
 
 const default_from_handle = async (name) => {
   /*
@@ -121,6 +157,27 @@ const default_from_handle = async (name) => {
       }
     }
   }
+  //markdown 
+  if (!markdown_editor_Status.first_read) {
+    markdown_editor_Status.handle = await linkStatus[name].handle.getDirectoryHandle(markdown_editor_Status.name, { create: true });
+    markdown_editor_Status.resource_handle = await markdown_editor_Status.handle.getDirectoryHandle(markdown_editor_Status.resource_name, { create: true });
+    markdown_editor_Status.export_handle = await markdown_editor_Status.handle.getDirectoryHandle(markdown_editor_Status.export_name, { create: true });
+    let last_backup = await file_read_json(markdown_editor_Status.backup, markdown_editor_Status.handle);
+    markdown_editor_Status.first_read = true;
+    if (last_backup.length === 0) {
+      //Create Backup File
+      let backup = new markdown_backup();
+      await file_save_json(markdown_editor_Status.backup,backup,markdown_editor_Status.handle,defaultFileSystemHandleName)
+    } else {
+      //Read Backup File
+      console.log(last_backup);
+      if (last_backup.data === '') {
+        //no data
+        console.log(last_backup);
+      }
+    }
+  }
+
   //calendar Load
   if (!CalenderStatus.first_read) {
     let calendar_source = await file_read_json(CalenderStatus.name, linkStatus[name].handle);
@@ -148,6 +205,7 @@ let diff_Directory = {
   dir: {},
   dir_array: [],
 }
+
 let CalenderStatus = {
   name: 'calendar.json',
   readtype: 'file_read_json',
@@ -155,6 +213,25 @@ let CalenderStatus = {
   eventChange: false,
 }
 
+let markdown_editor_Status = {
+  handle : null,
+  name: 'markdown',
+  backup:'backup.json',
+  first_read: false,
+  dom_created:false,
+  eventChange: false,
+  resource_handle: null,
+  resource_name : 'resource',
+  export_handle: null,
+  export_name : 'export',
+}
+class markdown_backup {
+  constructor() {
+    this.last_filename = '';
+    this.data = '';
+    this.lastsaved = '';
+  }
+}
 const file_read_json = async (readTarget, handle) => {
   let file_obj = await handle.getFileHandle(readTarget, { create: true });
   let file = await file_obj.getFile();
@@ -165,8 +242,11 @@ const file_read_json = async (readTarget, handle) => {
   return (JSON.parse(text));
 }
 
-const file_read_text = async (readTarget, handle) => {
-  let file_obj = await handle.getFileHandle(readTarget, { create: true });
+const file_read_text = async (readTarget, handle,isdirectory = true) => {
+  let file_obj = handle;
+  if(isdirectory){
+    file_obj = await handle.getFileHandle(readTarget, { create: true });
+  }
   let file = await file_obj.getFile();
   let text = await file.text();
   if (text === '') {
@@ -186,7 +266,6 @@ const file_save_json = async (writeTarget, data, handle, handle_name = defaultFi
     if (data === '') {
       return null;
     }
-    await Directory_Handle_Register(handle_name);
     const blob = new Blob([JSON.stringify(data, null, '  ')], { type: 'application/json' });
   
     let file_obj = await handle.getFileHandle(writeTarget, { create: true });
@@ -200,7 +279,7 @@ const file_save_json = async (writeTarget, data, handle, handle_name = defaultFi
 
 }
 
-const file_save_text = async (writeTarget, data, handle, handle_name = defaultFileSystemHandleName) => {
+const file_save_text = async (writeTarget, data, handle, handle_name = defaultFileSystemHandleName,isdirectory = true) => {
   try {
     if (!linkStatus[handle_name].ishandle) {
       return null;
@@ -209,8 +288,11 @@ const file_save_text = async (writeTarget, data, handle, handle_name = defaultFi
       return null;
     }
     const blob = new Blob([data], { type: 'text/plain' });
-  
-    let file_obj = await handle.getFileHandle(writeTarget, { create: true });
+    
+    let file_obj = handle;
+    if(isdirectory){
+      file_obj = await handle.getFileHandle(writeTarget, { create: true });
+    } 
     const stream = await file_obj.createWritable();
     await stream.write(blob);
     await stream.close();

@@ -2,4 +2,5 @@
 
 # exclusion
 /.vscode
-
+/markdownSA/node_modules
+/markdownSA/.vscode

@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#task_add_StartDayInput').val(today.getFullYear() + '-' + extend_0(today.getMonth() + 1) + '-' + extend_0(today.getDate()));
 
   var calendarEl = document.getElementById('calendar');
-
+  var day_weekName = ['日', '月', '火', '水', '木', '金', '土'];
   var containerEl = document.getElementById('external-events-list');
   var containerE2 = new FullCalendar.Draggable(containerEl, {
     itemSelector: '.fc-event',
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
     headerToolbar: {
       left: 'prev,next today myCustomButton',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,dayGridYear'
     },
     customButtons: {
       myCustomButton: {
@@ -32,7 +32,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     },
-    locale: 'ja',
+    //schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+    multiMonthMaxColumns: 1,
+    locale: 'en',
     initialDate: Date.now(),
     navLinks: true, // can click day/week names to navigate views
     editable: false,
@@ -63,23 +65,27 @@ document.addEventListener('DOMContentLoaded', function () {
       month: '月',
       week: '週',
       day: '日',
+      year: '年',
     },
     businessHours: [ // specify an array instead
-    {
-      daysOfWeek: [1, 2, 3, 4], // Monday, Tuesday, Wednesday, Thursday
-      startTime: '08:20', // 8am
-      endTime: '19:00' // 6pm
+      {
+        daysOfWeek: [1, 2, 3, 4], // Monday, Tuesday, Wednesday, Thursday
+        startTime: '08:20', // 8am
+        endTime: '19:00' // 6pm
+      },
+      {
+        daysOfWeek: [5], // Thursday, Friday
+        startTime: '08:20:00', // 10am
+        endTime: '17:00:00' // 4pm
+      }
+    ],
+    dayHeaderContent: function (arg) {
+      return day_weekName[arg.date.getDay()]
     },
-    {
-      daysOfWeek: [5], // Thursday, Friday
-      startTime: '08:20:00', // 10am
-      endTime: '17:00:00' // 4pm
-    }
-  ],
-    dayCellContent: (e) => {
-      e.dayNumberText = e.dayNumberText.replace('日', '');
-    },
-
+    /*dayCellContent: (e) => {
+      //console.log(e)
+      //e.dayNumberText = e.dayNumberText.replace('日', '');
+    },*/
     dateClick: (e) => {
       //console.log(e);
     },
@@ -105,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
   window.calendar.render();
 });
 
-const event_selectEvent = (event)=>{
+const event_selectEvent = (event) => {
   $('#textEdit_Title').text(event.title);
   $('#textEdit_ID').text(event.id);
   get_eventEditSideBar(event);
@@ -114,7 +120,7 @@ const event_selectEvent = (event)=>{
 const eventdata_updateEvent = (events) => {
   let data = { id: EventID, event: events }
   if (CalenderStatus.first_read) {
-    file_save_json(CalenderStatus.name, data,linkStatus[defaultFileSystemHandleName].handle);
+    file_save_json(CalenderStatus.name, data, linkStatus[defaultFileSystemHandleName].handle);
     CalenderStatus.eventChange = true;
   }
 }
@@ -131,14 +137,14 @@ const taskeditAreaToggle = async () => {
   if (taskEdit_close) {
     //hide -> visible
     $('#task_edit_sidebar').addClass('taskEdit_Visible');
-    $('#mainArea').addClass('mainArea_to_task_edit_sidebar_Visible');
+    $('#calendar').addClass('mainArea_to_task_edit_sidebar_Visible');
     document.getElementById('mainArea').addEventListener('transitionend', () => {
       window.calendar.updateSize();
     });
     taskEdit_close = false;
   } else {
     $('#task_edit_sidebar').removeClass('taskEdit_Visible');
-    $('#mainArea').removeClass('mainArea_to_task_edit_sidebar_Visible');
+    $('#calendar').removeClass('mainArea_to_task_edit_sidebar_Visible');
     taskEdit_close = true;
     document.getElementById('mainArea').addEventListener('transitionend', () => {
       window.calendar.updateSize();
@@ -198,8 +204,7 @@ $(document).on('click', '#task_add_addButton', async (e) => {
 
 $(document).on('click', '#task_add_editButton', async (e) => {
   //save button
-  //replace_eventEditSideBar($('#textEdit_ID').text());
-  eventdata_updateEvent(window.calendar.getEvents());
+  replace_eventEditSideBar($('#textEdit_ID').text());
 });
 
 $(document).on('click', '#task_add_deleteButton', async (e) => {

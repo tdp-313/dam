@@ -5,6 +5,7 @@ const wakelockRequest = async () => {
     try {
         wakeLock = await navigator.wakeLock.request('screen');
         screenLockToggle = true;
+        $('#screenLock_Icon').css('color', 'green');
     } catch (err) {
         console.error(err);
     }
@@ -14,6 +15,7 @@ const wakelockRelease = async () => {
         .then(() => {
             wakeLock = null;
             screenLockToggle = false;
+            $('#screenLock_Icon').css('color', 'red');
         });
 }
 document.addEventListener('visibilitychange', async () => {
