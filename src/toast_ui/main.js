@@ -94,7 +94,7 @@ const md_LaunchViewer_Button = () => {
   button.innerHTML = `<i><span class="material-symbols-outlined">exit_to_app</span></i>`;
   button.addEventListener('contextmenu', async (event) => {
     //new Tab
-    
+
   });
   button.addEventListener('click', async (event) => {
     //ChangeView
@@ -214,7 +214,7 @@ $(document).on('click', '#ToastImage_CopyClipboard', async () => {
   for( var i = 0; i < bin.length; i ++ ){
     buffer[i] = bin.charCodeAt( i );
   }
-  var blob = new Blob( [buffer], { type: 'image/png' } ); 
+  var blob = new Blob( [buffer], { type: 'image/png' } );
 
  try{
     navigator.clipboard.write([
