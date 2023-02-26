@@ -98,7 +98,7 @@ const md_LaunchViewer_Button = () => {
   });
   button.addEventListener('click', async (event) => {
     //ChangeView
-    window.open('/markdownSA');
+    window.open('markdownSA/');
   });
   return button;
 }
