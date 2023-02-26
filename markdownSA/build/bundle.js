@@ -111670,8 +111670,14 @@ const tableMergedCell = require('@toast-ui/editor-plugin-table-merged-cell');
 window.onload = async () =>{
   await markdownStart();
   let text = '';
+  let title = '';
   try {
     text = await window.opener.Editor_root.getMarkdown();
+    title = await window.opener.editing_markdownFileName;
+    if (title.length > 3) {
+      title = title.substring(title.length - 3, title.length) === '.md' ? title.substring(0, title.length - 3) : title;
+    }
+    $("title").html(title);
     $('#markdown_text').text(text);
   } catch (error) {
     text = $('#markdown_text').text();

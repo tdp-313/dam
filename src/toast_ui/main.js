@@ -1,6 +1,8 @@
 const markdown_idb_backup_name = "preMDE";
 const markdown_idb_file_name = 'markdown_file'
 const markdown_saveInterval = 3000; //3s
+var editing_markdownFileName = 'no saved';
+
 const toast_start = async () => {
   const editor = new Editor({
     el: document.querySelector('#editor'),
@@ -81,6 +83,7 @@ const md_FileOpen_Button = () => {
       }
       Editor_root.setMarkdown(text, true);
       $("#markdown_autosave").css('color', 'green');
+      editing_markdownFileName = handle.name;
     }
   });
   return button;
@@ -115,6 +118,7 @@ const md_FileSaveAs_Button = () => {
     if (await Save_Handle_Register(markdown_idb_file_name) === 'OK') {
       let handle = linkStatus[markdown_idb_file_name].handle;
       await file_save_text(handle.name, Editor_root.getMarkdown(), handle, markdown_idb_file_name, false);
+      editing_markdownFileName = handle.name;
       $("#markdown_autosave").css('color', 'green');
     }
   });
@@ -238,6 +242,7 @@ const autoSave_Clock_Process = async () => {
       if (typeof linkStatus[markdown_idb_file_name] !== 'undefined') {
         if (linkStatus[markdown_idb_file_name].ishandle) {
           let handle = linkStatus[markdown_idb_file_name].handle;
+          editing_markdownFileName = handle.name;
           await file_save_text(handle.name, Editor_root.getMarkdown(), handle, markdown_idb_file_name, false);
           save_information.file = true;
           $("#markdown_autosave").addClass('md_autoSaveAnimation');
