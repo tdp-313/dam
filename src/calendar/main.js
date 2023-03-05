@@ -1,4 +1,15 @@
 let defaultColor = { backgroundColor: '#3788d8', borderColor: '#3788d8', textColor: '#ffffff' };
+
+let sampleColor = {
+  1: { backgroundColor: '#A80000', borderColor: '#A80000' },
+  2: { backgroundColor: '#FB6400', borderColor: '#FB6400' },
+  3: { backgroundColor: '#FFC400', borderColor: '#FFC400' },
+  4: { backgroundColor: '#62BA27', borderColor: '#62BA27' },
+  5: { backgroundColor: '#3342C4', borderColor: '#3342C4' },
+  6: { backgroundColor: '#9362C4', borderColor: '#9362C4' },
+  7: { backgroundColor: '#3788d8', borderColor: '#3788d8' },
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   //
   //Kanban_Start();
@@ -6,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#task_add_textColor').val(defaultColor.textColor);
   $('#task_add_borderColor').val(defaultColor.borderColor);
   $('#task_add_backgroundColor').val(defaultColor.backgroundColor);
+  sampleColor_apply();
   let today = new Date();
   $('#task_add_StartDayInput').val(today.getFullYear() + '-' + extend_0(today.getMonth() + 1) + '-' + extend_0(today.getDate()));
 
@@ -141,10 +153,12 @@ const taskeditAreaToggle = async () => {
     document.getElementById('mainArea').addEventListener('transitionend', () => {
       window.calendar.updateSize();
     });
+    $(".taskEdit_close_inside").addClass("taskEdit_close_inside_openState");
     taskEdit_close = false;
   } else {
     $('#task_edit_sidebar').removeClass('taskEdit_Visible');
     $('#calendar').removeClass('mainArea_to_task_edit_sidebar_Visible');
+    $(".taskEdit_close_inside").removeClass("taskEdit_close_inside_openState");
     taskEdit_close = true;
     document.getElementById('mainArea').addEventListener('transitionend', () => {
       window.calendar.updateSize();
@@ -359,6 +373,15 @@ $(document).on('click', '#task_add_colorsync', async () => {
   }
 });
 
+$(document).on('keydown', '#task_add_Description', () => {
+  let textarea = $("#task_add_Description");
+  setTimeout(function () {
+    textarea.css('height', 'auto');
+    textarea.css('height', textarea.get(0).scrollHeight + 'px');
+    + 'px;';
+  }, 0);
+});
+
 $(document).on('change', 'input[id^="task_add"]', async (e) => {
   if (taskEdit_option_colorsync) {
     if (e.target.id === 'task_add_backgroundColor') {
@@ -377,6 +400,7 @@ $(document).on('change', 'input[id^="task_add"]', async (e) => {
   //サンプル変更
   task_add_sampleChange();
 });
+
 const task_add_sampleChange = () => {
   //サンプル変更
   let sample_Object = $('#drag_add_object');
@@ -389,3 +413,26 @@ const task_add_sampleChange = () => {
   sample_Object.css('color', $('#task_add_textColor').val());
   sample_Object_C.css('border-color', $('#task_add_borderColor').val());
 }
+
+const sampleColor_apply = () => {
+  let sampleArray = Object.keys(sampleColor);
+  for (i = 0; i < sampleArray.length; i++) {
+    let target = $('#task_add_Option_sample' + (i + 1));
+    console.log(target)
+    target.css('background-color', sampleColor[sampleArray[i]].backgroundColor);
+    target.css('border-color', sampleColor[sampleArray[i]].borderColor);
+  }
+}
+
+$(document).on('click', 'span[id^="task_add_Option_sample"]', async (e) => {
+  let sampleNumber = e.currentTarget.id.substring(22, e.currentTarget.id.length);
+  //$('#task_add_textColor').val(sampleColor[sampleNumber]/*text color*/);
+  $('#task_add_borderColor').val(sampleColor[sampleNumber].borderColor);
+  $('#task_add_backgroundColor').val(sampleColor[sampleNumber].backgroundColor);
+  //更新
+  let id = $('#textEdit_ID').text();
+  if (id !== '') {
+    replace_eventEditSideBar(id);
+  }
+  task_add_sampleChange();
+});

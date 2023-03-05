@@ -2,6 +2,7 @@
 <html lang="ja">
 
 <head>
+  <link rel="manifest" href="/manifest.json">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>dam</title>
@@ -153,7 +154,7 @@
     <div id="calendarObject">
       <div id='calendar'></div>
       <div id="task_edit_sidebar">
-        <div id="taskEdit_close"><span class="material-symbols-outlined fontsize_Large">keyboard_arrow_right</span>閉じる
+        <div id="taskEdit_close"><div class="taskEdit_close_inside"><span class="material-symbols-outlined fontsize_Large">keyboard_arrow_right</span></div>
         </div>
         <div id='external-events'>
           <div id='external-events-list'>
@@ -162,8 +163,7 @@
             </div>
           </div>
         </div>
-        <div class="">+ Title</div>
-        <input type="text" id="task_add_Title"></input>
+        <input type="text" id="task_add_Title"  placeholder="Event Title"></input>
         <div>Start</div>
         <div class="taskDateInputArea"><input class="taskDateInput" id="task_add_StartDayInput"
             type="date"></input><input class="taskTimeInput" id="task_add_StartTimeInput" type="time"
@@ -207,9 +207,16 @@
             </fieldset>
           </div>
           <div class="task_addOptionArea">
-            <div id="task_add_OptionControl_Color"><span class="material-symbols-outlined">
-                arrow_drop_down
-              </span><span>カラー</span></div>
+            <div class="task_add_OptionControl_Color_sampleArea">
+              <span class="task_add_Option_sample" id="task_add_Option_sample1"></span>
+              <span class="task_add_Option_sample" id="task_add_Option_sample2"></span> 
+              <span class="task_add_Option_sample" id="task_add_Option_sample3"></span> 
+              <span class="task_add_Option_sample" id="task_add_Option_sample4"></span> 
+              <span class="task_add_Option_sample" id="task_add_Option_sample5"></span> 
+              <span class="task_add_Option_sample" id="task_add_Option_sample6"></span> 
+              <span class="task_add_Option_sample" id="task_add_Option_sample7"></span> 
+              <span id="task_add_OptionControl_Color" class="material-symbols-outlined">arrow_drop_down</span>
+            </div>
             <div id="task_add_Option_Color" class="task_add_Option">
               <fieldset>
                 <div class="task_add_colorArea">
