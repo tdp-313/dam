@@ -2,7 +2,7 @@
 <html lang="ja">
 
 <head>
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>dam</title>
@@ -183,9 +183,14 @@
           <textarea id="task_add_Description" name="textarea" rows="3" placeholder="イベントの説明"></textarea>
         </div>
         <div class="task_addOptionArea">
-          <div id="task_add_OptionControl_Style"><span class="material-symbols-outlined">
-              arrow_drop_down
-            </span><span>表示スタイル</span></div>
+          <div >
+            <div class="task_add_OptionControl_Color_sampleArea">
+              <label for="task_add_dispFotmat_auto" class="task_addOptionArea_Style task_addOptionArea_Style_select"><span class="material-symbols-outlined">motion_photos_auto</span><span class="">Auto</span></label>
+              <label for="task_add_dispFotmat_block" class="task_addOptionArea_Style"><span class="material-symbols-outlined">indeterminate_check_box</span><span>Block</span></label>
+              <label for="task_add_dispFotmat_listitem" class="task_addOptionArea_Style"><span class="material-symbols-outlined">format_list_bulleted</span><span>List</span></label>
+              <span id="task_add_OptionControl_Style" class="material-symbols-outlined hover_white">arrow_drop_down</span>
+            </div>
+          </div>
           <div id="task_add_Option_Style" class="task_add_Option">
             <fieldset>
               <div>
@@ -215,7 +220,7 @@
               <span class="task_add_Option_sample" id="task_add_Option_sample5"></span> 
               <span class="task_add_Option_sample" id="task_add_Option_sample6"></span> 
               <span class="task_add_Option_sample" id="task_add_Option_sample7"></span> 
-              <span id="task_add_OptionControl_Color" class="material-symbols-outlined">arrow_drop_down</span>
+              <span id="task_add_OptionControl_Color" class="material-symbols-outlined hover_white">arrow_drop_down</span>
             </div>
             <div id="task_add_Option_Color" class="task_add_Option">
               <fieldset>

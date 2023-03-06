@@ -26,10 +26,11 @@ document.addEventListener('DOMContentLoaded', function () {
   var containerEl = document.getElementById('external-events-list');
   var containerE2 = new FullCalendar.Draggable(containerEl, {
     itemSelector: '.fc-event',
-    eventData: function (eventEl) {
+    eventData: (eventEl) =>{
       return (create_event_fromSideBar());
     }
   });
+  console.log(containerE2);
   window.calendar = new FullCalendar.Calendar(calendarEl, {
     headerToolbar: {
       left: 'prev,next today myCustomButton',
@@ -165,6 +166,7 @@ const taskeditAreaToggle = async () => {
     });
   }
 }
+
 const select_event = (e) => {
   let allDay = e.allDay;
   if (allDay) {
@@ -208,6 +210,16 @@ $(document).on('change', '#task_add_Endtime', (e) => {
 $(document).on('click', '#taskEdit_close', (e) => {
   taskeditAreaToggle();
 });
+
+$(document).on('change', 'input[id^="task_add_dispFotmat"]', () => {
+  task_dispFormatChange();
+});
+
+const task_dispFormatChange = () => {
+  let e = $('input:radio[name="task_add_dispFotmat"]:checked')[0].labels[0];
+  $(".task_addOptionArea_Style").removeClass("task_addOptionArea_Style_select");
+  e.classList.add("task_addOptionArea_Style_select");
+}
 
 $(document).on('click', '#task_add_addButton', async (e) => {
   let createEvent = create_event_fromSideBar();
@@ -298,10 +310,10 @@ const get_eventEditSideBar = (event) => {
   $('#task_add_borderColor').val(event.borderColor);
   $('#task_add_backgroundColor').val(event.backgroundColor);
   $('#task_add_Description').val(event.extendedProps.description);
+  task_dispFormatChange();
 }
 
 const replace_eventEditSideBar = (id) => {
-
   if (id === '') {
     console.error('Error EditTarget Unknown', id);
     return (null);
@@ -311,24 +323,6 @@ const replace_eventEditSideBar = (id) => {
   window.calendar.addEvent(createEvent);
   $('#textEdit_ID').text(createEvent.id);
   $('#textEdit_Title').text(createEvent.title);
-  /*
-  let allday = $('#task_add_Endtime').prop("checked");
-  console.log(event);
-  if (allday) {
-    let start = $('#task_add_StartDayInput').val();
-    let end = $('#task_add_EndDayInput').val();
-    event.setDates(start, end);
-  } else {
-    let start = $('#task_add_StartDayInput').val() + 'T' + $('#task_add_StartTimeInput').val();
-    let end = $('#task_add_EndDayInput').val() + 'T' + $('#task_add_EndTimeInput').val();
-    event.setDates(start, end);
-  }
-
-  event.setAllDay(allday);
-
-  event.setProp('display', $('input:radio[name="task_add_dispFotmat"]:checked').val(),);
-  event.setProp('title', $('#task_add_Title').val());
-  */
 }
 
 let taslEdit_option_close_style = true;
@@ -418,7 +412,6 @@ const sampleColor_apply = () => {
   let sampleArray = Object.keys(sampleColor);
   for (i = 0; i < sampleArray.length; i++) {
     let target = $('#task_add_Option_sample' + (i + 1));
-    console.log(target)
     target.css('background-color', sampleColor[sampleArray[i]].backgroundColor);
     target.css('border-color', sampleColor[sampleArray[i]].borderColor);
   }

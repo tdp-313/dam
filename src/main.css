@@ -87,7 +87,7 @@ li.hamberger {
 }
 
 .switch__label {
-    width: 4rem;
+    width: 3rem;
     position: relative;
     display: inline-block;
 }
@@ -95,8 +95,8 @@ li.hamberger {
     display: block;
     cursor: pointer;
     position: relative;
-    border-radius: 2rem;
-    height: 2rem;
+    border-radius: 1.5rem;
+    height: 1.5rem;
     overflow: hidden;
 }
 .switch__content:before {
@@ -120,7 +120,7 @@ li.hamberger {
     height: 0;
     top: 50%;
     left: 50%;
-    border-radius: 2rem;
+    border-radius: 1.5rem;
             transition: all .3s;
 }
 
@@ -134,15 +134,15 @@ li.hamberger {
     left: 0.1rem;
     position: absolute;
             box-shadow: 0 0.1rem 0.3rem #999;
-    width: 1.7rem;
-    height: 1.7rem;
+    width: 1.275rem;
+    height: 1.275rem;
             border-radius: 50%;
     background-color: #fff;
             transition: all .3s;
 }
 
 .switch__input:checked ~ .switch__circle {
-    left: 2.20rem;
+    left: 1.65rem;
 }
 
 .switch__input:checked ~ .switch__content:after {
@@ -151,6 +151,11 @@ li.hamberger {
     left: 0;
     width: 100%;
     height: 100%;
+}
+
+.hover_white:hover{
+    color: white;
+    cursor: pointer;
 }
 
 .flex {
