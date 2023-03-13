@@ -1,3 +1,4 @@
-function home_html() {
-    return ('<h1>Welcome DAM</h1>');
+async function home_html() {
+    let home = "<h1>Welcome DAM</h1>";
+    return (home);
 }

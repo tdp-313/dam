@@ -194,3 +194,7 @@ li.hamberger {
 #Picture_in_Picture_stop {
     background-color: #EB6440;
 }
+/*---------------------------**/
+video {
+    max-width: 100%;
+}

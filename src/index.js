@@ -60,7 +60,7 @@ class setting_value {
 
         switch (view) {
             case 'home':
-                mainArea.html(home_html());
+                mainArea.html(await home_html());
                 break;
             case 'folder':
                 mainArea.html(await projectBuilder_mainPage());
@@ -90,6 +90,9 @@ class setting_value {
             case 'image':
                 mainArea.html('');
                 $('#toast_image').removeClass('displayhide');
+                break;
+            case 'vttCaption':
+                mainArea.html(await vtt_main(false));
                 break;
             default:
                 break;
