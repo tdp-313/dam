@@ -33,7 +33,7 @@ $(document).on('change', '#vtt_movie', (e) => {
     let htmlText = "";
     htmlText += ""
     htmlText += '<video src="' + videoURL + '" controls>';
-    htmlText += '<track default src="'+ vttURL +'" />'
+    htmlText += '<track default src="'+ vttURL +'" kind="subtitles" srclang="ja" label="default"/>'
     htmlText += '</video>';
     htmlText += '<div id="vtt_textArea"></div>'
     $("#renderArea").html(htmlText);
