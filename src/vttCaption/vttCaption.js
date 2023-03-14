@@ -1,7 +1,7 @@
 async function vtt_main(isRead) {
     let home = "";
     if (isRead) {
-        home += '<div id="vtt_videoArea">.VTTと動画を一緒に選択して読み込むと字幕オンで再生できる。</div><hr>';
+        home += '<div id="vtt_videoArea">.VTTと動画を一緒に選択して読み込むと字幕オンで再生できる。</div>';
         home += '<div id="vtt_textArea"></div>';
     }
     else {
@@ -10,6 +10,7 @@ async function vtt_main(isRead) {
     }
     return (home);
 }
+
 $(document).on('change', '#vtt_movie', (e) => {
     let fileList = e.target.files;
     console.log(e.target.files);
@@ -24,21 +25,36 @@ $(document).on('change', '#vtt_movie', (e) => {
             let vttReader = new FileReader();
             vttReader.onload = function () {
                 console.log(vttToPlainText(vttReader.result));
-                $("#vtt_textArea").html(vttToPlainText(vttReader.result));
+                //$("#vtt_textArea").html(vttToPlainText(vttReader.result));
             }
             vttReader.readAsText(e.target.files[i]);
         }
     }
     
     let htmlText = "";
-    htmlText += ""
-    htmlText += '<video src="' + videoURL + '" controls>';
+    htmlText += "<div>"
+    htmlText += '<button id="vtt_videoSkip_rewind"><span class="material-symbols-outlined">fast_rewind</span></button>';
+    htmlText += '<button id="vtt_videoSkip_forward"><span class="material-symbols-outlined">fast_forward</span></button>';
+    htmlText += '</div><hr>';
+    htmlText += '<video id="vtt_videoContents" src="' + videoURL + '" controls>';
     htmlText += '<track default src="'+ vttURL +'" kind="subtitles" srclang="ja" label="default"/>'
     htmlText += '</video>';
+
     htmlText += '<div id="vtt_textArea"></div>'
     $("#renderArea").html(htmlText);
 });
 
+$(document).on('click', '#vtt_videoSkip_forward', () => {
+    let video = document.getElementById("vtt_videoContents");
+    video.play();
+    video.currentTime += 10;
+});
+
+$(document).on('click', '#vtt_videoSkip_rewind', () => {
+    let video = document.getElementById("vtt_videoContents");
+    video.play();
+    video.currentTime -= 10;
+});
 const vttToPlainText = (vttCaption) => {
     if (vttCaption.length === 0) {
       return;
