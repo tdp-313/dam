@@ -1,12 +1,16 @@
 :root {
     --backgorund-color: #EFF5F5;
     --navibar-color: #D6E4E5;
+    --navibarShare-color: #e5d6e4;
     --third-color: #497174;
-    --forth-colot: #EB6440;
+    --forth-color: #EB6440;
+    --select-color:#DFE6CA;
 }
+
 ::-webkit-scrollbar {
-    display:none;
+    display: none;
 }
+
 body {
     background-color: var(--backgorund-color);
     margin: 0;
@@ -24,12 +28,15 @@ body {
     transition: 0.05s ease;
     border-radius: 25%;
 }
+
 .navi-button:hover {
     background-color: #e7e5a6;
 }
+
 .navi-button:active {
     background-color: #ebd891;
 }
+
 .naviArea {
     width: 16rem;
     height: 100vh;
@@ -51,7 +58,7 @@ body {
 }
 
 .mainArea_to_naviArea_Visible {
-    padding-left: calc(16rem - 3.5rem + 0.5rem)!important;
+    padding-left: calc(16rem - 3.5rem + 0.5rem) !important;
 }
 
 li.navi-button {
@@ -83,7 +90,7 @@ li.hamberger {
 }
 
 .displayhide {
-    display: none!important;
+    display: none !important;
 }
 
 .switch__label {
@@ -91,6 +98,7 @@ li.hamberger {
     position: relative;
     display: inline-block;
 }
+
 .switch__content {
     display: block;
     cursor: pointer;
@@ -99,6 +107,7 @@ li.hamberger {
     height: 1.5rem;
     overflow: hidden;
 }
+
 .switch__content:before {
     content: "";
     display: block;
@@ -111,6 +120,7 @@ li.hamberger {
     border-radius: 2rem;
     background-color: #fff;
 }
+
 .switch__content:after {
     content: "";
     display: block;
@@ -121,7 +131,7 @@ li.hamberger {
     top: 50%;
     left: 50%;
     border-radius: 1.5rem;
-            transition: all .3s;
+    transition: all .3s;
 }
 
 .switch__input {
@@ -133,19 +143,19 @@ li.hamberger {
     top: 0.1rem;
     left: 0.1rem;
     position: absolute;
-            box-shadow: 0 0.1rem 0.3rem #999;
+    box-shadow: 0 0.1rem 0.3rem #999;
     width: 1.275rem;
     height: 1.275rem;
-            border-radius: 50%;
+    border-radius: 50%;
     background-color: #fff;
-            transition: all .3s;
+    transition: all .3s;
 }
 
-.switch__input:checked ~ .switch__circle {
+.switch__input:checked~.switch__circle {
     left: 1.65rem;
 }
 
-.switch__input:checked ~ .switch__content:after {
+.switch__input:checked~.switch__content:after {
     background-color: #88bf71;
     top: 0;
     left: 0;
@@ -153,7 +163,7 @@ li.hamberger {
     height: 100%;
 }
 
-.hover_white:hover{
+.hover_white:hover {
     color: white;
     cursor: pointer;
 }
@@ -161,39 +171,48 @@ li.hamberger {
 .flex {
     display: flex;
 }
+
 .flex_center {
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
 .flex_aligincenter {
     display: flex;
     align-items: center;
 }
+
 .padding-medium {
     padding: 0 0.5rem;
 }
 
 /*------------------------------**/
 #Picture_in_Picture {
-    margin: 0 3rem 3rem ;
+    margin: 0 3rem 3rem;
 }
+
 #Picture_in_Picture_video {
     max-width: 100%;
     max-height: 100%;
 }
-#Picture_in_Picture_start,#Picture_in_Picture_stop {
+
+#Picture_in_Picture_start,
+#Picture_in_Picture_stop {
     font-size: 1.5rem;
     padding: 0.5rem 3rem;
     border: 0;
     border-radius: 5rem;
 }
+
 #Picture_in_Picture_start {
     background-color: #88bf71;
 }
+
 #Picture_in_Picture_stop {
     background-color: #EB6440;
 }
+
 /*---------------------------**/
 video {
     max-width: 100%;

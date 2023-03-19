@@ -169,7 +169,9 @@
             <div class='fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event' id='drag_add_object_color'>
               <div class='fc-event-main' id='drag_add_object'>追加</div>
             </div>
-          </div>
+          </div> 
+          <input type="checkbox" id="task_add_EditLock" class="displayhide" checked></input>
+          <label for="task_add_EditLock" class="flex_center" ><span class="material-symbols-outlined" id="task_add_EditLockButton">lock_open</span></label>
         </div>
         <input type="text" id="task_add_Title"  placeholder="Event Title"></input>
         <div>Start</div>
@@ -189,6 +191,14 @@
         </div>
         <div>
           <textarea id="task_add_Description" name="textarea" rows="3" placeholder="イベントの説明"></textarea>
+        </div>
+        <div class="task_edit_sidebarEndtimeArea displayhide" id="task_add_ShareEventArea">
+          <label for="task_add_ShareEvent">共有イベント</label>
+          <label class="switch__label">
+            <input type="checkbox" class="switch__input" id='task_add_ShareEvent' />
+            <span class="switch__content"></span>
+            <span class="switch__circle"></span>
+          </label>
         </div>
         <div class="task_addOptionArea">
           <div >
@@ -219,6 +229,26 @@
               </div>
             </fieldset>
           </div>
+          <div>
+            <div class="flex_aligincenter task_add_titleIconArea">
+              <span class="material-symbols-outlined task_add_titleIcon" id="task_add_titleIcon_search">search</span>
+              <span class="material-symbols-outlined task_add_titleIcon" id="task_add_titleIcon_check_circle">check_circle</span>
+              <span class="material-symbols-outlined task_add_titleIcon" id="task_add_titleIcon_star">star</span>
+              <span class="material-symbols-outlined task_add_titleIcon" id="task_add_titleIcon_transcribe">transcribe</span>
+              <span class="material-symbols-outlined task_add_titleIcon" id="task_add_titleIcon_quick_reference">quick_reference</span>
+              <span class="material-symbols-outlined task_add_titleIcon" id="task_add_titleIcon_taunt">taunt</span>
+              <span class="material-symbols-outlined task_add_titleIcon" id="task_add_titleIcon_handshake">handshake</span>
+              <span id="task_add_titleIcon_Open" class="material-symbols-outlined hover_white">arrow_drop_down</span>
+            </div>
+            <fieldset class="flex_aligincenter task_add_titleIconArea_Additional displayhide" id="task_add_titleIcon_TexaArea">
+              <label for="task_add_TitleIconText" class="material-symbols-outlined" id="task_add_TitleIconTextSample"></label>
+              <input type="text" placeholder="Google Fonts Icon Name" id="task_add_TitleIconText"></input>  
+            </fieldset>
+          </div>
+          <div class="flex_aligincenter">
+            <input type="url" id="task_add_URL"  placeholder="URL"></input>
+            <span id="task_add_URLOpen" class="material-symbols-outlined">open_in_new</span>
+          </div>        
           <div class="task_addOptionArea">
             <div class="task_add_OptionControl_Color_sampleArea">
               <span class="task_add_Option_sample" id="task_add_Option_sample1"></span>

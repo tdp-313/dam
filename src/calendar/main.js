@@ -26,27 +26,27 @@ document.addEventListener('DOMContentLoaded', function () {
   var containerEl = document.getElementById('external-events-list');
   var containerE2 = new FullCalendar.Draggable(containerEl, {
     itemSelector: '.fc-event',
-    eventData: (eventEl) =>{
+    eventData: (eventEl) => {
       return (create_event_fromSideBar());
     }
   });
-  console.log(containerE2);
   window.calendar = new FullCalendar.Calendar(calendarEl, {
     headerToolbar: {
       left: 'prev,next today myCustomButton',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay,dayGridYear'
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,multiMonthYear'
     },
     customButtons: {
       myCustomButton: {
-        text: '追加',
-        click: function () {
-          taskeditAreaToggle();
+        text: '共有',
+        click: async () => {
+          //taskeditAreaToggle();
+          calendarShare_start();
         }
       }
     },
     //schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
-    multiMonthMaxColumns: 1,
+    //multiMonthMaxColumns: 1,
     locale: 'en',
     initialDate: Date.now(),
     navLinks: true, // can click day/week names to navigate views
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
     contentHeight: 'auto',
     weekNumbers: true,
     weekNumberFormat: { week: 'numeric' },
-    eventTimeFormat: { hour: 'numeric', minute: '2-digit' },
+    eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
     dayHeaderFormat: { weekday: 'short' },
     slotDuration: '00:30:00',
     slotLabelFormat: {
@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
       //console.log(e);
     },
     eventClick: (e) => {
+      e.jsEvent.preventDefault();
       event_selectEvent(e.event);
     },
     eventDrop: (e) => {
@@ -118,26 +119,54 @@ document.addEventListener('DOMContentLoaded', function () {
     eventReceive: (e) => {
       event_selectEvent(e.event);
     },
-    eventsSet: (e) => eventdata_updateEvent(e),
+    eventsSet: (e) => eventdata_updateEvent(getEventSourceID(), e),
+    eventDidMount: function (info) {
+      let titleIcon = info.event.extendedProps.titleIcon;
+      if (typeof (titleIcon) === "string") {
+        $(info.el).find('.fc-event-title').prepend('<span class="material-symbols-outlined fc_titleIcon">' + titleIcon + '</span>');
+      }
 
+        info.event.setProp("editable", info.event.extendedProps.editable_prop);
+      
+    },
   });
   window.calendar.render();
 });
 
+const calendarShare_start = async () => {
+  await Directory_Handle_Register(shareCalendarEvent);
+  let button = $(".fc-myCustomButton-button");
+  button.removeClass('fc-myCustomButton-button');
+  button.addClass('fc-myCustomButton-button_linked');
+  $("#task_add_ShareEventArea").removeClass("displayhide");
+}
 const event_selectEvent = (event) => {
   $('#textEdit_Title').text(event.title);
   $('#textEdit_ID').text(event.id);
   get_eventEditSideBar(event);
   task_add_sampleChange();
 }
-const eventdata_updateEvent = (events) => {
-  let data = { id: EventID, event: events }
-  if (CalenderStatus.first_read) {
+const eventdata_updateEvent = async (saveID, e) => {
+  let saveData = [];
+  if (e.length === 0) {
+    return null;
+  }
+  for (let i = 0; i < e.length; i++) {
+    if (e[i].source.id === saveID) {
+      saveData.push(e[i]);
+    }
+  }
+  let data = { id: EventID[saveID], event: saveData }
+  if (CalenderStatus.first_read && CalenderStatus.eventID === saveID) {
     file_save_json(CalenderStatus.name, data, linkStatus[defaultFileSystemHandleName].handle);
     CalenderStatus.eventChange = true;
   }
+  if (CalenderStatus_Share.first_read && CalenderStatus_Share.eventID === saveID) {
+    file_save_json(CalenderStatus_Share.name, data, linkStatus[shareCalendarEvent].handle);
+    CalenderStatus_Share.eventChange = true;
+  }
 }
-let EventID = 0;
+
 let taskEdit_close = true;
 
 const taskeditAreaToggle = async () => {
@@ -166,7 +195,6 @@ const taskeditAreaToggle = async () => {
     });
   }
 }
-
 const select_event = (e) => {
   let allDay = e.allDay;
   if (allDay) {
@@ -189,7 +217,13 @@ const select_event = (e) => {
     $('#task_add_EndDayInput').val(endday);
     $('#task_add_StartTimeInput').val(startTime);
     $('#task_add_EndTimeInput').val(endTime);
-    //console.log(startday, startTime, endday, endTime);
+  }
+}
+const getEventSourceID = () => {
+  if ($("#task_add_ShareEvent").prop('checked') === true) {
+    return (CalenderStatus_Share.eventID);
+  } else {
+    return (CalenderStatus.eventID);
   }
 }
 const extend_0 = (text) => {
@@ -223,7 +257,8 @@ const task_dispFormatChange = () => {
 
 $(document).on('click', '#task_add_addButton', async (e) => {
   let createEvent = create_event_fromSideBar();
-  window.calendar.addEvent(createEvent);
+  let temp = window.calendar.addEvent(createEvent, getEventSourceID());
+  console.log(temp);
   $('#textEdit_ID').text(createEvent.id);
   $('#textEdit_Title').text(createEvent.title);
 });
@@ -231,6 +266,8 @@ $(document).on('click', '#task_add_addButton', async (e) => {
 $(document).on('click', '#task_add_editButton', async (e) => {
   //save button
   replace_eventEditSideBar($('#textEdit_ID').text());
+  eventdata_updateEvent(CalenderStatus.eventID, window.calendar.getEvents());
+  eventdata_updateEvent(CalenderStatus_Share.eventID,window.calendar.getEvents());
 });
 
 $(document).on('click', '#task_add_deleteButton', async (e) => {
@@ -250,10 +287,12 @@ $(document).on('click', '#task_add_deleteButton', async (e) => {
   $('#textEdit_Title').text(now_Calendar_Events[now_Calendar_Events.length - 1].title);
 });
 
-const create_event_fromSideBar = () => {
+const create_event_fromSideBar = () => { 
   let event = {
-    id: EventID++,
+    id: getEventSourceID() + EventID[getEventSourceID()]++,
     title: $('#task_add_Title').val(),
+    editable: $('#task_add_EditLock').prop("checked"),
+    editable_prop :$('#task_add_EditLock').prop("checked"),
     start: null,
     end: null,
     allDay: $('#task_add_Endtime').prop("checked"),
@@ -262,6 +301,9 @@ const create_event_fromSideBar = () => {
     borderColor: $('#task_add_borderColor').val(),
     textColor: $('#task_add_textColor').val(),
     description: $('#task_add_Description').val(),
+    titleIcon: $("#task_add_TitleIconText").val(),
+    url: $('#task_add_URL').val(),
+    source: { id: getEventSourceID() },
   }
   if (event.allDay) {
     event.start = $('#task_add_StartDayInput').val();
@@ -284,10 +326,12 @@ const create_event_fromSideBar = () => {
 }
 
 const get_eventEditSideBar = (event) => {
+  console.log('select', event);
   $('#task_add_Title').val(event.title);
   $('#task_add_StartDayInput').val();
   let allDay = $('#task_add_Endtime').prop("checked", event.allDay);
-
+  $('#task_add_EditLock').prop("checked", event.extendedProps.editable_prop);
+  $('#task_add_ShareEvent').prop("checked", event.source.id === CalenderStatus_Share.eventID ? true : false);
   let startday = event.start.getFullYear() + '-' + extend_0(event.start.getMonth() + 1) + '-' + extend_0(event.start.getDate());
   $('#task_add_StartDayInput').val(startday);
   let startTime = extend_0(event.start.getHours()) + ':' + extend_0(event.start.getMinutes()) + ':' + '00';
@@ -310,7 +354,12 @@ const get_eventEditSideBar = (event) => {
   $('#task_add_borderColor').val(event.borderColor);
   $('#task_add_backgroundColor').val(event.backgroundColor);
   $('#task_add_Description').val(event.extendedProps.description);
+  $('#task_add_TitleIconText').val(event.extendedProps.titleIcon);
+  $('#task_add_URL').val(event.url);
+  task_add_EventLock_disp();
   task_dispFormatChange();
+  task_add_shareEventBackgroundColor();
+  task_add_titleIconButton(event.extendedProps.titleIcon);
 }
 
 const replace_eventEditSideBar = (id) => {
@@ -320,34 +369,34 @@ const replace_eventEditSideBar = (id) => {
   }
   calendar.getEventById(id).remove();
   let createEvent = create_event_fromSideBar();
-  window.calendar.addEvent(createEvent);
+  window.calendar.addEvent(createEvent, getEventSourceID());
   $('#textEdit_ID').text(createEvent.id);
   $('#textEdit_Title').text(createEvent.title);
 }
 
-let taslEdit_option_close_style = true;
+let taskEdit_option_close_style = true;
 $(document).on('click', '#task_add_OptionControl_Style', async () => {
-  if (taslEdit_option_close_style) {
+  if (taskEdit_option_close_style) {
     //hidden -> visible
     $('#task_add_Option_Style').addClass('task_add_Option_Visible');
-    taslEdit_option_close_style = false;
+    taskEdit_option_close_style = false;
   } else {
     $('#task_add_Option_Style').removeClass('task_add_Option_Visible');
-    taslEdit_option_close_style = true;
+    taskEdit_option_close_style = true;
   }
 });
 
-let taslEdit_option_close_color = true;
+let taskEdit_option_close_color = true;
 $(document).on('click', '#task_add_OptionControl_Color', async () => {
-  if (taslEdit_option_close_color) {
+  if (taskEdit_option_close_color) {
     //hidden -> visible
     $('#task_add_Option_Color').addClass('task_add_Option_Visible');
     $('#task_add_colorsync').removeClass('displayhide');
-    taslEdit_option_close_color = false;
+    taskEdit_option_close_color = false;
   } else {
     $('#task_add_Option_Color').removeClass('task_add_Option_Visible');
     $('#task_add_colorsync').addClass('displayhide');
-    taslEdit_option_close_color = true;
+    taskEdit_option_close_color = true;
   }
 });
 
@@ -367,6 +416,31 @@ $(document).on('click', '#task_add_colorsync', async () => {
   }
 });
 
+let taskEdit_option_close_titleIcon = true;
+$(document).on('click', '#task_add_titleIcon_Open', async () => {
+  if (taskEdit_option_close_titleIcon) {
+    //hidden -> visible
+    $('#task_add_titleIcon_TexaArea').addClass('task_add_Option_Visible');
+    $('#task_add_titleIcon_TexaArea').removeClass('displayhide');
+    taskEdit_option_close_titleIcon = false;
+  } else {
+    $('#task_add_titleIcon_TexaArea').removeClass('task_add_Option_Visible');
+    $('#task_add_titleIcon_TexaArea').addClass('displayhide');
+    taskEdit_option_close_titleIcon = true;
+  }
+});
+
+$(document).on('click', '.task_add_titleIcon', async (e) => {
+  let selectIcon = e.target.innerText;
+  $("#task_add_TitleIconText").val(selectIcon);
+  await task_add_sideBarChangeEvent();
+});
+
+const task_add_titleIconButton = (iconText) => {
+  $(".task_add_titleIcon").removeClass("task_addOptionArea_Style_select");
+  $("#task_add_titleIcon_" + iconText).addClass("task_addOptionArea_Style_select");
+}
+
 $(document).on('keydown', '#task_add_Description', () => {
   let textarea = $("#task_add_Description");
   setTimeout(function () {
@@ -385,15 +459,38 @@ $(document).on('change', 'input[id^="task_add"]', async (e) => {
       $('#task_add_backgroundColor').val($('#task_add_borderColor').val());
     }
   }
-
+  task_add_EventLock_disp();
+  task_add_shareEventBackgroundColor();
+  task_add_sideBarChangeEvent();
+});
+const task_add_EventLock_disp = () => {
+  let editLock = $("#task_add_EditLock");
+  if (editLock.prop("checked")) {
+    $("#task_add_EditLockButton").text("lock_open");
+  } else {
+    $("#task_add_EditLockButton").text("lock");
+  }
+}
+const task_add_shareEventBackgroundColor = () => {
+  if ($("#task_add_ShareEvent").prop('checked')) {
+    $("#task_edit_sidebar").css("background-color", 'var(--navibarShare-color)');
+  } else {
+    $("#task_edit_sidebar").css("background-color", 'var(--navibar-color)');
+  }
+  
+}
+const task_add_sideBarChangeEvent = async () => {
   //更新
+  let task_add_TitleIconText = $("#task_add_TitleIconText").val();
+  $('#task_add_TitleIconTextSample').text(task_add_TitleIconText);
+  task_add_titleIconButton(task_add_TitleIconText);
   let id = $('#textEdit_ID').text();
   if (id !== '') {
     replace_eventEditSideBar(id);
   }
   //サンプル変更
   task_add_sampleChange();
-});
+}
 
 const task_add_sampleChange = () => {
   //サンプル変更
@@ -401,7 +498,8 @@ const task_add_sampleChange = () => {
   let sample_Object_C = $('#drag_add_object_color');
   let title = $('#task_add_Title').val();
   if (title !== '') {
-    sample_Object.text($('#task_add_Title').val());
+    let titleIcon = '<span class="material-symbols-outlined fc_titleIcon">' + $("#task_add_TitleIconText").val() + '</span>'
+    sample_Object.html(titleIcon + title);
   }
   sample_Object_C.css('backgroundColor', $('#task_add_backgroundColor').val());
   sample_Object.css('color', $('#task_add_textColor').val());
@@ -423,9 +521,13 @@ $(document).on('click', 'span[id^="task_add_Option_sample"]', async (e) => {
   $('#task_add_borderColor').val(sampleColor[sampleNumber].borderColor);
   $('#task_add_backgroundColor').val(sampleColor[sampleNumber].backgroundColor);
   //更新
-  let id = $('#textEdit_ID').text();
-  if (id !== '') {
-    replace_eventEditSideBar(id);
-  }
-  task_add_sampleChange();
+  task_add_sideBarChangeEvent();
 });
+
+$(document).on('click', '#task_add_URLOpen', () => {
+  let url = $("#task_add_URL").val();
+  if (url.length > 1) {
+    window.open(url);
+  }
+});
+

@@ -39,7 +39,6 @@ $(document).on('change', '#vtt_movie', (e) => {
     htmlText += '<video id="vtt_videoContents" src="' + videoURL + '" controls>';
     htmlText += '<track default src="'+ vttURL +'" kind="subtitles" srclang="ja" label="default"/>'
     htmlText += '</video>';
-
     htmlText += '<div id="vtt_textArea"></div>'
     $("#renderArea").html(htmlText);
 });
@@ -55,22 +54,3 @@ $(document).on('click', '#vtt_videoSkip_rewind', () => {
     video.play();
     video.currentTime -= 10;
 });
-const vttToPlainText = (vttCaption) => {
-    if (vttCaption.length === 0) {
-      return;
-    }
-    vttCaption = vttCaption.replace(/<\/c>/g, '');
-    vttCaption = vttCaption.replace(/<.+?>/g, '');
-    vttCaption = vttCaption.replace(/^\s*$/g, '');
-    vttCaption = vttCaption.replace(/&nbsp;/g, ' ');
-    vttCaption = vttCaption.replace(/.+ --> .+/g, '<br>');
-
-    let lines = vttCaption.split('\n');
-    lines.splice(0, 4);
-    lines = lines.map(line => line.trim());
-    lines = lines.filter(line => line.length > 0);
-    lines = lines.filter((line, index, lines) => line !== lines[index + 1]);
-  
-    return lines.join(' ');
-}
-  

@@ -1,6 +1,9 @@
 const defaultFileSystemHandleName = 'dir';
+const shareCalendarEvent = 'share';
+
 $(document).on("click", "#folderLink_Open", async () => {
   await Directory_Handle_Register(defaultFileSystemHandleName);
+  await calendarShare_start();
   //await mergely_folderLink_Check('left');
   //await mergely_folderLink_Check('right');
 });
@@ -38,12 +41,14 @@ const Directory_Handle_Register = async (name = defaultFileSystemHandleName, isN
   await idbKeyval.set(name, linkStatus[name].handle);
   if (name === defaultFileSystemHandleName) {
     await default_from_handle(name);
+    connect_dispNaviBar(true);
+  } else if (name === shareCalendarEvent) {
+    await calendarEventSource_Set(CalenderStatus_Share, linkStatus[name].handle);
   }
-  connect_dispNaviBar(true);
   return ('OK');
 }
 
-const File_Handle_Register = async (name ,isNew = false) =>{
+const File_Handle_Register = async (name, isNew = false) => {
   const pickerOpts = {
     types: [
       {
@@ -88,7 +93,7 @@ const File_Handle_Register = async (name ,isNew = false) =>{
   return ('OK');
 }
 
-const Save_Handle_Register = async (name ) =>{
+const Save_Handle_Register = async (name) => {
   const opt = {
     types: [
       {
@@ -126,7 +131,7 @@ const default_from_handle = async (name) => {
     return null;
   }
   if (/*!diff_Directory.first_read*/true) {
-    diff_Directory.handle = await linkStatus[name].handle.getDirectoryHandle(diff_Directory.name, {create: true});
+    diff_Directory.handle = await linkStatus[name].handle.getDirectoryHandle(diff_Directory.name, { create: true });
     diff_Directory.first_read = true;
     diff_Directory.dir = {};
     diff_Directory.dir_array = [];
@@ -146,7 +151,7 @@ const default_from_handle = async (name) => {
       let left_folder = $('#mergely_toolbar_left_folder');
       right_folder.html('');
       left_folder.html('');
-      for (let i = 0; i < diff_Directory.dir_array.length; i++){
+      for (let i = 0; i < diff_Directory.dir_array.length; i++) {
         right_folder.append('<option value="' + diff_Directory.dir_array[i] + '">' + diff_Directory.dir_array[i] + '</option>');
         left_folder.append('<option value="' + diff_Directory.dir_array[i] + '">' + diff_Directory.dir_array[i] + '</option>');
       }
@@ -167,7 +172,7 @@ const default_from_handle = async (name) => {
     if (last_backup.length === 0) {
       //Create Backup File
       let backup = new markdown_backup();
-      await file_save_json(markdown_editor_Status.backup,backup,markdown_editor_Status.handle,defaultFileSystemHandleName)
+      await file_save_json(markdown_editor_Status.backup, backup, markdown_editor_Status.handle, defaultFileSystemHandleName)
     } else {
       //Read Backup File
       console.log(last_backup);
@@ -177,19 +182,26 @@ const default_from_handle = async (name) => {
       }
     }
   }
-
   //calendar Load
-  if (!CalenderStatus.first_read) {
-    let calendar_source = await file_read_json(CalenderStatus.name, linkStatus[name].handle);
-    EventID = typeof (calendar_source.id) === 'number' ? calendar_source.id : 0;
-    window.calendar.addEventSource(calendar_source.event);
-    window.calendar.setOption('editable', true);
-    worker.postMessage(JSON.stringify(calendar_source.event));
-    CalenderStatus.first_read = true;
-  }
-
+  await calendarEventSource_Set(CalenderStatus, linkStatus[name].handle);
 }
-
+const calendarEventSource_Set = async (calendarState, handle) => {
+  if (!calendarState.first_read) {
+    let calendar_source = await file_read_json(calendarState.name, handle);
+    if (typeof (calendar_source.event) === 'undefined') {
+      //dummy
+      console.warn("dummy Create " + calendarState.EventID);
+      calendar_source = { id: calendarState.EventID+"1", event: [{ id: calendarState.EventID +"0", start: '2023-03-19', allDay: true }] }
+      await file_save_json(calendarState.name, calendar_source, handle);
+    }
+    console.log(calendar_source.id);
+    EventID[calendarState.eventID] = typeof (calendar_source.id) === 'number' ? calendar_source.id : 0;
+    window.calendar.addEventSource({ events: calendar_source.event, id: calendarState.eventID });
+    window.calendar.setOption('editable', true);
+    //worker.postMessage(JSON.stringify(calendar_source.event));
+    calendarState.first_read = true;
+  }
+}
 let linkStatus = {};
 class linkStatusClass {
   constructor() {
@@ -208,22 +220,34 @@ let diff_Directory = {
 
 let CalenderStatus = {
   name: 'calendar.json',
+  eventID: 'Private',
   readtype: 'file_read_json',
   first_read: false,
   eventChange: false,
 }
 
-let markdown_editor_Status = {
-  handle : null,
-  name: 'markdown',
-  backup:'backup.json',
+let CalenderStatus_Share = {
+  name: 'calendarShare.json',
+  eventID: 'Share',
+  readtype: 'file_read_json',
   first_read: false,
-  dom_created:false,
+  eventChange: false,
+}
+let EventID = {};
+EventID[CalenderStatus_Share.eventID] = 0;
+EventID[CalenderStatus.eventID] = 0;
+
+let markdown_editor_Status = {
+  handle: null,
+  name: 'markdown',
+  backup: 'backup.json',
+  first_read: false,
+  dom_created: false,
   eventChange: false,
   resource_handle: null,
-  resource_name : 'resource',
+  resource_name: 'resource',
   export_handle: null,
-  export_name : 'export',
+  export_name: 'export',
 }
 class markdown_backup {
   constructor() {
@@ -242,9 +266,9 @@ const file_read_json = async (readTarget, handle) => {
   return (JSON.parse(text));
 }
 
-const file_read_text = async (readTarget, handle,isdirectory = true) => {
+const file_read_text = async (readTarget, handle, isdirectory = true) => {
   let file_obj = handle;
-  if(isdirectory){
+  if (isdirectory) {
     file_obj = await handle.getFileHandle(readTarget, { create: true });
   }
   let file = await file_obj.getFile();
@@ -267,19 +291,19 @@ const file_save_json = async (writeTarget, data, handle, handle_name = defaultFi
       return null;
     }
     const blob = new Blob([JSON.stringify(data, null, '  ')], { type: 'application/json' });
-  
+
     let file_obj = await handle.getFileHandle(writeTarget, { create: true });
     const stream = await file_obj.createWritable();
     await stream.write(blob);
     await stream.close();
-  } catch (error){
+  } catch (error) {
     console.error(error, handle_name + '->' + writeTarget);
     window.alert(handle_name + '->' + writeTarget);
   }
 
 }
 
-const file_save_text = async (writeTarget, data, handle, handle_name = defaultFileSystemHandleName,isdirectory = true) => {
+const file_save_text = async (writeTarget, data, handle, handle_name = defaultFileSystemHandleName, isdirectory = true) => {
   try {
     if (!linkStatus[handle_name].ishandle) {
       return null;
@@ -288,15 +312,15 @@ const file_save_text = async (writeTarget, data, handle, handle_name = defaultFi
       return null;
     }
     const blob = new Blob([data], { type: 'text/plain' });
-    
+
     let file_obj = handle;
-    if(isdirectory){
+    if (isdirectory) {
       file_obj = await handle.getFileHandle(writeTarget, { create: true });
-    } 
+    }
     const stream = await file_obj.createWritable();
     await stream.write(blob);
     await stream.close();
-  } catch (error){
+  } catch (error) {
     console.error(error, handle_name + '->' + writeTarget);
     window.alert(handle_name + '->' + writeTarget);
   }

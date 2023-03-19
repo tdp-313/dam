@@ -116,7 +116,6 @@ window.onload = async () => {
     //
     
     setting_data = new setting_value(await idbKeyval.get(settingDir_name));
-    console.log(setting_data);
     setting_data.set_nowView = setting_data.get_nowView;
 }
 
