@@ -146,6 +146,7 @@ const event_selectEvent = (event) => {
   get_eventEditSideBar(event);
   task_add_sampleChange();
 }
+
 const eventdata_updateEvent = async (saveID, e) => {
   let saveData = [];
   if (e.length === 0) {
@@ -156,13 +157,16 @@ const eventdata_updateEvent = async (saveID, e) => {
       saveData.push(e[i]);
     }
   }
+  console.log(saveID, e);
   let data = { id: EventID[saveID], event: saveData }
   if (CalenderStatus.first_read && CalenderStatus.eventID === saveID) {
-    file_save_json(CalenderStatus.name, data, linkStatus[defaultFileSystemHandleName].handle);
+    worker.postMessage({ CalendarEventID: CalenderStatus.name, data:  JSON.stringify(data) });
+    //file_save_json(CalenderStatus.name, data, linkStatus[defaultFileSystemHandleName].handle);
     CalenderStatus.eventChange = true;
   }
   if (CalenderStatus_Share.first_read && CalenderStatus_Share.eventID === saveID) {
-    file_save_json(CalenderStatus_Share.name, data, linkStatus[shareCalendarEvent].handle);
+    worker.postMessage({ CalendarEventID: CalenderStatus_Share.name, data: JSON.stringify(data) });
+    //file_save_json(CalenderStatus_Share.name, data, linkStatus[shareCalendarEvent].handle);
     CalenderStatus_Share.eventChange = true;
   }
 }
@@ -530,4 +534,3 @@ $(document).on('click', '#task_add_URLOpen', () => {
     window.open(url);
   }
 });
-

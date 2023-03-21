@@ -97,7 +97,7 @@ const md_LaunchViewer_Button = () => {
   button.innerHTML = `<i><span class="material-symbols-outlined">exit_to_app</span></i>`;
   button.addEventListener('contextmenu', async (event) => {
     //new Tab
-
+    window.open('markdownSA/',null,"popup");
   });
   button.addEventListener('click', async (event) => {
     //ChangeView

@@ -120,11 +120,7 @@ window.onload = async () => {
 }
 
 worker.addEventListener('message', (e) => {
-    console.log(e.data);
-    if (CalenderStatus.first_read && CalenderStatus.eventChange) {
-        worker.postMessage(JSON.stringify(window.calendar.getEvents()));
-        CalenderStatus.eventChange = false;
-    }
+    $("#calendar_saveMessage").html(e.data);
 }, false);
 
 window.addEventListener('resize', async () => {
