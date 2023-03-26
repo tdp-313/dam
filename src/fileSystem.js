@@ -1,5 +1,4 @@
 const defaultFileSystemHandleName = 'dir';
-const shareCalendarEvent = 'share';
 
 $(document).on("click", "#folderLink_Open", async () => {
   await Directory_Handle_Register(defaultFileSystemHandleName);
@@ -39,11 +38,12 @@ const Directory_Handle_Register = async (name = defaultFileSystemHandleName, isN
   linkStatus[name].ishandle = true;
   // FileSystemDirectoryHandle オブジェクトを Indexed Database に保存
   await idbKeyval.set(name, linkStatus[name].handle);
+
   if (name === defaultFileSystemHandleName) {
     await default_from_handle(name);
     connect_dispNaviBar(true);
   } else if (name === shareCalendarEvent) {
-    await calendarEventSource_Set(CalenderStatus_Share, linkStatus[name].handle);
+    await calendarEventSource_Set(CalenderStatus_Share, linkStatus[name].handle, false);
   }
   return ('OK');
 }
@@ -172,7 +172,7 @@ const default_from_handle = async (name) => {
     if (last_backup.length === 0) {
       //Create Backup File
       let backup = new markdown_backup();
-      await file_save_json(markdown_editor_Status.backup, backup, markdown_editor_Status.handle, defaultFileSystemHandleName)
+      await file_save_text(markdown_editor_Status.backup, backup, markdown_editor_Status.handle, defaultFileSystemHandleName)
     } else {
       //Read Backup File
       console.log(last_backup);
@@ -185,23 +185,44 @@ const default_from_handle = async (name) => {
   //calendar Load
   await calendarEventSource_Set(CalenderStatus, linkStatus[name].handle);
 }
-const calendarEventSource_Set = async (calendarState, handle) => {
+
+const calendarEventSource_Set = async (calendarState, handle, file = true) => {
   if (!calendarState.first_read) {
-    let calendar_source = await file_read_json(calendarState.name, handle);
-    if (typeof (calendar_source.event) === 'undefined') {
-      //dummy
-      console.warn("dummy Create " + calendarState.EventID);
-      calendar_source = { id: calendarState.EventID+"1", event: [{ id: calendarState.EventID +"0", start: '2023-03-19', allDay: true }] }
-      await file_save_json(calendarState.name, calendar_source, handle);
+    let calendar_source = "";
+    if (file) {
+      calendar_source = await file_read_json(calendarState.name, handle);
     }
-    console.log(calendar_source.id);
-    EventID[calendarState.eventID] = typeof (calendar_source.id) === 'number' ? calendar_source.id : 0;
-    window.calendar.addEventSource({ events: calendar_source.event, id: calendarState.eventID });
+    if (typeof (calendar_source.event) === 'undefined' && file === true) {
+      //dummy
+      console.warn("dummy Create " + calendarState.eventID);
+      calendar_source = { id: 0, event: [dummyCalendarEvent(calendarState.eventID)] };
+      await file_save_text(calendarState.name, calendar_source, handle);
+
+    }
+    if (file) {
+      EventID[calendarState.eventID] = typeof (calendar_source.id) === 'number' ? calendar_source.id : 0;
+      window.calendar.addEventSource({ events: calendar_source.event, id: calendarState.eventID });
+    } else {
+    }
     window.calendar.setOption('editable', true);
-    //worker.postMessage(JSON.stringify(calendar_source.event));
     calendarState.first_read = true;
-    worker.postMessage({name:calendarState.name,handle:handle});
+    worker.postMessage({ name: calendarState.name, handle: handle });
   }
+
+  if (file === false && handle.name === shareCalendarEvent) {
+    try {
+      await ymap_GetFile();
+    }
+    catch {
+      window.calendar.addEventSource({ events: [dummyCalendarEvent(calendarState.eventID)], id: calendarState.eventID });
+    }
+  }
+}
+const dummyCalendarEvent = (target) => {
+  let event = create_event_fromSideBar();
+  event.title = "Dummy";
+  event.source.id = target;
+  return (event);
 }
 let linkStatus = {};
 class linkStatusClass {

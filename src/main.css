@@ -218,3 +218,9 @@ video {
     max-width: 100%;
     max-height: calc(100vh - 5rem);
 }
+
+#iframe-monaco {
+    width: 100%;
+    height: calc(100vh - 1rem);
+    border: 0;
+}

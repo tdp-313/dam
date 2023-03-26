@@ -1,5 +1,5 @@
 let defaultColor = { backgroundColor: '#3788d8', borderColor: '#3788d8', textColor: '#ffffff' };
-
+let y_map = null;
 let sampleColor = {
   1: { backgroundColor: '#A80000', borderColor: '#A80000' },
   2: { backgroundColor: '#FB6400', borderColor: '#FB6400' },
@@ -10,8 +10,9 @@ let sampleColor = {
   7: { backgroundColor: '#3788d8', borderColor: '#3788d8' },
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+const calendarStart = () => {
   //
+  y_map = window.calendar_ydoc.getMap(CalenderStatus_Share.EventID);
   //Kanban_Start();
   //Sidebar Initialize
   $('#task_add_textColor').val(defaultColor.textColor);
@@ -126,12 +127,17 @@ document.addEventListener('DOMContentLoaded', function () {
         $(info.el).find('.fc-event-title').prepend('<span class="material-symbols-outlined fc_titleIcon">' + titleIcon + '</span>');
       }
 
-        info.event.setProp("editable", info.event.extendedProps.editable_prop);
-      
+      info.event.setProp("editable", info.event.extendedProps.editable_prop);
+
     },
+    eventAdd: (e) => CalendarChangeEventQueue.push({ type: 'add', source: e.event.source.id, ID: e.event.id, eventJson: JSON.stringify(window.calendar.getEventById(e.event.id)) }),
+    eventChange: (e) => CalendarChangeEventQueue.push({ type: 'change', source: e.event.source.id, ID: e.event.id, eventJson: JSON.stringify(window.calendar.getEventById(e.event.id)) }),
+    eventRemove: (e) => CalendarChangeEventQueue.push({ type: 'remove', source: e.event.source.id, ID: e.event.id, eventJson: JSON.stringify(window.calendar.getEventById(e.event.id)) }),
   });
   window.calendar.render();
-});
+}
+
+let CalendarChangeEventQueue = [];
 
 const calendarShare_start = async () => {
   await Directory_Handle_Register(shareCalendarEvent);
@@ -157,18 +163,18 @@ const eventdata_updateEvent = async (saveID, e) => {
       saveData.push(e[i]);
     }
   }
-  console.log(saveID, e);
+  //console.log(saveID, saveData);
   let data = { id: EventID[saveID], event: saveData }
   if (CalenderStatus.first_read && CalenderStatus.eventID === saveID) {
-    worker.postMessage({ CalendarEventID: CalenderStatus.name, data:  JSON.stringify(data) });
+    worker.postMessage({ CalendarHandleName: linkStatus[defaultFileSystemHandleName].handle.name, data: { target: CalenderStatus.name, json: JSON.stringify(data) } });
     //file_save_json(CalenderStatus.name, data, linkStatus[defaultFileSystemHandleName].handle);
     CalenderStatus.eventChange = true;
-  }
+  }/*
   if (CalenderStatus_Share.first_read && CalenderStatus_Share.eventID === saveID) {
-    worker.postMessage({ CalendarEventID: CalenderStatus_Share.name, data: JSON.stringify(data) });
+    worker.postMessage({ CalendarHandleName: linkStatus[shareCalendarEvent].handle.name, data: { target: CalenderStatus_Share.name, json: JSON.stringify(data) } });
     //file_save_json(CalenderStatus_Share.name, data, linkStatus[shareCalendarEvent].handle);
     CalenderStatus_Share.eventChange = true;
-  }
+  }*/
 }
 
 let taskEdit_close = true;
@@ -271,7 +277,7 @@ $(document).on('click', '#task_add_editButton', async (e) => {
   //save button
   replace_eventEditSideBar($('#textEdit_ID').text());
   eventdata_updateEvent(CalenderStatus.eventID, window.calendar.getEvents());
-  eventdata_updateEvent(CalenderStatus_Share.eventID,window.calendar.getEvents());
+  eventdata_updateEvent(CalenderStatus_Share.eventID, window.calendar.getEvents());
 });
 
 $(document).on('click', '#task_add_deleteButton', async (e) => {
@@ -291,12 +297,12 @@ $(document).on('click', '#task_add_deleteButton', async (e) => {
   $('#textEdit_Title').text(now_Calendar_Events[now_Calendar_Events.length - 1].title);
 });
 
-const create_event_fromSideBar = () => { 
+const create_event_fromSideBar = () => {
   let event = {
-    id: getEventSourceID() + EventID[getEventSourceID()]++,
+    id: getEventSourceID().substring(0, 1) + '-' + Date.now(),
     title: $('#task_add_Title').val(),
     editable: $('#task_add_EditLock').prop("checked"),
-    editable_prop :$('#task_add_EditLock').prop("checked"),
+    editable_prop: $('#task_add_EditLock').prop("checked"),
     start: null,
     end: null,
     allDay: $('#task_add_Endtime').prop("checked"),
@@ -325,12 +331,10 @@ const create_event_fromSideBar = () => {
       event.allDay = true;
     }
   }
-  console.log(event);
   return (event);
 }
 
 const get_eventEditSideBar = (event) => {
-  console.log('select', event);
   $('#task_add_Title').val(event.title);
   $('#task_add_StartDayInput').val();
   let allDay = $('#task_add_Endtime').prop("checked", event.allDay);
@@ -481,7 +485,7 @@ const task_add_shareEventBackgroundColor = () => {
   } else {
     $("#task_edit_sidebar").css("background-color", 'var(--navibar-color)');
   }
-  
+
 }
 const task_add_sideBarChangeEvent = async () => {
   //更新

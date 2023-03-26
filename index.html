@@ -24,12 +24,9 @@
 
   <script src="./src/calendar/main.js"></script>
   <script src="./src/calendar/notification.js"></script>
+  <script src="./src/calendar/share.js"></script>
   <link rel="stylesheet" href="./src/calendar/calendar.css" />
 
-  <!--jKanban-->
-  <script src='./src/jkanban/jkanban.js'></script>
-  <script src='./src/jkanban/jkanban_main.js'></script>
-  <link rel="stylesheet" href="./src/jkanban/jkanban.css" />
   <!--projectBuilder-->
   <script src='./src/projectbuilder/main.js'></script>
   <link rel="stylesheet" href="./src/projectbuilder/main.css" />
@@ -59,7 +56,6 @@
   <script src="https://uicdn.toast.com/chart/latest/toastui-chart.min.js"></script>
   <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
   <script src="https://uicdn.toast.com/editor-plugin-chart/latest/toastui-editor-plugin-chart.min.js"></script>
-
   <script
     src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
   <script src="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.min.js"></script>
@@ -76,6 +72,8 @@
   <script src="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.js"></script>
   <!--VTT Caption-->
   <script src="./src/vttCaption/vttCaption.js"></script>
+  <!--yjs-->
+  <script type="module" src="./src/yjs/yjs.js"></script>
   <!--Other-->
   <link rel="stylesheet" href="./src/main.css" />
   <script src='./src/index.js'></script>
@@ -113,18 +111,6 @@
       <div>Calendar</div>
       <div class="hambergerPosition">
         <span class="material-symbols-outlined fontsize_Large">calendar_month</span>
-      </div>
-    </li>
-    <!--li class="navi-button" id="bnavi-task">
-      <div>kanban</div>
-      <div class="hambergerPosition">
-        <span class="material-symbols-outlined fontsize_Large">task</span>
-      </div>
-    </li-->
-    <li class="navi-button" id="bnavi-folder">
-      <div>Folder</div>
-      <div class="hambergerPosition">
-        <span class="material-symbols-outlined fontsize_Large">folder</span>
       </div>
     </li>
     <li class="navi-button" id="bnavi-PiP">
@@ -372,7 +358,6 @@
         <canvas></canvas>
       </div>
     </div>
-  </div>
 </body>
 
 </html>

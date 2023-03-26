@@ -7,47 +7,83 @@ addEventListener('message', (e) => {
     }
     //read_todayEvents(data);
     //postMessage(e.data);
-    console.log(data);
-    if (Object.keys(data).indexOf("handle") !== -1) {
-        backup_handle[data.name] = { handle: data.handle, data: "", lastUpdate: "" };
+    //console.log(data);
+    let dataObjectKey = Object.keys(data);
+    if (dataObjectKey.indexOf("handle") !== -1) {
+        backup_handle[data.handle.name] = { handle: data.handle, data: { target: "", json: "none" }, lastUpdate: "" };
     }
-    else if (Object.keys(data).indexOf("CalendarEventID") !== -1) {
-        if (typeof (backup_handle[data.CalendarEventID]) !== 'undefined') {
-            backup_handle[data.CalendarEventID].data = JSON.parse(data.data);
+    else if (dataObjectKey.indexOf("CalendarHandleName") !== -1) {
+        if (typeof (backup_handle[data.CalendarHandleName]) !== 'undefined') {
+            if (data.data.target.indexOf(".bin") !== -1) {
+                console.log(data.data.json);
+                backup_handle[data.CalendarHandleName].data = data.data;
+            } else if (data.data.target.indexOf(".json") !== -1) {
+                backup_handle[data.CalendarHandleName].data.target = data.data.target;
+                backup_handle[data.CalendarHandleName].data.json = JSON.parse(data.data.json);
+            }
         }
     }
+    else if (dataObjectKey.indexOf("lastUpdate") !== -1) {
+        if (typeof (backup_handle[data.handleName]) !== 'undefined') {
+            backup_handle[data.handleName].lastUpdate = data.lastUpdate;
+        }
+    }
+    else if (dataObjectKey.indexOf("visibilitychange") !== -1) {
+        if (data.nowPage !== "") {
+            nowPage = data.nowPage;
+        }
+        if (nowPage === "calendar" && data.visibilitychange === "visible") {
+            clearTimeout(interval);
+            clockSpeed = 5000;
+            clockProcess();
+        } else {
+            clockSpeed = 60000*30;
+        }
+    }
+
 }, false);
 //SaveClock
-
+let clockSpeed = 5000;
 let backup_handle = {};
-
-setInterval(async () => {
+let nowPage = "";
+const clockProcess = async () => {
     let backup_handleKey = Object.keys(backup_handle);
-    let saveType = [];
-    let nowDate = new Date;
-    let nowDateStr = nowDate.toLocaleString('ja-JP');
+    let shareSkip = false;
     for (let i = 0; i < backup_handleKey.length; i++) {
-        if (backup_handle[backup_handleKey[i]].data !== "") {
+        if (backup_handle[backup_handleKey[i]].data.json !== "none") {
             //save
             let handle_data = backup_handle[backup_handleKey[i]];
-            await file_save_json(backup_handleKey[i], handle_data.data, handle_data.handle, "Worker_Process");
-            backup_handle[backup_handleKey[i]].data = "";
-
-            backup_handle[backup_handleKey[i]].lastUpdate = nowDateStr;
-            console.log('Save', backup_handleKey[i]);
-            saveType.push(backup_handleKey[i]);
+            backup_handle[backup_handleKey[i]].lastUpdate = await file_save_text(handle_data.data.target, handle_data.data.json, handle_data.handle, "Worker_Process");
+            console.log('Save', backup_handleKey[i], handle_data);
+            backup_handle[backup_handleKey[i]].data.json = "none";
+            if (handle_data.data.target === ShareEvent_bin) {
+                shareSkip = true;
+            }
         }
-    }
-    if (saveType.length > 0) {
-        let SendMessage = "Save (" + nowDateStr + ")";
-        for (let i = 0; i < backup_handleKey.length; i++) {
-            SendMessage = SendMessage + " <br> " + backup_handleKey[i] + "|" + backup_handle[backup_handleKey[i]].lastUpdate;
+        if (!shareSkip) {
+            if (backup_handleKey[i] === shareCalendarEvent) {
+                if (await isFileUpdateCheck(ShareEvent_bin, backup_handle[backup_handleKey[i]].handle, backup_handle[backup_handleKey[i]].lastUpdate)) {
+                    self.postMessage({ type: ShareEvent_bin, data: "UpdateRequired" });
+                }
+            }
         }
-        self.postMessage(SendMessage);
+
     }
-}, 5000);
+    /*
+    let calc_now = new Date;
 
+    let next = Math.abs(61 - calc_now.getSeconds()) * 1000
+    console.log(next, calc_now);
+    if (next === 0) {
+        next = 1000;
+    } else if (next > 10000) {
 
+    }*/
+    console.log(clockSpeed);
+    interval = setTimeout(async () => { clockProcess() }, clockSpeed);
+}
+
+let interval = setTimeout(async () => { clockProcess() }, 5000);
 //Notification (Not Working)
 const extend_0 = (text) => {
     if (String(text).length === 1) {

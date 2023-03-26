@@ -39,7 +39,7 @@ class setting_value {
         if (typeof (data) === 'undefined') {
             this.nowView = "";
         } else {
-            this.nowView = typeof(data.nowView) === 'undefined' ? "" : data.nowView;
+            this.nowView = typeof (data.nowView) === 'undefined' ? "" : data.nowView;
         }
     }
     get get_nowView() {
@@ -61,9 +61,6 @@ class setting_value {
         switch (view) {
             case 'home':
                 mainArea.html(await home_html());
-                break;
-            case 'folder':
-                mainArea.html(await projectBuilder_mainPage());
                 break;
             case 'calendar':
                 mainArea.html('');
@@ -97,9 +94,14 @@ class setting_value {
             default:
                 break;
         }
+        worker.postMessage({ visibilitychange: document.visibilityState,nowPage:view });
         await idbKeyval.set(settingDir_name, this);
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    calendarStart();
+});
 
 window.onload = async () => {
     disp_notificationPermisson();
@@ -114,13 +116,16 @@ window.onload = async () => {
     await toast_image_start();
     setTimeout(() => { wakelockRequest() }, 3000);
     //
-    
+
     setting_data = new setting_value(await idbKeyval.get(settingDir_name));
     setting_data.set_nowView = setting_data.get_nowView;
 }
 
 worker.addEventListener('message', (e) => {
-    $("#calendar_saveMessage").html(e.data);
+    let data = e.data;
+    if (data.type === ShareEvent_bin) {
+        ymap_GetFile();
+    }
 }, false);
 
 window.addEventListener('resize', async () => {
@@ -128,11 +133,11 @@ window.addEventListener('resize', async () => {
         await toast_image_resizeEvent();
     }
 });
+
 $(document).on('click', '#screenLock_Icon', (e) => {
     if (screenLockToggle) {
         wakelockRelease();
     } else {
         wakelockRequest();
     }
-
 });

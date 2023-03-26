@@ -1,11 +1,14 @@
 let wakeLock = null;
 
-// 非同期関数を作成して起動ロックをリクエスト
+
 const wakelockRequest = async () => {
+    //console.log("ScreenLockRequest");
     try {
-        wakeLock = await navigator.wakeLock.request('screen');
         screenLockToggle = true;
-        $('#screenLock_Icon').css('color', 'green');
+        if (document.visibilityState === 'visible') {
+            wakeLock = await navigator.wakeLock.request('screen');
+            $('#screenLock_Icon').css('color', 'green');
+        }
     } catch (err) {
         console.error(err);
     }
@@ -18,9 +21,17 @@ const wakelockRelease = async () => {
             $('#screenLock_Icon').css('color', 'red');
         });
 }
-document.addEventListener('visibilitychange', async () => {
-    if (wakeLock !== null && document.visibilityState === 'visible') {
-        wakeLock = await navigator.wakeLock.request('screen');
-        console.log('ScreenLock OK');
+
+document.addEventListener('visibilitychange', async (e) => {
+    if (document.visibilityState === 'visible') {
+        if (wakeLock !== null) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('ScreenLock OK');
+        }
+        
+    } else {
+        //hidden
+
     }
+    worker.postMessage({ visibilitychange: document.visibilityState ,nowPage:""});
 });
