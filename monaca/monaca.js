@@ -1,59 +1,21 @@
-require.config({ paths: { vs: "./lib/min/vs" } });
+require.config({
+  paths: {
+    'vs': "./lib/min/vs"
+  }
+});
 
 const monacoStart = () => {
+
   require(["vs/editor/editor.main"], function () {
     // 通常のエディターを作成
+    //monaco.editor.setLocale('ja');
     monaco.languages.register({ id: 'rpg' });
     monaco.languages.setLanguageConfiguration('rpg', {
       brackets: [
-        ['IF', 'END'],
+        ['IFEQ', 'END'],
       ],
     });
-    monaco.languages.setMonarchTokensProvider('rpg', {
-      operators: [
-        'IFEQ ', 'IFNE ', 'IFLT ', 'IFGT ', 'IFLE ', 'IFGE ','ENDIF',
-        'CABEQ', 'CABNE', 'CABLT', 'CABGT', 'CABLE', 'CABGE','END',
-        'DOEQ ', 'DONE ', 'DOLT ', 'DOGT ', 'DOLE ', 'DOGE ', 'DO   ', 'ENDDO',
-        'BEGSR' ,'ENDSR',
-      ],
-      keywords: [
-        'break', 'case', 'catch', 'class', 'continue', 'const',
-        'constructor', 'debugger', 'default', 'delete', 'do', 'else',
-        'export', 'extends', 'false', 'finally', 'for', 'from', 'function',
-        'get', 'if', 'import', 'in', 'instanceof', 'let', 'new', 'null',
-        'return', 'set', 'super', 'switch', 'symbol', 'this', 'throw', 'true',
-        'try', 'typeof', 'undefined', 'var', 'void', 'while', 'with', 'yield',
-        'async', 'await', 'of'
-      ],
-      IOs: [
-        'WRITE','UPDAT','DELET'
-      ],
-      PreIOs: [
-        'SETLL','SETGT','READE','READ ','CHAIN','REDPE','READP'
-      ],
-      tokenizer: {
-        root: [
-          [/.{7}\*.*/, { token: 'comment' }],
-          [/^(.{1,6})(C)(..)(.{1,2})(.{1,2})(.{1,2})(..)(.{1,10})(.{1,5})(.{1,10})(.{1,6})(.)(.{1,2})(.)(.{1,2})(.{1,2})(.{1,2})(.*)$/,
-            ['comment', 'tag', 'token-3', 'flag1', 'flag2', 'flag3', '', 'variable', {
-              cases: {
-                '@keywords': 'token-3',
-                '@operators': 'token-3',
-                '@IOs': 'IO',
-                '@PreIOs':'PreIOs',
-                '@default': 'order'
-              }
-            }, 'number', 'variable', '', 'number', 'type', 'flag1', 'flag2', 'flag3', ''
-            ]
-          ],
-        ],
-        tag: [
-          [/IF/, { token: 'keyword', next: '@root' }],
-          [/ENDIF/, { token: 'keyword' }],
-          [/[a-z]+/, { token: 'identifier' }],
-        ]
-      }
-    });
+    monaco.languages.setMonarchTokensProvider('rpg', rpg_token());
     monaco.editor.defineTheme('myTheme', {
       base: 'vs-dark',
       inherit: true,
@@ -75,10 +37,13 @@ const monacoStart = () => {
       emptySelectionClipboard: true,
       mouseWheelZoom: true,
       scrollBeyondLastLine: false,
-      theme: "vs-dark",
+      theme: "myTheme",
       locale: 'ja',
+      overwriteEmptySpaces: 'overwrite',
     });
+    normalEditor.updateOptions({
 
+    });
     // 差分エディターを作成
     var diffEditor = monaco.editor.createDiffEditor(document.getElementById('monaco-diff'), {
       renderSideBySide: true,
@@ -90,7 +55,8 @@ const monacoStart = () => {
       mouseWheelZoom: true,
       scrollBeyondLastLine: false,
       theme: "myTheme",
-      rulers: [6, 7, 17, 27, 32, 42, 48, 51, 52, 58],
+      overwriteEmptySpaces: 'overwrite',
+      rulers: [7, 8, 18, 28, 33, 43, 49, 52, 53, 59],
     });
 
     // 差分を表示する元となるテキストを作成
@@ -122,6 +88,8 @@ const monacoStart = () => {
     window.monacoRead = async (text, lang, text2 = "") => {
       if (text2.length === 0) {
         normalEditor.setValue(text);
+        const model = normalEditor.getModel();
+        monaco.editor.setModelLanguage(model, lang)
       }
       else {
         diff.left = await monaco.editor.createModel(text, lang);
@@ -132,7 +100,6 @@ const monacoStart = () => {
         });
       }
     }
-
   });
 }
 
