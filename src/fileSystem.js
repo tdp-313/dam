@@ -190,7 +190,7 @@ const calendarEventSource_Set = async (calendarState, handle, file = true, messa
   if (!calendarState.first_read) {
     let calendar_source = "";
     if (file) {
-      calendar_source = await file_read_text(CalenderStatus_Share.name, linkStatus[shareCalendarEvent].handle, true, "json", message);
+      calendar_source = await file_read_text(calendarState.name, handle, true, "json", message);
     }
     if (typeof (calendar_source.event) === 'undefined' && file === true) {
       //dummy
