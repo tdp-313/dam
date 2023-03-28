@@ -37,7 +37,7 @@ addEventListener('message', (e) => {
             clockSpeed = 5000;
             clockProcess();
         } else {
-            clockSpeed = 60000*30;
+            clockSpeed = 60000 * 30;
         }
     }
 
@@ -62,10 +62,18 @@ const clockProcess = async () => {
         }
         if (!shareSkip) {
             if (backup_handleKey[i] === shareCalendarEvent) {
-                if (await isFileUpdateCheck(ShareEvent_bin, backup_handle[backup_handleKey[i]].handle, backup_handle[backup_handleKey[i]].lastUpdate)) {
-                    self.postMessage({ type: ShareEvent_bin, data: "UpdateRequired" });
+                if (isShareEvent_FIle) {
+                    if (await isFileUpdateCheck('calendarShare.json', backup_handle[backup_handleKey[i]].handle, backup_handle[backup_handleKey[i]].lastUpdate)) {
+                        self.postMessage({ type: 'calendarShare.json', data: "UpdateRequired" });
+                    }
+                }
+                else {
+                    if (await isFileUpdateCheck(ShareEvent_bin, backup_handle[backup_handleKey[i]].handle, backup_handle[backup_handleKey[i]].lastUpdate)) {
+                        self.postMessage({ type: ShareEvent_bin, data: "UpdateRequired" });
+                    }
                 }
             }
+
         }
 
     }

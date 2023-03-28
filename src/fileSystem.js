@@ -43,7 +43,7 @@ const Directory_Handle_Register = async (name = defaultFileSystemHandleName, isN
     await default_from_handle(name);
     connect_dispNaviBar(true);
   } else if (name === shareCalendarEvent) {
-    await calendarEventSource_Set(CalenderStatus_Share, linkStatus[name].handle, false);
+    await calendarEventSource_Set(CalenderStatus_Share, linkStatus[name].handle, isShareEvent_FIle, false);
   }
   return ('OK');
 }
@@ -186,11 +186,11 @@ const default_from_handle = async (name) => {
   await calendarEventSource_Set(CalenderStatus, linkStatus[name].handle);
 }
 
-const calendarEventSource_Set = async (calendarState, handle, file = true) => {
+const calendarEventSource_Set = async (calendarState, handle, file = true, message = false) => {
   if (!calendarState.first_read) {
     let calendar_source = "";
     if (file) {
-      calendar_source = await file_read_json(calendarState.name, handle);
+      calendar_source = await file_read_text(CalenderStatus_Share.name, linkStatus[shareCalendarEvent].handle, true, "json", message);
     }
     if (typeof (calendar_source.event) === 'undefined' && file === true) {
       //dummy
@@ -201,6 +201,7 @@ const calendarEventSource_Set = async (calendarState, handle, file = true) => {
     }
     if (file) {
       EventID[calendarState.eventID] = typeof (calendar_source.id) === 'number' ? calendar_source.id : 0;
+      ReadingShareEventJsonString = JSON.stringify(calendar_source.event);
       window.calendar.addEventSource({ events: calendar_source.event, id: calendarState.eventID });
     } else {
     }

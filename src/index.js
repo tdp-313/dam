@@ -121,10 +121,19 @@ window.onload = async () => {
     setting_data.set_nowView = setting_data.get_nowView;
 }
 
-worker.addEventListener('message', (e) => {
+worker.addEventListener('message', async (e) => {
     let data = e.data;
     if (data.type === ShareEvent_bin) {
         ymap_GetFile();
+    }
+    if (data.type === CalenderStatus_Share.name) {
+        let calendar_source = await file_read_text(CalenderStatus_Share.name, linkStatus[shareCalendarEvent].handle,true,"json",true);
+        console.log("Sync", e.data);
+        ReadingShareEventJsonString = JSON.stringify(calendar_source.event);
+        if (await window.calendar.getEventSourceById(CalenderStatus_Share.eventID)) {
+            await window.calendar.getEventSourceById(CalenderStatus_Share.eventID).remove();
+        }
+        await window.calendar.addEventSource({ events: calendar_source.event, id: CalenderStatus_Share.eventID });
     }
 }, false);
 

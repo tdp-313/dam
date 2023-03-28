@@ -10,23 +10,21 @@ const monacoStart = () => {
     // 通常のエディターを作成
     //monaco.editor.setLocale('ja');
     monaco.languages.register({ id: 'rpg' });
-    monaco.languages.setLanguageConfiguration('rpg', {
-      brackets: [
-        ['IFEQ', 'END'],
-      ],
-    });
+    monaco.languages.register({ id: 'rpg-indent' });
     monaco.languages.setMonarchTokensProvider('rpg', rpg_token());
+    monaco.languages.setMonarchTokensProvider('rpg-indent', rpg_token2());
     monaco.editor.defineTheme('myTheme', {
       base: 'vs-dark',
       inherit: true,
       rules: [
-        { token: 'token-3', foreground: '#DDDD00' },
+        { token: 'Operation', foreground: '#DDDD00' },
         { token: 'IO', foreground: '#DD2000' },
         { token: 'PreIOs', foreground: '#DD8000' },
         { token: 'flag1', foreground: '#0030DB' },
         { token: 'flag2', foreground: '#0060DB' },
         { token: 'flag3', foreground: '#0090DB' },
-        { token: 'order', foreground: '#DD00DD' }
+        { token: 'order', foreground: '#DD00DD' },
+        { token: 'error', foreground: 'ff0000' }
       ],
       colors: {}
     });
@@ -56,7 +54,6 @@ const monacoStart = () => {
       scrollBeyondLastLine: false,
       theme: "myTheme",
       overwriteEmptySpaces: 'overwrite',
-      rulers: [5, 6, 17, 27, 32, 42, 48, 51, 52, 58],
     });
 
     // 差分を表示する元となるテキストを作成
@@ -90,6 +87,8 @@ const monacoStart = () => {
         normalEditor.setValue(text);
         const model = normalEditor.getModel();
         monaco.editor.setModelLanguage(model, lang)
+        normalEditor.updateOptions({ rulers: [5, 6, 17, 27, 36, 41, 51, 57, 60, 62, 69] });
+        nowLang = lang;
       }
       else {
         diff.left = await monaco.editor.createModel(text, lang);
@@ -98,11 +97,11 @@ const monacoStart = () => {
           original: diff.left,
           modified: diff.right,
         });
+        diffEditor.updateOptions({ rulers: [5, 6, 17, 27, 32, 42, 48, 51, 53, 60] });
       }
     }
   });
 }
-
 window.onload = async () => {
   monacoStart();
   readFileButtonCreate();

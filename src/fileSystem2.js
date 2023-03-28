@@ -1,6 +1,6 @@
 const shareCalendarEvent = 'share';
 const ShareEvent_bin = "ShareEvent.bin";
-
+const isShareEvent_FIle = true;
 
 const file_read_json = async (readTarget, handle) => {
   let file_obj = await handle.getFileHandle(readTarget, { create: true });

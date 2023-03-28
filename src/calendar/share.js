@@ -12,6 +12,10 @@ setInterval(async () => {
 }, 10000);
 
 const shareEventSaveStart = async () => {
+    if (isShareEvent_FIle) {
+        CalendarChangeEventQueue = [];
+        return null;
+    }
     if (CalendarChangeEventQueue.length > 0) {
         let CalendarChangeEventQueueLength = CalendarChangeEventQueue.length;
         let backup_map = new Map();

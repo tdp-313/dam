@@ -1,4 +1,5 @@
 let defaultColor = { backgroundColor: '#3788d8', borderColor: '#3788d8', textColor: '#ffffff' };
+
 let y_map = null;
 let sampleColor = {
   1: { backgroundColor: '#A80000', borderColor: '#A80000' },
@@ -10,6 +11,7 @@ let sampleColor = {
   7: { backgroundColor: '#3788d8', borderColor: '#3788d8' },
 }
 
+let ReadingShareEventJsonString = "";
 const calendarStart = () => {
   //
   y_map = window.calendar_ydoc.getMap(CalenderStatus_Share.EventID);
@@ -169,12 +171,14 @@ const eventdata_updateEvent = async (saveID, e) => {
     worker.postMessage({ CalendarHandleName: linkStatus[defaultFileSystemHandleName].handle.name, data: { target: CalenderStatus.name, json: JSON.stringify(data) } });
     //file_save_json(CalenderStatus.name, data, linkStatus[defaultFileSystemHandleName].handle);
     CalenderStatus.eventChange = true;
-  }/*
-  if (CalenderStatus_Share.first_read && CalenderStatus_Share.eventID === saveID) {
-    worker.postMessage({ CalendarHandleName: linkStatus[shareCalendarEvent].handle.name, data: { target: CalenderStatus_Share.name, json: JSON.stringify(data) } });
-    //file_save_json(CalenderStatus_Share.name, data, linkStatus[shareCalendarEvent].handle);
-    CalenderStatus_Share.eventChange = true;
-  }*/
+  }
+  if (CalenderStatus_Share.first_read && CalenderStatus_Share.eventID === saveID && isShareEvent_FIle) {
+    if (ReadingShareEventJsonString !== JSON.stringify(saveData)){
+      worker.postMessage({ CalendarHandleName: linkStatus[shareCalendarEvent].handle.name, data: { target: CalenderStatus_Share.name, json: JSON.stringify(data) } });
+      //file_save_json(CalenderStatus_Share.name, data, linkStatus[shareCalendarEvent].handle);
+      CalenderStatus_Share.eventChange = true;
+    }
+  }
 }
 
 let taskEdit_close = true;

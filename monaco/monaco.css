@@ -16,15 +16,23 @@ body {
 header {
     height: var(--headerHeight);
     display: grid;
-    grid-template-columns: 3rem 3rem 1rem 2rem 1rem 2rem 1fr;
+    grid-template-columns: 3rem 3rem 1rem 2rem 1rem 2rem 1fr 2rem;
     margin-bottom: 0.5rem;
     user-select: none;
+    position: relative;
 }
 
 #monaco-code, #monaco-diff{
     height: calc(100% - 2rem);
     width: 100%;
 }
+
+.triangle-left {
+    display: inline-block;
+    border-style: solid;
+    border-width: 0.5rem 1rem 0.5rem 0;
+    border-color: transparent #000 transparent transparent;
+  }
 
 .displayHide {
     display: none;
@@ -63,4 +71,11 @@ input[type="radio"]:checked + label {
     width: 100%;
     display: grid;
     grid-template-columns: 35% 65%;
+}
+#control-subArea {
+    position: absolute;
+    background-color: #EFF5F5;
+    right: 0px;
+    display: grid;
+    grid-template-columns: 1fr 2rem;
 }

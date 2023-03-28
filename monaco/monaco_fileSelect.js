@@ -50,8 +50,9 @@ const readFileButtonCreate = () => {
         let Left = FileList.Left.file[FileLeft.value];
         let Right = FileList.Right.file[FileRight.value];
         let LeftText = await file_read_text(Left.fullname, Left.handle, false, "text", false);
+        
+        await monacoRead(addIndent(LeftText), "rpg-indent", "");
         LeftText = await addSpaces(LeftText);
-        await monacoRead(LeftText, "rpg", "");
         await monacoRead(LeftText, "rpg", await addSpaces(await file_read_text(Right.fullname, Right.handle, false, "text", false)));
     }
     const fileSelectSync_Process = async (target, fullname) => {
@@ -193,6 +194,65 @@ function addSpaces(text) {
                 spaces += " ";
             }
             lines[i] = leadingSpaces + line + spaces;
+        }
+    }
+
+    return lines.join("\n");
+}
+
+function addIndent(text) {
+    const lines = text.split("\n");
+    const maxLength = 80;
+    const regPattern_Open = new RegExp(`(${Operetor_OpenArray.concat(Subroutine_OpenArray).join("|")})`);
+    const regPattern_Close = new RegExp(`(${Operetor_CloseArray.concat(Subroutine_CloseArray).join("|")})`);
+    console.log(regPattern_Open,regPattern_Close);
+    let counter_open = 0;
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        let leadingSpaces = line.match(/^\s*/)[0];
+        line = line.trim();
+        let length = line.length;
+        let numSpaces = maxLength - length;
+        if (numSpaces > 0) {
+            let spaces = "";
+            for (let j = 0; j < numSpaces; j++) {
+                spaces += " ";
+            }
+            lines[i] = leadingSpaces + line + spaces;
+        }
+        
+        let insertText = '';
+        insertText = " ".repeat(9 - counter_open);
+        insertText += "|".repeat(counter_open);
+        console.log(lines[i].substring(27, 32));
+        if (regPattern_Open.test(lines[i].substring(27,32))) {
+            counter_open++;
+            if (counter_open > 9) {
+                console.warn('Error Inline over 9');
+                counter_open = 9;
+            }
+            const arr = insertText.split("");
+            arr[9 - counter_open] = "-";
+            insertText = arr.join("");
+        }
+        if (regPattern_Close.test(lines[i].substring(27, 32))) {
+            const arr = insertText.split("");
+            arr[9 - counter_open] = "-";
+            insertText = arr.join("");
+            counter_open--;
+            if (counter_open < 0) {
+                console.warn('Error Inline under 0');
+                counter_open = 0;
+            }
+        }
+        if (lines[i].substring(27, 32) === "ELSE ") {
+            const arr = insertText.split("");
+            arr[9 - counter_open] = "-";
+            insertText = arr.join("");
+        }
+        console.log(counter_open);
+        if (lines[i].substring(6, 7) !== "*") {
+            lines[i] = lines[i].substring(0,27) + insertText + lines[i].substring(27,lines[i].length);
         }
     }
 
