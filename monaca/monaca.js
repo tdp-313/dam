@@ -56,7 +56,7 @@ const monacoStart = () => {
       scrollBeyondLastLine: false,
       theme: "myTheme",
       overwriteEmptySpaces: 'overwrite',
-      rulers: [7, 8, 18, 28, 33, 43, 49, 52, 53, 59],
+      rulers: [5, 6, 17, 27, 32, 42, 48, 51, 52, 58],
     });
 
     // 差分を表示する元となるテキストを作成
