@@ -1,11 +1,12 @@
 const Operetor_OpenArray = [
     'IFEQ ', 'IFNE ', 'IFLT ', 'IFGT ', 'IFLE ', 'IFGE ',
-    'DOUEQ', 'DOUNE', 'DOULT', 'DOUGT', 'DOULE', 'DOUGE', 'DO   ',
-    'DOWEQ', 'DOWNE', 'DOWLT', 'DOWGT', 'DOWLE', 'DOWGE',
-    'SELEC',
+    'DOUEQ ', 'DOUNE ', 'DOULT ', 'DOUGT ', 'DOULE ', 'DOUGE ', 'DO   ',
+    'DOWEQ ', 'DOWNE ', 'DOWLT ', 'DOWGT ', 'DOWLE ', 'DOWGE ',
+
+    'SELEC', 'WHEQ ', 'WHNE ', 'WHLT ', 'WHGT ', 'WHLE ', 'WHGE '
 ];
 const Operetor_CloseArray = [
-    'END  ', 'ENDDO', 'ENDIF', 'ENDSL'
+    'END', 'ENDDO','ENDIF'
 ];
 const Subroutine_OpenArray = [
     'BEGSR'
@@ -21,13 +22,12 @@ const rpg_token = () => {
             OperatorOther: [
                 'CABEQ', 'CABNE', 'CABLT', 'CABGT', 'CABLE', 'CABGE', 'CAB  ', 'ITER ', 'LEAVE',
                 'ANDEQ', 'ANDNE', 'ANDLT', 'ANDGT', 'ANDLE', 'ANDGE', 'ELSE ',
-                'OREQ ', 'ORNE ', 'ORLT ', 'ORGT ', 'ORLE ', 'ORGE ', 'GOTO ',
-                'WHEQ ', 'WHNE ', 'WHLT ', 'WHGT ', 'WHLE ', 'WHGE ', 'OTHER'
+                'OREQ ', 'ORNE ', 'ORLT ', 'ORGT ', 'ORLE ', 'ORGE ','GOTO ' 
             ],
             SubroutineOpen: Subroutine_OpenArray,
             SubroutineClose: Subroutine_CloseArray,
             SubroutineOther: [
-                'EXSR ', 'CASGT', 'CASLT', 'CASEQ', 'CASNE', 'CASGE', 'CASLE', 'CAS  ', 'ENDCS'
+                'EXSR','CASGT','CASLT','CASEQ','CASNE','CASGE','CASLE','CAS  '
             ],
             Arrays: [
                 'LOKUP', 'MOVEA', 'SORTA', 'XPOOT'
@@ -36,38 +36,38 @@ const rpg_token = () => {
                 'BITOF', 'BITON', 'TESTB'
             ],
             CallOrder: [
-                'CALL ', 'FREE ', 'PARM ', 'PLIST', 'RETRN'
+                'CALL ','FREE ','PARM ','PLIST','RETRN'
             ],
             DataFields: [
-                'IN   ', 'OUT  ', 'UNKCK'
+                'IN   ','OUT  ','UNKCK'
             ],
             Declarations: [
-                'DEFN ', 'KFLD ', 'KLIST', 'PARM ', 'PLIST', 'TAG  '
+                'DEFN ','KFLD ','KLIST','PARM ','PLIST','TAG  '
             ],
             FileIOs: [
-                'COMIT', 'DELET', 'DELET', 'EXCPT', 'EXFMT', 'FORCE', 'POST ', 'ROLBK', 'UPDAT', 'WRITE'
+                'COMIT', 'DELET', 'DELET','EXCPT','EXFMT','FORCE','POST ','ROLBK','UPDAT','WRITE'
             ],
             FilePreIOs: [
                 'ACQ  ', 'CHAIN', 'CLOSE', 'EXCPT', 'FEOD ', 'NEXT ', 'OPEN ', 'READ ', 'READC', 'READE', 'READP',
-                'REDPE', 'REL  ', 'SETGT', 'SETLL', 'UNLCK'
+                'REDPE', 'REL  ','SETGT','SETLL','UNLCK'
             ],
             FlagOrders: [
-                'SETON', 'SETOF'
+                'SETON','SETOF'
             ],
             Information: [
-                'DEBUG', 'DUMP ', 'SHTDN', 'TIME ', 'DSPLY', 'TESTB', 'TESTN', 'TESTZ'
+                'DEBUG','DUMP ','SHTDN','TIME ','DSPLY','TESTB','TESTN','TESTZ'
             ],
             Arithmetics: [
-                'ADD  ', 'DIV  ', 'MULT ', 'MVR  ', 'SQRT ', 'SUB  ', 'XFOOT', 'Z-ADD', 'Z-SUB'
+                'ADD  ','DIV  ','MULT ','MVR  ','SQRT ','SUB  ','XFOOT','Z-ADD','Z-SUB'
             ],
             StringOrders: [
-                'CAT  ', 'CHECK', 'CHEKR', 'SCAN ', 'SUBST', 'XLATE', 'MOVE ', 'MOVEL'
+                'CAT  ','CHECK','CHEKR','SCAN ','SUBST','XLATE','MOVE ','MOVEL'
             ],
             ZoneTransfers: [
-                'MHHZO', 'MHLZO', 'MLHZO', 'MLLZO'
+                'MHHZO','MHLZO','MLHZO','MLLZO'
             ],
             Initializes: [
-                'CLEAR', 'RESET'
+                'CLEAR','RESET'
             ],
             tokenizer: {
                 root: [
@@ -143,7 +143,6 @@ const rpg_token = () => {
                                 cases: {
                                     '[0-9].*.*': 'number',
                                     '[\*](LOVAL|HIVAL).*': 'number',
-                                    'UDATE.*': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*]IN[0-9][0-9].*': 'type',
                                     '[\*].*': 'predefined',
@@ -165,20 +164,17 @@ const rpg_token = () => {
                                     '@Declarations': 'keyword',
                                     '@FlagOrders': 'keyword',
                                     '@Information': 'keyword',
-                                    '@Initializes': 'keyword',
                                     '@Arithmetics': 'regexp',
                                     '@StringOrders': 'regexp',
                                     '@ZoneTransfers': 'regexp',
                                     '@FileIOs': 'IO',
                                     '@FilePreIOs': 'PreIOs',
-
                                     '@default': 'invalid'
                                 },
                             }, {// 33-42
                                 cases: {
                                     '[0-9].*.*': 'number',
                                     '[\*](LOVAL|HIVAL).*': 'number',
-                                    'UDATE.*': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*].*': 'string',
                                     "'.*'.*": 'string',
@@ -257,6 +253,7 @@ const rpg_token = () => {
         }
     );
 }
+
 const rpg_token2 = () => {
     return (
         {
@@ -265,13 +262,12 @@ const rpg_token2 = () => {
             OperatorOther: [
                 'CABEQ', 'CABNE', 'CABLT', 'CABGT', 'CABLE', 'CABGE', 'CAB  ', 'ITER ', 'LEAVE',
                 'ANDEQ', 'ANDNE', 'ANDLT', 'ANDGT', 'ANDLE', 'ANDGE', 'ELSE ',
-                'OREQ ', 'ORNE ', 'ORLT ', 'ORGT ', 'ORLE ', 'ORGE ', 'GOTO ',
-                'WHEQ ', 'WHNE ', 'WHLT ', 'WHGT ', 'WHLE ', 'WHGE ', 'OTHER'
+                'OREQ ', 'ORNE ', 'ORLT ', 'ORGT ', 'ORLE ', 'ORGE ','GOTO ' 
             ],
             SubroutineOpen: Subroutine_OpenArray,
             SubroutineClose: Subroutine_CloseArray,
             SubroutineOther: [
-                'EXSR ', 'CASGT', 'CASLT', 'CASEQ', 'CASNE', 'CASGE', 'CASLE', 'CAS  ', 'ENDCS'
+                'EXSR','CASGT','CASLT','CASEQ','CASNE','CASGE','CASLE','CAS  '
             ],
             Arrays: [
                 'LOKUP', 'MOVEA', 'SORTA', 'XPOOT'
@@ -280,45 +276,45 @@ const rpg_token2 = () => {
                 'BITOF', 'BITON', 'TESTB'
             ],
             CallOrder: [
-                'CALL ', 'FREE ', 'PARM ', 'PLIST', 'RETRN'
+                'CALL ','FREE ','PARM ','PLIST','RETRN'
             ],
             DataFields: [
-                'IN   ', 'OUT  ', 'UNKCK'
+                'IN   ','OUT  ','UNKCK'
             ],
             Declarations: [
-                'DEFN ', 'KFLD ', 'KLIST', 'PARM ', 'PLIST', 'TAG  '
+                'DEFN ','KFLD ','KLIST','PARM ','PLIST','TAG  '
             ],
             FileIOs: [
-                'COMIT', 'DELET', 'DELET', 'EXCPT', 'EXFMT', 'FORCE', 'POST ', 'ROLBK', 'UPDAT', 'WRITE'
+                'COMIT', 'DELET', 'DELET','EXCPT','EXFMT','FORCE','POST ','ROLBK','UPDAT','WRITE'
             ],
             FilePreIOs: [
                 'ACQ  ', 'CHAIN', 'CLOSE', 'EXCPT', 'FEOD ', 'NEXT ', 'OPEN ', 'READ ', 'READC', 'READE', 'READP',
-                'REDPE', 'REL  ', 'SETGT', 'SETLL', 'UNLCK'
+                'REDPE', 'REL  ','SETGT','SETLL','UNLCK'
             ],
             FlagOrders: [
-                'SETON', 'SETOF'
+                'SETON','SETOF'
             ],
             Information: [
-                'DEBUG', 'DUMP ', 'SHTDN', 'TIME ', 'DSPLY', 'TESTB', 'TESTN', 'TESTZ'
+                'DEBUG','DUMP ','SHTDN','TIME ','DSPLY','TESTB','TESTN','TESTZ'
             ],
             Arithmetics: [
-                'ADD  ', 'DIV  ', 'MULT ', 'MVR  ', 'SQRT ', 'SUB  ', 'XFOOT', 'Z-ADD', 'Z-SUB'
+                'ADD  ','DIV  ','MULT ','MVR  ','SQRT ','SUB  ','XFOOT','Z-ADD','Z-SUB'
             ],
             StringOrders: [
-                'CAT  ', 'CHECK', 'CHEKR', 'SCAN ', 'SUBST', 'XLATE', 'MOVE ', 'MOVEL'
+                'CAT  ','CHECK','CHEKR','SCAN ','SUBST','XLATE','MOVE ','MOVEL'
             ],
             ZoneTransfers: [
-                'MHHZO', 'MHLZO', 'MLHZO', 'MLLZO'
+                'MHHZO','MHLZO','MLHZO','MLLZO'
             ],
             Initializes: [
-                'CLEAR', 'RESET'
+                'CLEAR','RESET'
             ],
             tokenizer: {
                 root: [
-                    [/.{16}\*.*/, { token: 'comment' }],
+                    [/.{6}\*.*/, { token: 'comment' }],
                     //     |       |       |  |   |            
-                    [/^(.{1,10})(.{1,2})(.{1,3})(C)(..)(.)(.{1,2})(.)(.{1,2})(.)(.{1,2})(.{1,10})(.{1,18})(.{1,5})(.{1,10})(.{1,6})(.{1,3})(.)(.)(.{1,2})(.{1,2})(.{1,2})(.{1,15})(.*)$/,
-                        ['','comment', '', 'tag',
+                    [/^(.{1,2})(.{1,3})(C)(..)(.)(.{1,2})(.)(.{1,2})(.)(.{1,2})(.{1,10})(.{1,9})(.{1,5})(.{1,10})(.{1,6})(.{1,3})(.)(.)(.{1,2})(.{1,2})(.{1,2})(.{1,15})(.*)$/,
+                        ['comment', '', 'tag',
                             {
                                 cases: {//7-8
                                     ' {2}': 'overwhite',
@@ -387,14 +383,13 @@ const rpg_token2 = () => {
                                 cases: {
                                     '[0-9].*.*': 'number',
                                     '[\*](LOVAL|HIVAL).*': 'number',
-                                    'UDATE.*': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*]IN[0-9][0-9].*': 'type',
                                     '[\*].*': 'predefined',
                                     "'.*'.*": 'string',
                                     '@default': 'identifier'
                                 }
-                            },'', {//28-32
+                            },'',{//28-32
                                 cases: {//control
                                     '@OperatorOpen': { token: 'Operation', bracket: '@open' },
                                     '@OperatorClose': { token: 'Operation', bracket: '@close' },
@@ -409,20 +404,17 @@ const rpg_token2 = () => {
                                     '@Declarations': 'keyword',
                                     '@FlagOrders': 'keyword',
                                     '@Information': 'keyword',
-                                    '@Initializes': 'keyword',
                                     '@Arithmetics': 'regexp',
                                     '@StringOrders': 'regexp',
                                     '@ZoneTransfers': 'regexp',
                                     '@FileIOs': 'IO',
                                     '@FilePreIOs': 'PreIOs',
-
                                     '@default': 'invalid'
                                 },
                             }, {// 33-42
                                 cases: {
                                     '[0-9].*.*': 'number',
                                     '[\*](LOVAL|HIVAL).*': 'number',
-                                    'UDATE.*': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*].*': 'string',
                                     "'.*'.*": 'string',

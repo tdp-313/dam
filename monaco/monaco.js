@@ -11,16 +11,6 @@ const monacoStart = () => {
     //monaco.editor.setLocale('ja');
     monaco.languages.register({ id: 'rpg' });
     monaco.languages.register({ id: 'rpg-indent' });
-    monaco.languages.setLanguageConfiguration('rpg-indent', {
-      indentSize: 2,
-      useTabStops: false,
-      brackets: [
-        ['{', '}'],
-      ],
-      autoClosingPairs: [
-        { open: '{', close: '}' },
-      ]
-    });
     monaco.languages.setMonarchTokensProvider('rpg', rpg_token());
     monaco.languages.setMonarchTokensProvider('rpg-indent', rpg_token2());
     monaco.editor.defineTheme('myTheme', {
@@ -97,7 +87,7 @@ const monacoStart = () => {
         normalEditor.setValue(text);
         const model = normalEditor.getModel();
         monaco.editor.setModelLanguage(model, lang)
-        normalEditor.updateOptions({ rulers: [15, 16, 27, 37, 55, 60, 70, 76, 79, 81, 87] });
+        normalEditor.updateOptions({ rulers: [5, 6, 17, 27, 36, 41, 51, 57, 60, 62, 69] });
         nowLang = lang;
       }
       else {
@@ -107,7 +97,7 @@ const monacoStart = () => {
           original: diff.left,
           modified: diff.right,
         });
-        diffEditor.updateOptions({ rulers: [5, 6, 17, 27, 32, 42, 48, 51, 53, 59] });
+        diffEditor.updateOptions({ rulers: [5, 6, 17, 27, 32, 42, 48, 51, 53, 60] });
       }
     }
   });
