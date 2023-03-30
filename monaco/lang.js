@@ -27,7 +27,7 @@ const rpg_token = () => {
             SubroutineOpen: Subroutine_OpenArray,
             SubroutineClose: Subroutine_CloseArray,
             SubroutineOther: [
-                'EXSR ', 'CASGT', 'CASLT', 'CASEQ', 'CASNE', 'CASGE', 'CASLE', 'CAS  ', 'ENDCS'
+                'EXSR ', 'CASGT', 'CASLT', 'CASEQ', 'CASNE', 'CASGE', 'CASLE', 'CAS  ', 'ENDCS','COMP '
             ],
             Arrays: [
                 'LOKUP', 'MOVEA', 'SORTA', 'XPOOT'
@@ -152,12 +152,12 @@ const rpg_token = () => {
                                 }
                             }, {//28-32
                                 cases: {//control
-                                    '@OperatorOpen': { token: 'Operation', bracket: '@open' },
-                                    '@OperatorClose': { token: 'Operation', bracket: '@close' },
-                                    '@OperatorOther': 'Operation',
-                                    '@SubroutineOpen': { token: 'Operation', bracket: '@open' },
-                                    '@SubroutineClose': { token: 'Operation', bracket: '@close' },
-                                    '@SubroutineOther': 'Operation',
+                                    '@OperatorOpen': { token: 'constant', bracket: '@open' },
+                                    '@OperatorClose': { token: 'constant', bracket: '@close' },
+                                    '@OperatorOther': 'constant',
+                                    '@SubroutineOpen': { token: 'constant', bracket: '@open' },
+                                    '@SubroutineClose': { token: 'constant', bracket: '@close' },
+                                    '@SubroutineOther': 'constant',
                                     '@Arrays': 'keyword',
                                     '@BitOrders': 'keyword',
                                     '@CallOrder': 'keyword',
@@ -169,7 +169,7 @@ const rpg_token = () => {
                                     '@Arithmetics': 'regexp',
                                     '@StringOrders': 'regexp',
                                     '@ZoneTransfers': 'regexp',
-                                    '@FileIOs': 'IO',
+                                    '@FileIOs': 'entity',
                                     '@FilePreIOs': 'PreIOs',
 
                                     '@default': 'invalid'
@@ -271,7 +271,7 @@ const rpg_token2 = () => {
             SubroutineOpen: Subroutine_OpenArray,
             SubroutineClose: Subroutine_CloseArray,
             SubroutineOther: [
-                'EXSR ', 'CASGT', 'CASLT', 'CASEQ', 'CASNE', 'CASGE', 'CASLE', 'CAS  ', 'ENDCS'
+                'EXSR ', 'CASGT', 'CASLT', 'CASEQ', 'CASNE', 'CASGE', 'CASLE', 'CAS  ', 'ENDCS','COMP '
             ],
             Arrays: [
                 'LOKUP', 'MOVEA', 'SORTA', 'XPOOT'
@@ -394,14 +394,14 @@ const rpg_token2 = () => {
                                     "'.*'.*": 'string',
                                     '@default': 'identifier'
                                 }
-                            },'', {//28-32
+                            },'support', {//28-32
                                 cases: {//control
-                                    '@OperatorOpen': { token: 'Operation', bracket: '@open' },
-                                    '@OperatorClose': { token: 'Operation', bracket: '@close' },
-                                    '@OperatorOther': 'Operation',
-                                    '@SubroutineOpen': { token: 'Operation', bracket: '@open' },
-                                    '@SubroutineClose': { token: 'Operation', bracket: '@close' },
-                                    '@SubroutineOther': 'Operation',
+                                    '@OperatorOpen': { token: 'constant', bracket: '@open' },
+                                    '@OperatorClose': { token: 'constant', bracket: '@close' },
+                                    '@OperatorOther': 'constant',
+                                    '@SubroutineOpen': { token: 'constant', bracket: '@open' },
+                                    '@SubroutineClose': { token: 'constant', bracket: '@close' },
+                                    '@SubroutineOther': 'constant',
                                     '@Arrays': 'keyword',
                                     '@BitOrders': 'keyword',
                                     '@CallOrder': 'keyword',
@@ -413,8 +413,8 @@ const rpg_token2 = () => {
                                     '@Arithmetics': 'regexp',
                                     '@StringOrders': 'regexp',
                                     '@ZoneTransfers': 'regexp',
-                                    '@FileIOs': 'IO',
-                                    '@FilePreIOs': 'PreIOs',
+                                    '@FileIOs': 'entity',
+                                    '@FilePreIOs': 'keyword',
 
                                     '@default': 'invalid'
                                 },

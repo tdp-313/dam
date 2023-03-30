@@ -5,17 +5,19 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <script src="https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js"></script>
     <script src="./lang.js"></script>
+    <script src="./theme.js"></script>
     <script src="./lib/min/vs/loader.js"></script>
     <script src="./monaco.js"></script>
     <script src="./monaco_fileSelect.js"></script>
     <script src="../src/fileSystem2.js"></script>
     <link rel="stylesheet" href="./monaco.css" />
 </head>
+
 <body>
     <header>
         <div>
             <input type="radio" class="displayHide" id="control-EditorModeChange-code" name="control-EditorModeChange"
-                value="code" ></input>
+                value="code"></input>
             <label for="control-EditorModeChange-code" class="control-iconButton"><img class="refSize"
                     src="./icon/code.svg"></label>
         </div>
@@ -23,36 +25,42 @@
             <input type="radio" class="displayHide" id="control-EditorModeChange-diff" name="control-EditorModeChange"
                 value="diff" checked></input>
             <label for="control-EditorModeChange-diff" class="control-iconButton"><img class="refSize"
-                    src="./icon/arrows-diff.svg" ></label>
+                    src="./icon/arrows-diff.svg"></label>
         </div>
         <div class="alignLine"></div>
         <div>
             <span id="control-Reload" class="control-iconButton"><img class="refSize" src="./icon/reload.svg"></span>
         </div>
         <div class="alignLine"></div>
-        <div>
-            <span id="control-FolderSelect" class="control-iconButton"><img class="refSize"
-                    src="./icon/folder-code.svg"></span>
-        </div>
-        <div style="display:flex; width: 100%;">
+        <div style="display:flex; width: 100%;position:relative;overflow: hidden;">
             <div class="control-FolderFileArea">
                 <select name="control-Folder-Left" id="control-Folder-Left"
                     class="control-FileFolder-pulldown"></select>
                 <select name="control-File-Left" id="control-File-Left" class="control-FileFolder-pulldown"></select>
             </div>
             <div style="margin: 0 0.3rem">
-                <span id="control-FileSelectSync" class="control-iconButton"><img class="refSize" src="./icon/link.svg"></span>
+                <span id="control-FileSelectSync" class="control-iconButton"><img class="refSize"
+                        src="./icon/link.svg"></span>
             </div>
             <div class="control-FolderFileArea">
                 <select name="control-Folder-Right" id="control-Folder-Right"
                     class="control-FileFolder-pulldown"></select>
                 <select name="control-File-Right" id="control-File-Right" class="control-FileFolder-pulldown"></select>
             </div>
-        </div>
-        <div id="control-subArea">
-            <div>
-                
+            <div id="control-subArea" class="close">
+                <span id="control-FolderSelect" class="control-iconButton hoverButton"><img class="refSize"
+                        src="./icon/cursor-text.svg"></span>
+                <span id="control-extraTheme" class="control-iconButton hoverButton"><img class="refSize"
+                        src="./icon/palette.svg"></span>
+                <span id="control-extraRuler" class="control-iconButton hoverButton"><img class="refSize"
+                        src="./icon/ruler-2.svg"></span>
+                <span id="control-extraTerminal" class="control-iconButton hoverButton"><img class="refSize"
+                        src="./icon/terminal-2.svg"></span>
             </div>
+        </div>
+        <div>
+            <span id="control-extraButton" class="control-iconButton"><img class="refSize"
+                    src="./icon/caret-up.svg"></span>
         </div>
     </header>
     <div id="monaco-code" style="border: 1px solid grey;"></div>

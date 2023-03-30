@@ -16,7 +16,7 @@ body {
 header {
     height: var(--headerHeight);
     display: grid;
-    grid-template-columns: 3rem 3rem 1rem 2rem 1rem 2rem 1fr 2rem;
+    grid-template-columns: 3rem 3rem 1rem 2rem 1rem  1fr 2rem;
     margin-bottom: 0.5rem;
     user-select: none;
     position: relative;
@@ -50,7 +50,10 @@ header {
     height: var(--headerHeight);
 }
 /***********************/
-input[type="radio"]:checked + label {
+.hoverButton {
+    transition: 0.3s;
+}
+input[type="radio"]:checked + label,.hoverButton:hover {
     background-color: rgba(0,0,0,0.2)
   }
   
@@ -62,6 +65,9 @@ input[type="radio"]:checked + label {
     justify-content: center;
     border-radius: .3rem;
     transition: 0.3s;
+    user-select: none;
+    cursor: pointer;
+    pointer-events: auto;
 }
 
 #control-Reload:active{
@@ -74,8 +80,15 @@ input[type="radio"]:checked + label {
 }
 #control-subArea {
     position: absolute;
-    background-color: #EFF5F5;
-    right: 0px;
+    background-color: var(--backgroundColor);
+    right: 0;
+    top:0;
+    width: calc(50% + 0.5rem);
     display: grid;
-    grid-template-columns: 1fr 2rem;
+    grid-template-columns: 2rem 2rem 2rem 2rem;
+    transition: 0.3s ease;
 }
+#control-subArea.close{
+    top:2rem;
+}
+

@@ -21,33 +21,29 @@ const monacoStart = () => {
         { open: '{', close: '}' },
       ]
     });
+    const themeRules = [
+      { token: 'Operation', foreground: '#DDDD00' },
+      { token: 'IO', foreground: '#DD2000' },
+      { token: 'PreIOs', foreground: '#DD8000' },
+      { token: 'flag1', foreground: '#0030DB' },
+      { token: 'flag2', foreground: '#0060DB' },
+      { token: 'flag3', foreground: '#0090DB' },
+      { token: 'order', foreground: '#DD00DD' },
+      { token: 'error', foreground: 'ff0000' }
+    ];
     monaco.languages.setMonarchTokensProvider('rpg', rpg_token());
     monaco.languages.setMonarchTokensProvider('rpg-indent', rpg_token2());
-    monaco.editor.defineTheme('myTheme', {
-      base: 'vs-dark',
-      inherit: true,
-      rules: [
-        { token: 'Operation', foreground: '#DDDD00' },
-        { token: 'IO', foreground: '#DD2000' },
-        { token: 'PreIOs', foreground: '#DD8000' },
-        { token: 'flag1', foreground: '#0030DB' },
-        { token: 'flag2', foreground: '#0060DB' },
-        { token: 'flag3', foreground: '#0090DB' },
-        { token: 'order', foreground: '#DD00DD' },
-        { token: 'error', foreground: 'ff0000' }
-      ],
-      colors: {}
-    });
+    monaco.editor.defineTheme('myTheme', theme_dark);
+
     var normalEditor = monaco.editor.create(document.getElementById('monaco-code'), {
       value: '12345678 *comment\nabcdefghijk\nlmnopqrs *\nuvwxyz',
-      language: 'vba',
+      language: 'vb',
       automaticLayout: true,
       emptySelectionClipboard: true,
       mouseWheelZoom: true,
       scrollBeyondLastLine: false,
       theme: "myTheme",
       locale: 'ja',
-      overwriteEmptySpaces: 'overwrite',
     });
     normalEditor.updateOptions({
 
@@ -63,7 +59,6 @@ const monacoStart = () => {
       mouseWheelZoom: true,
       scrollBeyondLastLine: false,
       theme: "myTheme",
-      overwriteEmptySpaces: 'overwrite',
     });
 
     // 差分を表示する元となるテキストを作成
@@ -86,13 +81,16 @@ const monacoStart = () => {
     modeChangeCode.addEventListener('click', (e) => {
       setModeChange('code');
       normalEditor.layout();
+      extraControlClick(false);
     });
     const modeChangeDiff = document.getElementById('control-EditorModeChange-diff');
     modeChangeDiff.addEventListener('click', (e) => {
       setModeChange('diff');
       diffEditor.layout();
+      extraControlClick(true);
     });
     window.monacoRead = async (text, lang, text2 = "") => {
+      ruler_State = true;
       if (text2.length === 0) {
         normalEditor.setValue(text);
         const model = normalEditor.getModel();
@@ -110,8 +108,42 @@ const monacoStart = () => {
         diffEditor.updateOptions({ rulers: [5, 6, 17, 27, 32, 42, 48, 51, 53, 59] });
       }
     }
+    const extraRulerChange = document.getElementById('control-extraRuler');
+    extraRulerChange.addEventListener('click', () => {
+      if (ruler_State) {
+        normalEditor.updateOptions({ rulers: [] });
+        diffEditor.updateOptions({ rulers: [] });
+        ruler_State = false;
+      } else {
+        normalEditor.updateOptions({ rulers: [15, 16, 27, 37, 55, 60, 70, 76, 79, 81, 87] });
+        diffEditor.updateOptions({ rulers: [5, 6, 17, 27, 32, 42, 48, 51, 53, 59] });
+        ruler_State = true;
+      }
+    });
+    const extraThemeChange = document.getElementById('control-extraTheme');
+    extraThemeChange.addEventListener('click', () => {
+      switch (theme_State) {
+        case 0:
+          monaco.editor.defineTheme('myTheme', theme_dark2);
+          theme_State++;
+          break;
+        case 1:
+          monaco.editor.defineTheme('myTheme', theme_dark3);
+          theme_State++;
+          break;
+        case 2:
+            monaco.editor.defineTheme('myTheme', theme_white);
+            theme_State++;
+            break;
+        default:
+          monaco.editor.defineTheme('myTheme', theme_dark);
+          theme_State = 0;
+      }
+    });
   });
 }
+let theme_State = 0;
+let ruler_State = true;
 window.onload = async () => {
   monacoStart();
   readFileButtonCreate();
