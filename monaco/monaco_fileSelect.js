@@ -16,19 +16,28 @@ class monaco_file {
     }
 }
 const monaco_handleName = "monaco";
+const monaco_handleName_Sub = "monaco-sub";
 let isFileSelectSync = true;
 const readFileButtonCreate = () => {
 
     const modeChangeSync = document.getElementById('control-Reload');
-    modeChangeSync.addEventListener('contextmenu', async () => {
+    modeChangeSync.addEventListener('contextmenu', async (event) => {
+        event.preventDefault();
+        const separate = document.getElementById('control-extraFolderSeparate');
         console.log(await Directory_Handle_RegisterV2(monaco_handleName, true));
+        if (separate.checked) {
+            console.log(await Directory_Handle_RegisterV2(monaco_handleName_Sub, true));
+        }
         await pullDownCreate();
         await fileReadBoth();
-
     });
     modeChangeSync.addEventListener('click', async (event) => {
-        event.preventDefault();
+        const separate = document.getElementById('control-extraFolderSeparate');
         console.log(await Directory_Handle_RegisterV2(monaco_handleName, false));
+        console.log(separate.checked);
+        if (separate.checked) {
+            console.log(await Directory_Handle_RegisterV2(monaco_handleName_Sub, false));
+        }
         await pullDownCreate();
         await fileReadBoth();
 
@@ -46,6 +55,9 @@ const readFileButtonCreate = () => {
             e.target.src = "./icon/link.svg";
         }
     });
+    const separateFolder = document.getElementById('control-extraFolderSeparate');
+    separateFolder.addEventListener('click', async (event) => Setting.setHandleSeparate = event.target.checked);
+    separateFolder.checked = Setting.getHandleSeparate;
     const control_extraArea = document.getElementById('control-extraButton');
     control_extraArea.addEventListener('click', () => {
         const modeChangeCode = document.getElementById('control-EditorModeChange-code');
@@ -60,47 +72,83 @@ const readFileButtonCreate = () => {
             extraControl = true;
         }
     });
-
+    const control_LibLeft = document.getElementById('control-Library-Left');
+    control_LibLeft.addEventListener('contextmenu', async (event) => {
+        event.preventDefault();
+        if (!Setting.getHandleSeparate) {
+            Setting.setHandleSeparate = true;
+            separateFolder.checked = Setting.getHandleSeparate;
+        }
+        await Directory_Handle_RegisterV2(monaco_handleName, true);
+        await pullDownCreate();
+        await fileReadBoth();
+    });
+    const control_LibRight = document.getElementById('control-Library-Right');
+    control_LibRight.addEventListener('contextmenu', async (event) => {
+        event.preventDefault();
+        if (!Setting.getHandleSeparate) {
+            Setting.setHandleSeparate = true;
+            separateFolder.checked = Setting.getHandleSeparate;
+        }
+        await Directory_Handle_RegisterV2(monaco_handleName_Sub, true);
+        await pullDownCreate();
+        await fileReadBoth();
+    });
     const fileReadBoth = async () => {
         const FileLeft = document.getElementById('control-File-Left');
         const FileRight = document.getElementById('control-File-Right');
-        let Left = FileList.Left.file[FileLeft.value];
-        let Right = FileList.Right.file[FileRight.value];
+        let Left = FileList.Left.File[FileLeft.value];
+        let Right = FileList.Right.File[FileRight.value];
         let LeftText = await file_read_text(Left.fullname, Left.handle, false, "text", false);
 
         await monacoRead(addIndent(LeftText), "rpg-indent", "");
         LeftText = await addSpaces(LeftText);
         await monacoRead(LeftText, "rpg", await addSpaces(await file_read_text(Right.fullname, Right.handle, false, "text", false)));
     }
-    const fileSelectSync_Process = async (target, fullname) => {
+    const fileSelectSync_Process = async (target, fullname, fileType) => {
         let reverse = target === 'Left' ? 'Right' : 'Left';
-
-        let search_target = Object.keys(FileList[reverse]["file"]);
+        let search_target = Object.keys(FileList[reverse][fileType]);
 
         for (let i = 0; i < search_target.length; i++) {
-            if (FileList[target]["file"][fullname].name === FileList[reverse]["file"][search_target[i]].name) {
+            if (FileList[target][fileType][fullname].name === FileList[reverse][fileType][search_target[i]].name) {
                 console.log("Sync");
-                let revPulldown = document.getElementById('control-File-' + reverse);
+                let revPulldown = document.getElementById('control-' + fileType + '-' + reverse);
                 revPulldown.selectedIndex = i;
                 break;
             }
         }
+
     }
     const fileFolderPulldown = document.querySelectorAll('.control-FileFolder-pulldown');
     fileFolderPulldown.forEach((pulldown) => {
         pulldown.addEventListener('change', async (e) => {
             let file = e.target.id.substring(e.target.id.indexOf("-") + 1, e.target.id.lastIndexOf("-"));
             let L_R = e.target.id.substring(e.target.id.lastIndexOf("-") + 1, e.target.id.length);
-            const FileLR = document.getElementById('control-File-' + L_R);
-            if (file === 'Folder') {
-                await monaco_pulldownCreate(FileLR, L_R, FileList[L_R]["directory"][e.target.value].handle, "file");
+            let FileLR = document.getElementById('control-' + file + '-' + L_R);
+            if (file === 'Library') {
+                const separate = document.getElementById('control-extraFolderSeparate');
+                let handleName = monaco_handleName;
+                if (!separate.checked) {
+                    handleName = monaco_handleName_Sub;
+                }
+                await monaco_pulldownCreate(FileLR, L_R, linkStatus[handleName].handle, 'Library');
+                let FileLR_2 = document.getElementById('control-Folder-' + L_R);
+                await monaco_pulldownCreate(FileLR_2, L_R, FileList[L_R]['Library'][FileLR.value].handle, 'Folder');
+                let FileLR_3 = document.getElementById('control-File-' + L_R);
+                await monaco_pulldownCreate(FileLR_3, L_R, FileList[L_R]['Folder'][FileLR_2.value].handle, 'File');
+            } else if (file === 'Folder') {
+                let FileLR_1 = document.getElementById('control-Library-' + L_R);
+                await monaco_pulldownCreate(FileLR, L_R, FileList[L_R]['Library'][FileLR_1.value].handle, 'Folder');
+                let FileLR_3 = document.getElementById('control-File-' + L_R);
+                await monaco_pulldownCreate(FileLR_3, L_R, FileList[L_R]['Folder'][FileLR.value].handle, 'File');
+            } else if (file === 'File') {
+                //await monaco_pulldownCreate(FileLR, L_R, FileList[L_R]['Folder'][FileLR.value].handle, file);
             }
             //sync 
             if (isFileSelectSync) {
-                await fileSelectSync_Process(L_R, FileLR.value);
+                await fileSelectSync_Process(L_R, FileLR.value, file);
             }
             await fileReadBoth();
-
         });
     });
 }
@@ -125,17 +173,27 @@ const extraControlClick = (open) => {
     }
 }
 const pullDownCreate = async (target = 'All') => {
+
     if (target === 'All' || target === 'Left') {
+        const LibLeft = document.getElementById('control-Library-Left');
+        await monaco_pulldownCreate(LibLeft, "Left", linkStatus[monaco_handleName].handle, "Library");
         const FolderLeft = document.getElementById('control-Folder-Left');
-        await monaco_pulldownCreate(FolderLeft, "Left", linkStatus[monaco_handleName].handle, "directory");
+        await monaco_pulldownCreate(FolderLeft, "Left", FileList["Left"]["Library"][LibLeft.value].handle, "Folder");
         const FileLeft = document.getElementById('control-File-Left');
-        await monaco_pulldownCreate(FileLeft, "Left", FileList["Left"]["directory"][FolderLeft.value].handle, "file");
+        await monaco_pulldownCreate(FileLeft, "Left", FileList["Left"]["Folder"][FolderLeft.value].handle, "File");
     }
     if (target === 'All' || target === 'Right') {
+        const separate = document.getElementById('control-extraFolderSeparate');
+        let handleName = monaco_handleName;
+        if (separate.checked) {
+            handleName = monaco_handleName_Sub;
+        }
+        const LibRight = document.getElementById('control-Library-Right');
+        await monaco_pulldownCreate(LibRight, "Right", linkStatus[handleName].handle, "Library");
         const FolderRight = document.getElementById('control-Folder-Right');
-        await monaco_pulldownCreate(FolderRight, "Right", linkStatus[monaco_handleName].handle, "directory");
+        await monaco_pulldownCreate(FolderRight, "Right", FileList["Right"]["Library"][LibRight.value].handle, "Folder");
         const FileRight = document.getElementById('control-File-Right');
-        await monaco_pulldownCreate(FileRight, "Right", FileList["Right"]["directory"][FolderRight.value].handle, "file");
+        await monaco_pulldownCreate(FileRight, "Right", FileList["Right"]["Folder"][FolderRight.value].handle, "File");
     }
 
 }
@@ -181,7 +239,7 @@ async function monaco_pulldownCreate(create_target, L_R, readHandle, readKind) {
     if (typeof (FileList[L_R]) === 'undefined') {
         FileList[L_R] = {};
     }
-    if (await create_target.value !== "") {
+    if (create_target.value !== "") {
         backup_target = FileList[L_R][readKind][create_target.value];
     } else {
         backup_target = { name: "" };
@@ -189,33 +247,17 @@ async function monaco_pulldownCreate(create_target, L_R, readHandle, readKind) {
     create_target.innerHTML = '';
     FileList[L_R][readKind] = {};
     for await (const handle of readHandle.values()) {
-        if (handle.kind === 'file' && readKind === handle.kind) {
-
-            let insert = document.createElement('option');
-            insert.value = handle.name;
-            insert.text = handle.name;
-            await create_target.appendChild(insert);
-            let file_set = new monaco_file(handle);
-            FileList[L_R][readKind][file_set.fullname] = file_set;
-            if (backup_target.name === file_set.name) {
-                console.log("Restore", backup_target.name);
-                create_target.selectedIndex = count;
-            }
-            count++;
-        } else if (handle.kind === 'directory' && readKind === handle.kind) {
-
-            let insert = document.createElement('option');
-            insert.value = handle.name;
-            insert.text = handle.name;
-            await create_target.appendChild(insert);
-            let file_set = new monaco_file(handle);
-            FileList[L_R][readKind][file_set.fullname] = file_set;
-            if (backup_target.name === file_set.name) {
-                console.log("Restore", backup_target.name, count);
-                create_target.selectedIndex = count;
-            }
-            count++;
+        let insert = document.createElement('option');
+        insert.value = handle.name;
+        insert.text = handle.name;
+        await create_target.appendChild(insert);
+        let file_set = new monaco_file(handle);
+        FileList[L_R][readKind][file_set.fullname] = file_set;
+        if (backup_target.name === file_set.name) {
+            //console.log("Restore", backup_target.name);
+            create_target.selectedIndex = count;
         }
+        count++;
     }
 }
 
@@ -262,27 +304,6 @@ function addIndent(text) {
             }
             lines[i] = leadingSpaces + line + spaces;
         }
-        let bracket = " ".repeat(10);
-        /*
-        if (lines[i].substring(5, 6) !== lastFormatType) {
-            if (lines[i].substring(5, 6) === "C") {
-                //"closeOnly"
-                bracket = "}";
-                bracket += " ".repeat(9);
-            } else if (lastFormatType === "C"||lastFormatType === "") {
-                //"OpenOnly"
-                bracket = "{";
-                bracket += " ".repeat(9);
-
-            } else {
-                //CloseOpen
-                bracket = "}{";
-                bracket += " ".repeat(8);
-            }
-            lastFormatType = lines[i].substring(5, 6);
-        } else {
-            bracket = " ".repeat(10);
-        }*/
         if (lines[i].substring(6, 7) !== "*" && lines[i].substring(5, 6) === "C") {
             let insertText = '';
             insertText = " ".repeat(14);
@@ -294,16 +315,10 @@ function addIndent(text) {
                 }
                 insertText += 'O' + counter_open;
 
-                const arr_bracket = bracket.split("");
-                arr_bracket[counter_open - 1] = "{";
-                bracket = arr_bracket.join("");
             }
             else if (regPattern_Close.test(lines[i].substring(27, 32))) {
                 insertText += 'C' + counter_open;
 
-                const arr_bracket = bracket.split("");
-                arr_bracket[counter_open - 1] = "}";
-                bracket = arr_bracket.join("");
 
                 counter_open--;
                 if (counter_open < 0) {
@@ -313,11 +328,6 @@ function addIndent(text) {
             }
             else if (lines[i].substring(27, 32) === "ELSE ") {
                 insertText += 'L' + counter_open;
-
-                const arr_bracket = bracket.split("");
-                arr_bracket[counter_open - 1] = "}";
-                arr_bracket[counter_open] = "{";
-                bracket = arr_bracket.join("");
             }
             else {
                 insertText += 'S' + counter_open;
@@ -326,12 +336,10 @@ function addIndent(text) {
                 maxIndent = counter_open;
             }
             insertText += '-' + maxIndent;
-            lines[i] = bracket + lines[i].substring(0, 27) + insertText + lines[i].substring(27, lines[i].length);
+            lines[i] = lines[i].substring(0, 27) + insertText + lines[i].substring(27, lines[i].length);
             if (counter_open === 0) {
                 maxIndent = 0;
             }
-        } else {
-            lines[i] = bracket + lines[i];
         }
     }
     //indent line Create
@@ -339,10 +347,10 @@ function addIndent(text) {
     let lastIndent = 0;
     for (let i = lines.length - 1; i > 0; i--) {
         let line = lines[i];
-        if (line.substr(15, 1) === "C" && line.substr(16, 1) !== "*") {
-            let indent = Number(line.substr(10 + 27 + 14 + 3, 1)) + 1;
-            let indentLevel = Number(line.substr(10 + 27 + 14 + 1, 1));
-            let indentLine = line.substr(10 + 27 + 14, 1);
+        if (line.substr(5, 1) === "C" && line.substr(6, 1) !== "*") {
+            let indent = Number(line.substr(27 + 14 + 3, 1)) + 1;
+            let indentLevel = Number(line.substr(27 + 14 + 1, 1));
+            let indentLine = line.substr(27 + 14, 1);
             //console.debug(indentLine, indentLevel, indent);
             maxIndent = Math.max(maxIndent, indent);
             let replaceIndentText = "  ".repeat(indentMaxLength);
@@ -353,29 +361,37 @@ function addIndent(text) {
                 maxIndent = 0;
             } else {
                 //create
-                if (indentLine === "O" || indentLine === "C") {
+                if (indentLine === "O") {
                     replaceIndentText = "  ".repeat(indentMaxLength - (maxIndent - indentLevel));
-                    replaceIndentText += "+"
+                    replaceIndentText += "{"
                     replaceIndentText += "-".repeat((maxIndent - indentLevel) * 2 - 1);
-                } else if (indentLine === "L") {
+                }
+
+                else if (indentLine === "C") {
+                    replaceIndentText = "  ".repeat(indentMaxLength - (maxIndent - indentLevel));
+                    replaceIndentText += "}";
+                    replaceIndentText += "-".repeat((maxIndent - indentLevel) * 2 - 1);
+                }
+                else if (indentLine === "L") {
                     replaceIndentText = "  ".repeat(indentMaxLength - (maxIndent - indentLevel));
                     replaceIndentText += "*"
                     replaceIndentText += "-".repeat((maxIndent - indentLevel) * 2 - 1);
                 }
             }
             lastIndent = indent;
-            lines[i] = lines[i].substring(0, 37) + replaceIndentText + lines[i].substring(55, lines[i].length);
+            lines[i] = lines[i].substring(0, 27) + replaceIndentText + lines[i].substring(45, lines[i].length);
         }
     }
     let nowRow = (" ".repeat(indentMaxLength * 2)).split("");
+
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
-        if (line.substr(15, 1) === "C" && line.substr(16, 1) !== "*") {
-            let readRow = line.substring(37, 55).split("");;
+        if (line.substr(5, 1) === "C" && line.substr(6, 1) !== "*") {
+            let readRow = line.substring(27, 45).split("");;
 
             let isPlus = false;
             for (let i = 0; i < nowRow.length; i++) {
-                if (readRow[i] === "+") {
+                if (readRow[i] === "{" || readRow[i] === "}") {
                     isPlus = true;
                     if (nowRow[i] === "|") {
                         nowRow[i] = " ";
@@ -393,16 +409,10 @@ function addIndent(text) {
             }
 
             let insertText = readRow.join('');
-            lines[i] = lines[i].substring(0, 37) + insertText + lines[i].substring(55, lines[i].length);
+            lines[i] = lines[i].substring(0, 27) + insertText + lines[i].substring(45, lines[i].length);
 
         }
     }
     return lines.join("\n");
 }
-var linkStatus = {};
-class linkStatusClass {
-    constructor() {
-        this.handle = null;
-        this.ishandle = false;
-    }
-}
+

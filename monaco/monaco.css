@@ -53,7 +53,7 @@ header {
 .hoverButton {
     transition: 0.3s;
 }
-input[type="radio"]:checked + label,.hoverButton:hover {
+input[type="radio"]:checked + label,.hoverButton:hover,#control-subArea input[type="checkbox"]:checked + label{
     background-color: rgba(0,0,0,0.2)
   }
   
@@ -76,7 +76,7 @@ input[type="radio"]:checked + label,.hoverButton:hover {
 .control-FolderFileArea {
     width: 100%;
     display: grid;
-    grid-template-columns: 35% 65%;
+    grid-template-columns: 35% 30% 35%;
 }
 #control-subArea {
     position: absolute;
@@ -85,7 +85,7 @@ input[type="radio"]:checked + label,.hoverButton:hover {
     top:0;
     width: calc(50% + 0.5rem);
     display: grid;
-    grid-template-columns: 2rem 2rem 2rem 2rem;
+    grid-template-columns: 0.5rem 2rem 2rem 0.5rem 2rem 2rem 2rem;
     transition: 0.3s ease;
 }
 #control-subArea.close{
