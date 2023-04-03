@@ -23,24 +23,20 @@ const readFileButtonCreate = () => {
     const modeChangeSync = document.getElementById('control-Reload');
     modeChangeSync.addEventListener('contextmenu', async (event) => {
         event.preventDefault();
-        const separate = document.getElementById('control-extraFolderSeparate');
-        console.log(await Directory_Handle_RegisterV2(monaco_handleName, true));
-        if (separate.checked) {
-            console.log(await Directory_Handle_RegisterV2(monaco_handleName_Sub, true));
-        }
-        await pullDownCreate();
-        await fileReadBoth();
+        fileReadStart(true);
     });
-    modeChangeSync.addEventListener('click', async (event) => {
+    const fileReadStart = async (isNew = false) => {
         const separate = document.getElementById('control-extraFolderSeparate');
-        console.log(await Directory_Handle_RegisterV2(monaco_handleName, false));
-        console.log(separate.checked);
-        if (separate.checked) {
-            console.log(await Directory_Handle_RegisterV2(monaco_handleName_Sub, false));
+        console.log(await Directory_Handle_RegisterV2(monaco_handleName, isNew));
+        if (!separate.checked) {
+            console.log(await Directory_Handle_RegisterV2(monaco_handleName_Sub, isNew));
         }
         await pullDownCreate();
         await fileReadBoth();
 
+    }
+    modeChangeSync.addEventListener('click', async (event) => {
+        fileReadStart(false)
     });
     const fileSelectSync = document.getElementById('control-FileSelectSync');
     fileSelectSync.addEventListener('click', async (e) => {
@@ -79,9 +75,7 @@ const readFileButtonCreate = () => {
             Setting.setHandleSeparate = true;
             separateFolder.checked = Setting.getHandleSeparate;
         }
-        await Directory_Handle_RegisterV2(monaco_handleName, true);
-        await pullDownCreate();
-        await fileReadBoth();
+        fileReadStart(true);
     });
     const control_LibRight = document.getElementById('control-Library-Right');
     control_LibRight.addEventListener('contextmenu', async (event) => {
@@ -90,9 +84,7 @@ const readFileButtonCreate = () => {
             Setting.setHandleSeparate = true;
             separateFolder.checked = Setting.getHandleSeparate;
         }
-        await Directory_Handle_RegisterV2(monaco_handleName_Sub, true);
-        await pullDownCreate();
-        await fileReadBoth();
+        fileReadStart(true);
     });
     const fileReadBoth = async () => {
         const FileLeft = document.getElementById('control-File-Left');
@@ -185,7 +177,7 @@ const pullDownCreate = async (target = 'All') => {
     if (target === 'All' || target === 'Right') {
         const separate = document.getElementById('control-extraFolderSeparate');
         let handleName = monaco_handleName;
-        if (separate.checked) {
+        if (!separate.checked) {
             handleName = monaco_handleName_Sub;
         }
         const LibRight = document.getElementById('control-Library-Right');

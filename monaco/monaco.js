@@ -26,7 +26,66 @@ const monacoStart = async () => {
     monaco.languages.setMonarchTokensProvider('rpg-indent', rpg_token2());
     monaco.editor.defineTheme('myTheme', theme_dark);
     //monaco.editor.telemetry = false;
+    monaco.languages.registerDefinitionProvider('rpg-indent', {
+      provideDefinition: function (model, position) {
+        let row = model.getLineContent(position.lineNumber);
+        let text = getRow_Text(row, position.column);
+        const wordStr = text.text.trim();
+        if (wordStr === "") {
+          return null;
+        }
+        let ranges = [];
 
+        let lineCount = model.getLineCount();
+        for (let i = 1; i < lineCount; i++) {
+          let row = model.getLineContent(i);
+          let op_1 = row.substring(17, 27).trim();
+          let op_m = row.substring(45, 50).trim();
+          let op_2 = row.substring(50, 60).trim();
+          let fieldLen = row.substring(67, 70).trim();
+          let result = row.substring(60, 66).trim();
+          if (op_m === 'PARM') {
+            if (wordStr === result) {
+              ranges.push({ range: new monaco.Range(i, 1, i, 70), uri: model.uri });
+            }
+          } else if (op_m === 'PLIST' || op_m === 'KLIST' || op_m === 'BEGSR') {
+            if (wordStr === op_1) {
+              ranges.push({ range: new monaco.Range(i, 1, i, 70), uri: model.uri });
+            }
+          } else {
+            if (wordStr === result && fieldLen !== '') {
+              ranges.push({ range: new monaco.Range(i, 1, i, 70), uri: model.uri });
+            }
+          }
+        }
+        return ranges;
+      }
+    });
+    monaco.languages.registerReferenceProvider('rpg-indent', {
+      provideReferences: function (model, position) {
+        let row = model.getLineContent(position.lineNumber);
+        let text = getRow_Text(row, position.column);
+        const wordStr = text.text.trim();
+        if (wordStr === "") {
+          return null;
+        }
+        let ranges = [];
+
+        let lineCount = model.getLineCount();
+        for (let i = 1; i < lineCount; i++) {
+          let row = model.getLineContent(i);
+          let op_1 = row.substring(17, 27).trim();
+          //let op_m = row.substring(45, 50).trim();
+          let op_2 = row.substring(50, 60).trim();
+          //let fieldLen = row.substring(67, 70).trim();
+          let result = row.substring(60, 66).trim();
+          if (wordStr === op_1 || wordStr === op_2 || wordStr === result) {
+            ranges.push({ range: new monaco.Range(i, 1, i, 70), uri: model.uri });
+          }
+        }
+        return ranges;
+      }
+    });
     monaco.languages.registerHoverProvider('rpg-indent', {
       provideHover: function (model, position) {
         // 変数名の取得
