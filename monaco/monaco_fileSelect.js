@@ -19,7 +19,14 @@ const monaco_handleName = "monaco";
 const monaco_handleName_Sub = "monaco-sub";
 let isFileSelectSync = true;
 const readFileButtonCreate = () => {
-
+    const otherTabOpen = document.getElementById('control-otherTab');
+    otherTabOpen.addEventListener('click', async () => {
+        window.open('/monaco');
+    });
+    otherTabOpen.addEventListener('contextmenu', async (event) => {
+        event.preventDefault();
+        window.open('/monaco',Math.random(),"popup");
+    });
     const modeChangeSync = document.getElementById('control-Reload');
     modeChangeSync.addEventListener('contextmenu', async (event) => {
         event.preventDefault();
@@ -93,7 +100,7 @@ const readFileButtonCreate = () => {
         let Right = FileList.Right.File[FileRight.value];
         let LeftText = await file_read_text(Left.fullname, Left.handle, false, "text", false);
 
-        await monacoRead(addIndent(LeftText), "rpg-indent", "");
+        await monacoRead(addIndent(LeftText), "rpg-indent", "",Left.fullname);
         LeftText = await addSpaces(LeftText);
         await monacoRead(LeftText, "rpg", await addSpaces(await file_read_text(Right.fullname, Right.handle, false, "text", false)));
     }

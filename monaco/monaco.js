@@ -26,6 +26,7 @@ const monacoStart = async () => {
     monaco.languages.setMonarchTokensProvider('rpg-indent', rpg_token2());
     monaco.editor.defineTheme('myTheme', theme_dark);
     //monaco.editor.telemetry = false;
+
     monaco.languages.registerDefinitionProvider('rpg-indent', {
       provideDefinition: function (model, position) {
         let row = model.getLineContent(position.lineNumber);
@@ -83,6 +84,20 @@ const monacoStart = async () => {
             ranges.push({ range: new monaco.Range(i, 1, i, 70), uri: model.uri });
           }
         }
+        if (text.type === 'flag' || text.type === 'flag1' || text.type === 'flag2' || text.type === 'flag3') {
+          let wordStr_flag = "*IN" + wordStr;
+          for (let i = 1; i < lineCount; i++) {
+            let row = model.getLineContent(i);
+            let op_1 = row.substring(17, 27).trim();
+            //let op_m = row.substring(45, 50).trim();
+            let op_2 = row.substring(50, 60).trim();
+            //let fieldLen = row.substring(67, 70).trim();
+            if (wordStr_flag === op_1 || wordStr_flag === op_2) {
+              ranges.push({ range: new monaco.Range(i, 1, i, 70), uri: model.uri });
+            }
+          }
+        }
+
         return ranges;
       }
     });
@@ -99,6 +114,7 @@ const monacoStart = async () => {
         if (wordStr.length === 0) {
           return null;
         }
+
         let tooltip_text = ["", "", ""];
         let target = 'tip_' + text.type;
         if (window[target].type === "fixed") {
@@ -145,44 +161,33 @@ const monacoStart = async () => {
         // 行数を取得
         var lineCount = model.getLineCount();
 
-        // 折りたたみ範囲の開始行と終了行を格納する変数
-
-
-        // 1行ずつループ
         for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
           // 行のテキストを取得
-          var lineText = model.getLineContent(lineNumber);
+          let lineText = model.getLineContent(lineNumber);
           // 折りたたみ範囲の開始行を判定
-          let plus = lineText.substring(37, 55).indexOf("{");
-          if (plus !== -1) {
+          let plus = lineText.substring(27, 45).indexOf("{");
+          if (plus !== -1 && lineText.substring(5, 7) === "C ") {
             // 折りたたみ範囲が開始された
             let startLineNumber = -1;
             let endLineNumber = -1;
             startLineNumber = lineNumber;
             for (let endLineRow = startLineNumber + 1; endLineRow <= lineCount; endLineRow++) {
-
               let endlineText = model.getLineContent(endLineRow);
-              if (endlineText.substring(37, 55).substr(plus, 1) === "}") {
-                // 折りたたみ範囲が終了した
-                endLineNumber = endLineRow - 1;
+              if (endlineText.substring(5, 7) === "C ") {
+                if (endlineText.substring(27, 45).substr(plus, 1) === "}") {
+                  // 折りたたみ範囲が終了した
+                  endLineNumber = endLineRow - 1;
 
-                // 折りたたみ範囲を配列に追加
-                if (startLineNumber !== -1 && endLineNumber !== -1) {
-                  ranges.push({
-                    start: startLineNumber,
-                    end: endLineNumber
-                  });
+                  // 折りたたみ範囲を配列に追加
+                  if (startLineNumber !== -1 && endLineNumber !== -1) {
+                    ranges.push({
+                      start: startLineNumber,
+                      end: endLineNumber
+                    });
+                  }
+                  break;
                 }
-                break;
-              } /*else if (endlineText.substring(37, 55).substr(plus, 1) === "+") {
-                // 折りたたみ範囲 else
-                endLineNumber = endLineRow - 1;
-                // 折りたたみ範囲を配列に追加
-                if (startLineNumber !== -1 && endLineNumber !== -1) {
-                  ranges.push({ start: startLineNumber, end: endLineNumber });
-                  startLineNumber = endLineRow;
-                }
-              }*/
+              }
             }
           }
         }
@@ -225,9 +230,8 @@ const monacoStart = async () => {
       modified: diff.right
     });
 
-    // 初期表示は通常のエディターにする
-    document.getElementById('monaco-code').style.display = 'none';
-    document.getElementById('monaco-diff').style.display = 'block';
+    document.getElementById('monaco-code').style.display = 'block';
+    document.getElementById('monaco-diff').style.display = 'none';
 
     const modeChangeCode = document.getElementById('control-EditorModeChange-code');
     modeChangeCode.addEventListener('click', (e) => {
@@ -262,13 +266,14 @@ const monacoStart = async () => {
         folding: true,
       });
     }
-    window.monacoRead = async (text, lang, text2 = "") => {
+    window.monacoRead = async (text, lang, text2 = "", readFileName = "") => {
       ruler_State = true;
       if (text2.length === 0) {
         normalEditor.setValue(text);
         const model = normalEditor.getModel();
         monaco.editor.setModelLanguage(model, lang)
         nowLang = lang;
+        document.title = readFileName;
       }
       else {
         diff.left = await monaco.editor.createModel(text, lang);
@@ -313,6 +318,30 @@ const monacoStart = async () => {
       Setting.setTheme = themeState;
     }
     themeApply(Setting.getTheme);
+    window.testCreateRefList = async () => {
+      const model = await normalEditor.getModel();
+      await createRefList(model);
+    }
+    const createRefList = async (refModel) => {
+      var lineCount = await refModel.getLineCount();
+      let dds = [];
+      let dsp = [];
+      for (let i = 1; i <= lineCount; i++) {
+        // 行のテキストを取得
+        let lineText = refModel.getLineContent(i);
+        if (lineText.substring(5, 6) === "F" && lineText.substring(6, 7) !== "*") {
+          let type = lineText.substring(39, 46).trim();
+          let file = lineText.substring(6, 14).trim();
+          if (type === "WORKSTN") {
+            dsp.push(file);
+          } else if (type === "DISK") {
+            dds.push(file);
+          }
+
+        }
+      }
+      console.log(dds, dsp);
+    }
   });
 }
 window.onload = async () => {

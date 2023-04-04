@@ -53,7 +53,7 @@ header {
 .hoverButton {
     transition: 0.3s;
 }
-input[type="radio"]:checked + label,.hoverButton:hover,#control-subArea input[type="checkbox"]:checked + label{
+header input[type="radio"]:checked + label,.hoverButton:hover,#control-subArea input[type="checkbox"]:checked + label{
     background-color: rgba(0,0,0,0.2)
   }
   
@@ -85,10 +85,9 @@ input[type="radio"]:checked + label,.hoverButton:hover,#control-subArea input[ty
     top:0;
     width: calc(50% + 0.5rem);
     display: grid;
-    grid-template-columns: 0.5rem 2rem 2rem 0.5rem 2rem 2rem 2rem;
+    grid-template-columns: 0.5rem 2rem 2rem 0.5rem 2rem 2rem 2rem 1fr 3rem;
     transition: 0.3s ease;
 }
 #control-subArea.close{
     top:2rem;
 }
-
