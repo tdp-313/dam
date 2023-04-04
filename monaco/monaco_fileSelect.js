@@ -21,11 +21,11 @@ let isFileSelectSync = true;
 const readFileButtonCreate = () => {
     const otherTabOpen = document.getElementById('control-otherTab');
     otherTabOpen.addEventListener('click', async () => {
-        window.open('/monaco');
+        window.open('/dam/monaco');
     });
     otherTabOpen.addEventListener('contextmenu', async (event) => {
         event.preventDefault();
-        window.open('/monaco',Math.random(),"popup");
+        window.open('/dam/monaco',Math.random(),"popup");
     });
     const modeChangeSync = document.getElementById('control-Reload');
     modeChangeSync.addEventListener('contextmenu', async (event) => {
