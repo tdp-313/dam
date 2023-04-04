@@ -17,13 +17,13 @@
     <header>
         <div>
             <input type="radio" class="displayHide" id="control-EditorModeChange-code" name="control-EditorModeChange"
-                value="code"></input>
+                value="code" checked></input>
             <label for="control-EditorModeChange-code" class="control-iconButton"><img class="refSize"
                     src="./icon/code.svg"></label>
         </div>
         <div>
             <input type="radio" class="displayHide" id="control-EditorModeChange-diff" name="control-EditorModeChange"
-                value="diff" checked></input>
+                value="diff"></input>
             <label for="control-EditorModeChange-diff" class="control-iconButton"><img class="refSize"
                     src="./icon/arrows-diff.svg"></label>
         </div>
@@ -34,7 +34,8 @@
         <div class="alignLine"></div>
         <div style="display:flex; width: 100%;position:relative;overflow: hidden;">
             <div class="control-FolderFileArea">
-                <select name="control-Folder-Left" id="control-Library-Left" class="control-FileFolder-pulldown"></select>
+                <select name="control-Folder-Left" id="control-Library-Left"
+                    class="control-FileFolder-pulldown"></select>
                 <select name="control-Folder-Left" id="control-Folder-Left"
                     class="control-FileFolder-pulldown"></select>
                 <select name="control-File-Left" id="control-File-Left" class="control-FileFolder-pulldown"></select>
@@ -44,12 +45,13 @@
                         src="./icon/link.svg"></span>
             </div>
             <div class="control-FolderFileArea">
-                <select name="control-Folder-Left" id="control-Library-Right" class="control-FileFolder-pulldown"></select>
+                <select name="control-Folder-Left" id="control-Library-Right"
+                    class="control-FileFolder-pulldown"></select>
                 <select name="control-Folder-Right" id="control-Folder-Right"
                     class="control-FileFolder-pulldown"></select>
                 <select name="control-File-Right" id="control-File-Right" class="control-FileFolder-pulldown"></select>
             </div>
-            <div id="control-subArea" class="close">
+            <div id="control-subArea" class="">
                 <div class="alignLine"></div>
                 <div>
                     <input type="checkbox" class="displayHide" id="control-extraInsertText"></input>
@@ -71,11 +73,16 @@
                         src="./icon/palette.svg"></span>
                 <span id="control-extraTerminal" class="control-iconButton hoverButton"><img class="refSize"
                         src="./icon/terminal-2.svg"></span>
+                <span></span>
+                <span id="control-otherTab" class="control-iconButton hoverButton">
+                    <img class="refSize" src="./icon/navigation.svg"></img>
+                </span>
+
             </div>
         </div>
         <div>
             <span id="control-extraButton" class="control-iconButton"><img class="refSize"
-                    src="./icon/caret-up.svg"></span>
+                    src="./icon/caret-down.svg"></span>
         </div>
     </header>
     <div id="monaco-code" style="border: 1px solid grey;"></div>
