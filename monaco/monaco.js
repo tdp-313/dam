@@ -40,19 +40,21 @@ const monacoStart = async () => {
         let lineCount = model.getLineCount();
         for (let i = 1; i < lineCount; i++) {
           let row = model.getLineContent(i);
-          let op_1 = row.substring(17, 27).trim();
-          let op_m = row.substring(45, 50).trim();
-          let op_2 = row.substring(50, 60).trim();
-          let fieldLen = row.substring(67, 70).trim();
-          let result = row.substring(60, 66).trim();
           if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "C") {
+            let op_1 = row.substring(17, 27).trim();
+            let op_m = row.substring(45, 50).trim();
+            let op_2 = row.substring(50, 60).trim();
+            let fieldLen = row.substring(67, 70).trim();
+            let result = row.substring(60, 66).trim();
             if (op_m === 'PARM') {
               if (wordStr === result) {
                 ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
+                break;
               }
             } else if (op_m === 'PLIST' || op_m === 'KLIST' || op_m === 'BEGSR') {
               if (wordStr === op_1) {
                 ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
+                break;
               }
             } else {
               if (wordStr === result && fieldLen !== '') {
@@ -75,6 +77,11 @@ const monacoStart = async () => {
               if (flag.includes(wordStr.substring(3, 5))) {
                 ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
               }
+            }
+          } else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "I") {
+            let field = row.substring(52, 58).trim();
+            if (wordStr === field) {
+              ranges.push({ range: new monaco.Range(i, 5, i, 80), uri: model.uri });
             }
           }
         }
@@ -121,6 +128,11 @@ const monacoStart = async () => {
               if (flag.includes(wordStr.substring(3, 5))) {
                 ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr.substring(3, 5)) + 1, i, row.lastIndexOf(wordStr.substring(3, 5)) + 3), uri: model.uri });
               }
+            }
+          } else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "I") {
+            let field = row.substring(52, 58).trim();
+            if (wordStr === field) {
+              ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr), i, row.indexOf(wordStr) + wordStr.length), uri: model.uri });
             }
           }
         }

@@ -107,7 +107,9 @@ const readFileButtonCreate = () => {
     const fileSelectSync_Process = async (target, fullname, fileType) => {
         let reverse = target === 'Left' ? 'Right' : 'Left';
         let search_target = Object.keys(FileList[reverse][fileType]);
-
+        if (fileType === 'Library') {
+            return null;
+        }
         for (let i = 0; i < search_target.length; i++) {
             if (FileList[target][fileType][fullname].name === FileList[reverse][fileType][search_target[i]].name) {
                 console.log("Sync");
