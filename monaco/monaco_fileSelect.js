@@ -3,6 +3,7 @@ class monaco_file {
         this.fullname = handle.name;
         this.prefix = this.fullname.indexOf('_') === -1 ? '' : this.fullname.substring(this.fullname.indexOf('_'), this.fullname.indexOf('.'));
         this.ext = this.fullname.substring(this.fullname.indexOf('.'), this.fullname.length);
+        this.extFormat = this.fullname.substring(this.fullname.indexOf('.') + 1, this.fullname.length);
         this.handle = handle;
         if (this.prefix.length === 0) {
             this.name = this.fullname.substring(0, this.fullname.indexOf('.'));
@@ -17,6 +18,8 @@ class monaco_file {
 }
 const monaco_handleName = "monaco";
 const monaco_handleName_Sub = "monaco-sub";
+const monaco_handleName_RefMaster = "monaco-ref";
+const fileNameExt = 'txt';
 let isFileSelectSync = true;
 const readFileButtonCreate = () => {
     const otherTabOpen = document.getElementById('control-otherTab');
@@ -25,7 +28,7 @@ const readFileButtonCreate = () => {
     });
     otherTabOpen.addEventListener('contextmenu', async (event) => {
         event.preventDefault();
-        window.open('/dam/monaco',Math.random(),"popup");
+        window.open('/dam/monaco', Math.random(), "popup");
     });
     const modeChangeSync = document.getElementById('control-Reload');
     modeChangeSync.addEventListener('contextmenu', async (event) => {
@@ -36,11 +39,13 @@ const readFileButtonCreate = () => {
         const separate = document.getElementById('control-extraFolderSeparate');
         console.log(await Directory_Handle_RegisterV2(monaco_handleName, isNew));
         if (!separate.checked) {
-            console.log(await Directory_Handle_RegisterV2(monaco_handleName_Sub, isNew));
+            console.log(await Directory_Handle_RegisterV2(monaco_handleName_Sub, isNew, 'read'));
+        }
+        if (extraRefButton.checked) {
+            console.log(await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read'));
         }
         await pullDownCreate();
         await fileReadBoth();
-
     }
     modeChangeSync.addEventListener('click', async (event) => {
         fileReadStart(false)
@@ -58,6 +63,9 @@ const readFileButtonCreate = () => {
             e.target.src = "./icon/link.svg";
         }
     });
+    const extraRefButton = document.getElementById('control-extraRef');
+    extraRefButton.addEventListener('click', async (event) => Setting.setRefMaster = event.target.checked);
+    extraRefButton.checked = Setting.getRefMaster;
     const separateFolder = document.getElementById('control-extraFolderSeparate');
     separateFolder.addEventListener('click', async (event) => Setting.setHandleSeparate = event.target.checked);
     separateFolder.checked = Setting.getHandleSeparate;
@@ -96,13 +104,35 @@ const readFileButtonCreate = () => {
     const fileReadBoth = async () => {
         const FileLeft = document.getElementById('control-File-Left');
         const FileRight = document.getElementById('control-File-Right');
+        const FolderLeft = document.getElementById('control-Folder-Left');
+        const FolderRight = document.getElementById('control-Folder-Right');
+
         let Left = FileList.Left.File[FileLeft.value];
         let Right = FileList.Right.File[FileRight.value];
-        let LeftText = await file_read_text(Left.fullname, Left.handle, false, "text", false);
 
-        await monacoRead(addIndent(LeftText), "rpg-indent", "",Left.fullname);
-        LeftText = await addSpaces(LeftText);
-        await monacoRead(LeftText, "rpg", await addSpaces(await file_read_text(Right.fullname, Right.handle, false, "text", false)));
+        let LeftText = await file_read_text(Left.fullname, Left.handle, false, "text", false);
+        let RightText = await file_read_text(Right.fullname, Right.handle, false, "text", false);
+
+        let NormalUri = monaco.Uri.parse(control_LibLeft.value + '/' + FolderLeft.value + '/' + FileLeft.value);
+        let LeftUri = monaco.Uri.parse('DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + FileLeft.value);
+        let RightUri = monaco.Uri.parse('DIFF/' +control_LibRight.value + '/' + FolderRight.value + '/' + FileRight.value);
+
+        let lang = ['', '', ''];//normal original modified
+        if (FolderLeft.value === 'QRPGSRC') {
+            lang = ['rpg-indent', 'rpg', 'rpg'];
+        } else if (FolderLeft.value === 'QDSPSRC' || FolderLeft.value === 'QDDSSRC') {
+            lang = ['dds', 'dds', 'dds'];
+        }
+
+        
+        let normalEditorModel = await modelChange(await addIndent(LeftText), lang[0], NormalUri);
+        let diffEditorModel_Original = await modelChange(await addSpaces(LeftText), lang[1],LeftUri);
+        let normalEditorModel_Modified = await modelChange(await addSpaces(RightText), lang[2],RightUri);
+        await monacoRead2(normalEditorModel, diffEditorModel_Original, normalEditorModel_Modified);
+        //
+        if (lang[0] === 'rpg-indent') {
+            await refDefStart();
+        }
     }
     const fileSelectSync_Process = async (target, fullname, fileType) => {
         let reverse = target === 'Left' ? 'Right' : 'Left';
@@ -198,7 +228,7 @@ const pullDownCreate = async (target = 'All') => {
     }
 
 }
-const Directory_Handle_RegisterV2 = async (name, isNew = false) => {
+const Directory_Handle_RegisterV2 = async (name, isNew = false, rw_mode = 'readwrite') => {
     // Indexed Database から FileSystemDirectoryHandle オブジェクトを取得
     if (typeof linkStatus[name] === 'undefined') {
         linkStatus[name] = new linkStatusClass;
@@ -209,10 +239,10 @@ const Directory_Handle_RegisterV2 = async (name, isNew = false) => {
             linkStatus[name].handle = await window.showDirectoryPicker();
         } else {
             // すでにユーザーの許可が得られているかをチェック
-            let permission = await linkStatus[name].handle.queryPermission({ mode: 'readwrite' });
+            let permission = await linkStatus[name].handle.queryPermission({ mode: rw_mode });
             if (permission !== 'granted') {
                 // ユーザーの許可が得られていないなら、許可を得る（ダイアログを出す）
-                permission = await linkStatus[name].handle.requestPermission({ mode: 'readwrite' });
+                permission = await linkStatus[name].handle.requestPermission({ mode: rw_mode });
                 if (permission !== 'granted') {
                     linkStatus[name].handle = await window.showDirectoryPicker();
                     if (!linkStatus[name].handle) {
@@ -260,6 +290,31 @@ async function monaco_pulldownCreate(create_target, L_R, readHandle, readKind) {
         }
         count++;
     }
+}
+
+const createFolderExistList = async (libHandle, folder) => {
+    let rtn = [];
+    for await (const handle of libHandle.values()) {
+        if (handle.kind === 'directory' && handle.name === folder) {
+            for await (const fileHandle of handle.values()) {
+                if (fileHandle.kind === 'file') {
+                    rtn.push(new monaco_file(fileHandle));
+                }
+            }
+            break;
+        }
+    }
+    return rtn;
+}
+
+const getFolderExistList_Text = async (List, target) => {
+    for (let i = 0; i < List.length; i++) {
+        if (List[i].name === target) {
+            let text = await file_read_text(List[i].fullname, List[i].handle, false, 'text', false, false);
+            return text;
+        }
+    }
+    return null;
 }
 
 function addSpaces(text) {

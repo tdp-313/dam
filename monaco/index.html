@@ -5,11 +5,14 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <script src="https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js"></script>
     <script src="./lang.js"></script>
+    <script src="./monaco-lang.js"></script>
+    <script src="./lang2.js"></script>
     <script src="./theme.js"></script>
     <script src="./lib/min/vs/loader.js"></script>
     <script src="./monaco.js"></script>
     <script src="./monaco_fileSelect.js"></script>
     <script src="../src/fileSystem2.js"></script>
+    <script src="./uml.js"></script>
     <link rel="stylesheet" href="./monaco.css" />
 </head>
 
@@ -74,6 +77,12 @@
                 <span id="control-extraTerminal" class="control-iconButton hoverButton"><img class="refSize"
                         src="./icon/terminal-2.svg"></span>
                 <span></span>
+                <div>
+                    <input type="checkbox" class="displayHide" id="control-extraRef"></input>
+                    <label for="control-extraRef" class="control-iconButton"><img class="refSize"
+                            src="./icon/certificate.svg"></label>
+                </div>
+                <div class="alignLine"></div>
                 <span id="control-otherTab" class="control-iconButton hoverButton">
                     <img class="refSize" src="./icon/navigation.svg"></img>
                 </span>

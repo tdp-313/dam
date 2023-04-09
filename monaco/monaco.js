@@ -11,228 +11,9 @@ require.config({
 const monacoStart = async () => {
 
   require(["vs/editor/editor.main"], async function () {
-    // 通常のエディターを作成
-    //monaco.editor.setLocale('ja');
-    monaco.languages.register({ id: 'rpg' });
-    monaco.languages.register({ id: 'rpg-indent' });
-    monaco.languages.setLanguageConfiguration('rpg-indent', {
-      indentSize: 2,
-      useTabStops: false,
-      brackets: [
-        ['{', '}'],
-      ],
-    });
-    monaco.languages.setMonarchTokensProvider('rpg', rpg_token());
-    monaco.languages.setMonarchTokensProvider('rpg-indent', rpg_token2());
+    monacoLang();
+
     monaco.editor.defineTheme('myTheme', theme_dark);
-    //monaco.editor.telemetry = false;
-    const flag_regex = /\*IN[0-9][0-9]/;
-    monaco.languages.registerDefinitionProvider('rpg-indent', {
-      provideDefinition: function (model, position) {
-        let row = model.getLineContent(position.lineNumber);
-        let text = getRow_Text(row, position.column);
-        const wordStr = text.text.trim();
-        if (wordStr === "") {
-          return null;
-        }
-        let ranges = [];
-
-        let lineCount = model.getLineCount();
-        for (let i = 1; i < lineCount; i++) {
-          let row = model.getLineContent(i);
-          if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "C") {
-            let op_1 = row.substring(17, 27).trim();
-            let op_m = row.substring(45, 50).trim();
-            let op_2 = row.substring(50, 60).trim();
-            let fieldLen = row.substring(67, 70).trim();
-            let result = row.substring(60, 66).trim();
-            if (op_m === 'PARM') {
-              if (wordStr === result) {
-                ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
-                break;
-              }
-            } else if (op_m === 'PLIST' || op_m === 'KLIST' || op_m === 'BEGSR') {
-              if (wordStr === op_1) {
-                ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
-                break;
-              }
-            } else {
-              if (wordStr === result && fieldLen !== '') {
-                ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
-              } else if (wordStr === result && wordStr.substring(0, 1) === "*") {
-                ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
-              }
-            }
-            if (text.type === 'flag' || text.type === 'flag1' || text.type === 'flag2' || text.type === 'flag3') {
-              let wordStr_flag = "*IN" + wordStr;
-              if (wordStr_flag === result) {
-                ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
-              }
-            }
-            if (flag_regex.test(wordStr)) {
-              let flag = [];
-              flag.push(row.substring(71, 73));
-              flag.push(row.substring(73, 75));
-              flag.push(row.substring(75, 77));
-              if (flag.includes(wordStr.substring(3, 5))) {
-                ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
-              }
-            }
-          } else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "I") {
-            let field = row.substring(52, 58).trim();
-            if (wordStr === field) {
-              ranges.push({ range: new monaco.Range(i, 5, i, 80), uri: model.uri });
-            }
-          }
-        }
-        return ranges;
-      }
-    });
-    monaco.languages.registerReferenceProvider('rpg-indent', {
-      provideReferences: function (model, position) {
-        let row = model.getLineContent(position.lineNumber);
-        let text = getRow_Text(row, position.column);
-        const wordStr = text.text.trim();
-        if (wordStr === "") {
-          return null;
-        }
-        let ranges = [];
-
-        let lineCount = model.getLineCount();
-        for (let i = 1; i < lineCount; i++) {
-          let row = model.getLineContent(i);
-          if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "C") {
-            let op_1 = row.substring(17, 27).trim();
-            //let op_m = row.substring(45, 50).trim();
-            let op_2 = row.substring(50, 60).trim();
-            //let fieldLen = row.substring(67, 70).trim();
-            let result = row.substring(60, 66).trim();
-
-            if (wordStr === op_1 || wordStr === op_2 || wordStr === result) {
-              ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr) + 1, i, row.lastIndexOf(wordStr) + wordStr.length + 1), uri: model.uri });
-            }
-            if (text.type === 'flag' || text.type === 'flag1' || text.type === 'flag2' || text.type === 'flag3') {
-              let wordStr_flag = "*IN" + wordStr;
-              if (wordStr_flag === op_1 || wordStr_flag === op_2) {
-                ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr_flag) + 1, i, row.lastIndexOf(wordStr_flag) + wordStr_flag.length + 1), uri: model.uri });
-              }
-            }
-            if (flag_regex.test(wordStr)) {
-              let flag = [];
-              flag.push(row.substring(9, 11));
-              flag.push(row.substring(12, 14));
-              flag.push(row.substring(15, 17));
-              flag.push(row.substring(71, 73));
-              flag.push(row.substring(73, 75));
-              flag.push(row.substring(75, 77));
-              if (flag.includes(wordStr.substring(3, 5))) {
-                ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr.substring(3, 5)) + 1, i, row.lastIndexOf(wordStr.substring(3, 5)) + 3), uri: model.uri });
-              }
-            }
-          } else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "I") {
-            let field = row.substring(52, 58).trim();
-            if (wordStr === field) {
-              ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr), i, row.indexOf(wordStr) + wordStr.length), uri: model.uri });
-            }
-          }
-        }
-        return ranges;
-      }
-    });
-    monaco.languages.registerHoverProvider('rpg-indent', {
-      provideHover: function (model, position) {
-        // 変数名の取得
-        let word = model.getWordAtPosition(position);
-        if (!word) {
-          return null;
-        };
-        let row = model.getLineContent(position.lineNumber);
-        let text = getRow_Text(row, position.column)
-        const wordStr = text.text.trim();
-        if (wordStr.length === 0) {
-          return null;
-        }
-
-        let tooltip_text = ["", "", ""];
-        let target = 'tip_' + text.type;
-        if (window[target].type === "fixed") {
-          tooltip_text[0] = '**' + wordStr + '**';
-          tooltip_text[1] = window[target].description;
-        } else if (window[target].type === "simpleDetail") {
-          let tip = window[target].detail[text.text];
-          if (typeof (tip) === "undefined") {
-            tooltip_text[0] = '**' + window[target].name + " : " + wordStr + '**';
-            tooltip_text[1] = window[target].description
-          } else {
-            tooltip_text[0] = '**' + tip.name + " : " + wordStr + '**';
-            tooltip_text[1] = tip.description;
-            if (typeof (tip.description2) !== 'undefined') {
-              tooltip_text[2] = tip.description2;
-            }
-          }
-        } else if (window[target].type === "Detail_2") {
-          let tip = window[target].detail[text.text];
-          tooltip_text[0] = '**' + window[target].name + " : " + wordStr + '**';
-          tooltip_text[1] = tip.description;
-        } else if (window[target].type === "substr") {
-          let tip = window[target].detail[text.text.substring(0, window[target].len)];
-          tooltip_text[0] = '**' + window[target].name + " : " + wordStr + '**';
-          tooltip_text[1] = tip.description;
-        }
-        // ホバー情報の作成
-        return {
-          range: new monaco.Range(position.lineNumber, text.startColumn, position.lineNumber, text.endColumn),
-          contents: [
-            { value: tooltip_text[0] },
-            { value: tooltip_text[1] },
-            { value: tooltip_text[2] }
-          ]
-        };
-      }
-    });
-    monaco.languages.registerFoldingRangeProvider('rpg-indent', {
-      provideFoldingRanges: function (model, context, token) {
-        //console.log(model, context, token, "test");
-        // 折りたたむ範囲を格納する配列
-        var ranges = [];
-
-        // 行数を取得
-        var lineCount = model.getLineCount();
-
-        for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
-          // 行のテキストを取得
-          let lineText = model.getLineContent(lineNumber);
-          // 折りたたみ範囲の開始行を判定
-          let plus = lineText.substring(27, 45).indexOf("{");
-          if (plus !== -1 && lineText.substring(5, 7) === "C ") {
-            // 折りたたみ範囲が開始された
-            let startLineNumber = -1;
-            let endLineNumber = -1;
-            startLineNumber = lineNumber;
-            for (let endLineRow = startLineNumber + 1; endLineRow <= lineCount; endLineRow++) {
-              let endlineText = model.getLineContent(endLineRow);
-              if (endlineText.substring(5, 7) === "C ") {
-                if (endlineText.substring(27, 45).substr(plus, 1) === "}") {
-                  // 折りたたみ範囲が終了した
-                  endLineNumber = endLineRow - 1;
-
-                  // 折りたたみ範囲を配列に追加
-                  if (startLineNumber !== -1 && endLineNumber !== -1) {
-                    ranges.push({
-                      start: startLineNumber,
-                      end: endLineNumber
-                    });
-                  }
-                  break;
-                }
-              }
-            }
-          }
-        }
-        // 折りたたみ範囲を返す
-        return ranges;
-      }
-    })
     const editorOptionGeneral = {
       language: 'vb',
       mouseWheelZoom: true,
@@ -248,7 +29,6 @@ const monacoStart = async () => {
       automaticLayout: true,
     });
     normalEditor.updateOptions(editorOptionGeneral);
-    // 差分エディターを作成
     var diffEditor = monaco.editor.createDiffEditor(document.getElementById('monaco-diff'), {
       renderSideBySide: true,
       enableSplitViewResizing: false,
@@ -256,13 +36,10 @@ const monacoStart = async () => {
       automaticLayout: true,
     });
     diffEditor.updateOptions(editorOptionGeneral);
-    // 差分を表示する元となるテキストを作成
     var diff = {};
-
     diff.left = monaco.editor.createModel('function hello() {\n\talert("Hello world!");\n}', 'javascript');
     diff.right = monaco.editor.createModel('function hello() {\n\tconsole.log("Hello world!");\n}', 'javascript');
 
-    // 差分を表示する元となるエディターを設定
     diffEditor.setModel({
       original: diff.left,
       modified: diff.right
@@ -308,37 +85,36 @@ const monacoStart = async () => {
       const extraRulerChange = document.getElementById('control-extraRuler');
       extraRulerChange.checked = isDisp;
     }
-    const rpgEditorOption = () => {
-      return ({
-        columnSelection: true,
-        emptySelectionClipboard: true,
-        automaticLayout: true,
-        bracketMatching: "always",
-        //foldingStrategy: "indentation",
-        folding: true,
-      });
-    }
-    window.monacoRead = async (text, lang, text2 = "", readFileName = "") => {
-      ruler_State = true;
-      if (text2.length === 0) {
-        normalEditor.setValue(text);
-        const model = normalEditor.getModel();
-        monaco.editor.setModelLanguage(model, lang)
-        nowLang = lang;
-        document.title = readFileName;
-      }
-      else {
-        diff.left = await monaco.editor.createModel(text, lang);
-        diff.right = await monaco.editor.createModel(text2, lang);
-        diffEditor.setModel({
-          original: diff.left,
-          modified: diff.right,
+
+    window.monacoRead2 = async (editModel, diffModel_original, diffModel_modified) => {
+      const rpgEditorOption = () => {
+        return ({
+          columnSelection: true,
+          emptySelectionClipboard: true,
+          automaticLayout: true,
+          bracketMatching: "always",
+          //foldingStrategy: "indentation",
+          folding: true,
         });
       }
-      rulerChange(true);
+      //let editLang = editModel.getLanguageId();
+      //let diff_originalLang = diffModel_original.getLanguageId();
+      //let diff_modifiedLang = diffModel_modified.getLanguageId();
+      
+      //Title
+      document.title = editModel.uri.path;
+      //normalEditor 
+      normalEditor.setModel(editModel);
+      //diffEditor
+      diffEditor.setModel({
+        original: diffModel_original,
+        modified: diffModel_modified,
+      });
+      ruler_State = true;
+      rulerChange(ruler_State);
+      //anytime
       normalEditor.updateOptions(rpgEditorOption());
       diffEditor.updateOptions(rpgEditorOption());
-
     }
 
     const extraRulerChange = document.getElementById('control-extraRuler');
@@ -347,9 +123,71 @@ const monacoStart = async () => {
     });
 
     const extraTerminal = document.getElementById('control-extraTerminal');
-    extraTerminal.addEventListener('click', (e) => {
+    extraTerminal.addEventListener('click', async (e) => {
       //monaco.editor.showCommands();
+      await refDefStart();
+      const model = await normalEditor.getModel();
+      console.log(await createUML(model));
     });
+
+    window.refDefStart = async () => {
+      const model = await normalEditor.getModel();
+      let refListFile = await createRefList(model);
+      const LibLeft = document.getElementById('control-Library-Left');
+      if (LibLeft.value === '') {
+        return null;
+      }
+      normalRefDef.clear();
+      additionalRefDef.clear();
+      notExist_DSP.clear();
+      notExist_DDS.clear();
+      normalRefDef = await refDefCreate('QDDSSRC', FileList.Left.Library[LibLeft.value].handle, normalRefDef, refListFile.dds);
+      normalRefDef = await refDefCreate('QDSPSRC', FileList.Left.Library[LibLeft.value].handle, normalRefDef, refListFile.dsp);
+      if (additionalRefDef.size > 0) {//PFILE
+        normalRefDef = await refDefCreate('QDDSSRC', FileList.Left.Library[LibLeft.value].handle, normalRefDef, [...additionalRefDef]);
+      }
+      if (Setting.getRefMaster) {
+        await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read');
+        let refRootHandle = linkStatus[monaco_handleName_RefMaster].handle;
+        let searchLibName = LibLeft.value.substring(0, 3);
+        let folderHandle = null;
+        for await (const handle of refRootHandle.values()) {
+          if (handle.name.indexOf(searchLibName) !== -1) {
+            folderHandle = handle;
+            break;
+          }
+        }
+        if (folderHandle === null) {
+          return null; //end
+        }
+        additionalRefDef.clear();
+        normalRefDef = await refDefCreate('QDDSSRC', folderHandle, normalRefDef, [...notExist_DDS]);
+        normalRefDef = await refDefCreate('QDSPSRC', folderHandle, normalRefDef, [...notExist_DSP]);
+        if (additionalRefDef.size > 0) {//PFILE
+          normalRefDef = await refDefCreate('QDDSSRC', folderHandle, normalRefDef, [...additionalRefDef]);
+        }
+      }
+    }
+
+    const refDefCreate = async (FileName, handle, refDef, reflist) => {
+      let current_SRC = await createFolderExistList(handle, FileName);
+
+      for (let i = 0; i < reflist.length; i++) {
+        let uri = monaco.Uri.parse(handle.name + '/' + FileName + '/' + reflist[i]);
+        let textData = await getFolderExistList_Text(current_SRC, reflist[i]);
+        if (textData !== null) {
+          let model = await modelChange(textData, 'dds', uri);
+          refDef = await dds_DefinitionList(model, refDef, reflist[i]);
+        } else {
+          if (FileName === "QDDSSRC") {
+            notExist_DDS.add(reflist[i]);
+          } else if (FileName === "QDSPSRC") {
+            notExist_DSP.add(reflist[i]);
+          }
+        }
+      }
+      return refDef;
+    }
     const extraThemeChange = document.getElementById('control-extraTheme');
     extraThemeChange.addEventListener('click', () => themeApply((Setting.getTheme) + 1));
     const themeApply = (themeState) => {
@@ -370,10 +208,6 @@ const monacoStart = async () => {
       Setting.setTheme = themeState;
     }
     themeApply(Setting.getTheme);
-    window.testCreateRefList = async () => {
-      const model = await normalEditor.getModel();
-      await createRefList(model);
-    }
     const createRefList = async (refModel) => {
       var lineCount = await refModel.getLineCount();
       let dds = [];
@@ -389,11 +223,11 @@ const monacoStart = async () => {
           } else if (type === "DISK") {
             dds.push(file);
           }
-
         }
       }
-      console.log(dds, dsp);
+      return { dds: dds, dsp: dsp }
     }
+
     normalEditor.onKeyDown(function (e) {
       if (e.code === 'Insert') {
         isInsert = !isInsert;
@@ -431,6 +265,15 @@ const monacoStart = async () => {
     });
   });
 }
+const modelChange = async (text, lang, uri) => {
+  let model = monaco.editor.getModel(uri);
+  if (model) {
+    model.setValue(text);
+  } else {
+    model = monaco.editor.createModel(text, lang, uri);
+  }
+  return model;
+}
 window.onload = async () => {
   await SettingLoad();
   await monacoStart();
@@ -461,6 +304,7 @@ class localSetting {
   constructor(data) {
     this.handleSeparate = typeof (data.handleSeparate) === 'undefined' ? false : data.handleSeparate;
     this.theme = typeof (data.theme) === 'undefined' ? 0 : data.theme;
+    this.refMaster = typeof (data.refMaster) === 'undefined' ? false : data.refMaster;
   }
   get getAll() {
     return this;
@@ -471,6 +315,9 @@ class localSetting {
   get getTheme() {
     return this.theme;
   }
+  get getRefMaster() {
+    return this.refMaster;
+  }
   set setHandleSeparate(handle_sepa) {
     this.handleSeparate = handle_sepa;
     this.save();
@@ -479,12 +326,18 @@ class localSetting {
     this.theme = theme;
     this.save();
   }
-
+  set setRefMaster(isMaster) {
+    this.refMaster = isMaster;
+    this.save();
+  }
   save() {
     idbKeyval.set('monaco-setting', this);
   }
 }
-
+var normalRefDef = new Map();
+var additionalRefDef = new Set();
+var notExist_DDS = new Set();
+var notExist_DSP = new Set();
 var linkStatus = {};
 class linkStatusClass {
   constructor() {

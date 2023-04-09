@@ -12,10 +12,14 @@ const file_read_json = async (readTarget, handle) => {
   return (JSON.parse(text));
 }
 
-const file_read_text = async (readTarget, handle, isdirectory = true, saveType = 'text',message = false) => {
+const file_read_text = async (readTarget, handle, isdirectory = true, saveType = 'text',message = false,isCreate = true) => {
   let file_obj = handle;
   if (isdirectory) {
-    file_obj = await handle.getFileHandle(readTarget, { create: true });
+    try {
+      file_obj = await handle.getFileHandle(readTarget, { create: isCreate });
+    } catch (error) {
+      return null;
+    }
   }
   let file = await file_obj.getFile();
   let lastModifiedTime = await file.lastModified;

@@ -335,7 +335,7 @@ const rpg_token2 = () => {
                             }, '', 'constant', '']
                     ],
                     [/^(.{1,5})(I)(.{1,37})(.{1,4})(.{1,4})(.)(.{1,6})(.*)$/,
-                        ['', 'tag', '', 'number', 'number', 'keyword', 'identifier', '']
+                        ['', 'tag', '', 'number', 'number', 'constant', 'identifier', '']
                     ],
                     //     |       |       |  |   |            
                     [/^(.{1,2})(.{1,3})(C)(..)(.)(.{1,2})(.)(.{1,2})(.)(.{1,2})(.{1,10})(.{1,18})(.{1,5})(.{1,10})(.{1,6})(.{1,3})(.)(.)(.{1,2})(.{1,2})(.{1,2})(.{1,15})(.*)$/,
@@ -457,15 +457,15 @@ const rpg_token2 = () => {
                             }, {//49-51
                                 cases: {
                                     ' {3}': 'overwhite',
-                                    '[1-2][0-9][0-9]': 'number',
-                                    ' [0-9][0-9]': 'number',
-                                    '  [0-9]': 'number',
+                                    '[1-2][0-9][0-9]': 'constant.numeric',
+                                    ' [0-9][0-9]': 'constant.numeric',
+                                    '  [0-9]': 'constant.numeric',
                                     '@default': 'invalid'
                                 }
                             }, {//52
                                 cases: {
                                     ' ': 'overwhite',
-                                    '[0-9]': 'number',
+                                    '[0-9]': 'constant',
                                     '@default': 'invalid'
                                 }
                             }, {//53
@@ -617,8 +617,20 @@ const getRow_Text = (row, columns) => {
             return { text: row.substring(52, 58), startColumn: 53, endColumn: 59, type: 'fieldName' };
         }
     }
-    console.log("nomatch")
-        return { text: "", startColumn: columns, endColumn: columns };
+
+    if (row.substring(5, 6) === "F") {
+        if (columns <= 5) {
+            return { text: "", startColumn: columns, endColumn: columns, type: 'none' };
+        }
+        else if (columns <= 14) {
+            return { text: row.substring(6, 14), startColumn: 7, endColumn: 15, type: 'memberName' };
+        }
+        else if (columns === 15) {
+            return { text: row.substring(14, 15), startColumn: 44, endColumn: 48, type: 'fileIO' };
+        }
+    }
+    console.log("nomatch");
+    return { text: "", startColumn: columns, endColumn: columns };
 }
 var tip_page = {
     type: 'fixed',
@@ -778,12 +790,12 @@ var tip_flag = {
     }
 }
 var tip_operation1 = {
-    type: 'fixed',
+    type: 'auto-fixed',
     description: "命令コードに対する演算命令1です。",
     detail: {}
 }
 var tip_operation2 = {
-    type: 'fixed',
+    type: 'auto-fixed',
     description: "命令コードに対する演算命令2です。",
     detail: {}
 }
@@ -859,7 +871,7 @@ var tip_operation = {
     }
 }
 var tip_result = {
-    type: 'fixed',
+    type: 'auto-fixed',
     description: "命令コードに対する演算結果です。",
     detail: {}
 }
@@ -886,6 +898,22 @@ var tip_additionaOperation = {
         },
         P: {
             description: "結果フィールドにブランクを埋め込みます。"
+        }
+    }
+}
+var tip_fileIO = {
+    type: 'Detail_2',
+    description: "I/O/U",
+    name: "ファイルの読み込み",
+    detail: {
+        I: {
+            description: "読み取り専用"
+        },
+        O: {
+            description: "書き出し専用"
+        },
+        U: {
+            description: "読み取りと書き出し"
         }
     }
 }
@@ -1081,5 +1109,10 @@ var tip_ds_end = {
 var tip_fieldName = {
     type: 'fixed',
     description: "定義するサブフィールド名",
+    detail: {}
+}
+var tip_memberName = {
+    type: 'fixed',
+    description: "ファイルオブジェクト名",
     detail: {}
 }
