@@ -7,9 +7,15 @@ const dds_token = () => {
             root: [
                 [/^.{6}\*.*/, { token: 'comment' }],
                 //     |       |       |  |   |         
-
-                [/^(.{1,5})(A)(.)(.)(.{1,2})(.)(.{1,2})(.)(.{1,2})(.{1,2})(.{1,6})(.{1,8})(.{1,2})(.)(.)(.)(.)(.{1,3})(.{1,3})/, [
-                    '', 'tag', '', {
+                          //6  7  8    9-10  11 12-13  14 15-16    17-18   19-28   29  30-34
+                [/^(.{1,5})(A)(.)(.)(.{1,2})(.)(.{1,2})(.)(.{1,2})(.{1,2})(.{1,9})(.)(.{1,4})(.{1,2})(.)(.)(.)(.)(.{1,3})(.{1,3})/, [
+                    '', 'tag', {
+                        cases: {
+                            '(A|O)': 'entity',
+                            ' ': 'overwhite',
+                            '@default': 'invalid'
+                        }
+                    }, {
                         cases: {//12
                             ' ': 'overwhite',
                             'N': 'keyword',
@@ -66,7 +72,7 @@ const dds_token = () => {
                             '(O[A-G]|OV)': 'type',
                             '@default': 'invalid'
                         }
-                    }, 'keyword', 'identifier', 'overwhite', 'constant.numeric', 'type', '', 'constant', '', 'number', 'number',
+                    }, 'keyword', 'identifier', 'overwhite','' ,'constant.numeric', 'type', '', 'constant', '', 'number', 'number',
                 ]],
                 [/[A-Z_$][\w$]*/, {
                     cases: {
@@ -130,14 +136,14 @@ const getRow_DDSText = (row, columns) => {
         else if (columns === 18) {
             return { text: row.substring(17, 18), startColumn: 18, endColumn: 19, type: 'other' };
         }
-        else if (columns <= 24) {
-            return { text: row.substring(18, 24), startColumn: 19, endColumn: 25, type: 'dds_val' };
+        else if (columns <= 28) {
+            return { text: row.substring(18, 28), startColumn: 19, endColumn: 28, type: 'dds_val' };
         }
-        else if (columns <= 32) {
-            return { text: row.substring(24, 32), startColumn: 25, endColumn: 33, type: 'other' };
+        else if (columns == 29) {
+            return { text: row.substring(29, 30), startColumn: 28, endColumn: 29, type: 'other' };
         }
         else if (columns <= 34) {
-            return { text: row.substring(32, 34), startColumn: 33, endColumn: 35, type: 'fieldLen' };
+            return { text: row.substring(30, 34), startColumn: 29, endColumn: 35, type: 'fieldLen' };
         }
         else if (columns === 35) {
             return { text: row.substring(34, 35), startColumn: 35, endColumn: 36, type: 'fieldType' };
@@ -226,7 +232,7 @@ var tip_IO_Option = {
     }
 }
 var tip_dds_val = {
-    type: 'fixed',
+    type: 'auto-fixed',
     description: "フィールド名",
     detail: {}
 }

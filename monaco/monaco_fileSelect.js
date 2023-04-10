@@ -311,7 +311,7 @@ const getFolderExistList_Text = async (List, target) => {
     for (let i = 0; i < List.length; i++) {
         if (List[i].name === target) {
             let text = await file_read_text(List[i].fullname, List[i].handle, false, 'text', false, false);
-            return text;
+            return await addSpaces(text);
         }
     }
     return null;

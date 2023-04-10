@@ -132,8 +132,25 @@ const monacoStart = async () => {
 
     window.refDefStart = async () => {
       const model = await normalEditor.getModel();
-      let refListFile = await createRefList(model);
+      let refListFile = null;
+      console.log(model.getLanguageId);
+      if (model.getLanguageId() === 'rpg-indent') {
+        refListFile = await createRefList(model);
+      } else if (model.getLanguageId() === 'dds') {
+        const leftFolder = document.getElementById('control-Folder-Left');
+        const leftFile = document.getElementById('control-File-Left');
+        if (leftFolder.value === 'QDDSSRC') {
+          refListFile = { dds: [FileList.Left.file[leftFile.value]], dsp: [] };
+        } else if (leftFolder.value === 'QDSPSRC') {
+          refListFile = { dds: [], dsp: [FileList.Left.file[leftFile.value]] };
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
       const LibLeft = document.getElementById('control-Library-Left');
+      
       if (LibLeft.value === '') {
         return null;
       }

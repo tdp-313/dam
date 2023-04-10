@@ -281,6 +281,26 @@ const monacoLang = async () => {
             };
         }
     });
+    monaco.languages.registerDefinitionProvider('dds', {
+        provideDefinition: async function (model, position) {
+            let row = model.getLineContent(position.lineNumber);
+            let text = getRow_DDSText(row, position.column);
+            const wordStr = text.text.trim();
+            if (wordStr === "") {
+                return null;
+            }
+            let ranges = [];
+
+            let lineCount = model.getLineCount();
+
+            let refDef = await normalRefDef.get(wordStr);
+            if (typeof (refDef) !== 'undefined') {
+                ranges.push(refDef.location);
+            }
+            
+            return ranges;
+        }
+    });
 }
 const dds_DefinitionList = async (model, map, refName) => {
     const createDescription = async (start_row, i, model, max) => {
