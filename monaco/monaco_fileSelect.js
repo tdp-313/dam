@@ -130,9 +130,9 @@ const readFileButtonCreate = () => {
         let normalEditorModel_Modified = await modelChange(await addSpaces(RightText), lang[2],RightUri);
         await monacoRead2(normalEditorModel, diffEditorModel_Original, normalEditorModel_Modified);
         //
-        if (lang[0] === 'rpg-indent') {
-            await refDefStart();
-        }
+        
+        await refDefStart();
+       
     }
     const fileSelectSync_Process = async (target, fullname, fileType) => {
         let reverse = target === 'Left' ? 'Right' : 'Left';

@@ -140,9 +140,9 @@ const monacoStart = async () => {
         const leftFolder = document.getElementById('control-Folder-Left');
         const leftFile = document.getElementById('control-File-Left');
         if (leftFolder.value === 'QDDSSRC') {
-          refListFile = { dds: [FileList.Left.file[leftFile.value]], dsp: [] };
+          refListFile = { dds: [FileList.Left.File[leftFile.value].name], dsp: [] };
         } else if (leftFolder.value === 'QDSPSRC') {
-          refListFile = { dds: [], dsp: [FileList.Left.file[leftFile.value]] };
+          refListFile = { dds: [], dsp: [FileList.Left.File[leftFile.value].name] };
         } else {
           return null;
         }
