@@ -67,9 +67,8 @@ class setting_value {
                 $('#calendarObject').removeClass('displayhide');
                 window.calendar.changeView('dayGridMonth');
                 break;
-            case 'task':
-                mainArea.html(await kanban_html());
-                await Kanban_Start();
+            case 'monaco':
+                mainArea.html('<iframe id="iframe-monaco" title="Moncaco_from DAM" src="./monaco/"></iframe>');
                 break;
             case 'PiP':
                 mainArea.html("");
