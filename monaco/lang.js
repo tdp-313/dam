@@ -1112,7 +1112,7 @@ var tip_fieldName = {
     detail: {}
 }
 var tip_memberName = {
-    type: 'fixed',
+    type: 'auto-fixed',
     description: "ファイルオブジェクト名",
     detail: {}
 }

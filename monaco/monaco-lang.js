@@ -42,12 +42,29 @@ const monacoLang = async () => {
                     let op_2 = row.substring(50, 60).trim();
                     let fieldLen = row.substring(67, 70).trim();
                     let result = row.substring(60, 66).trim();
-                    if (op_m === 'PARM') {
+                    if (op_m === 'PARM' || op_m === 'DEFN') {
                         if (wordStr === result) {
                             ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
                             break;
                         }
-                    } else if (op_m === 'PLIST' || op_m === 'KLIST' || op_m === 'BEGSR') {
+                    } else if (op_m === 'PLIST' || op_m === 'KLIST') {
+                        if (wordStr === op_1) {
+                            let found = false;
+                            for (let p = i + 1; p <= lineCount; p++) {
+                                let row_extend = model.getLineContent(p);
+                                let op_m_extend = row_extend.substring(45, 50).trim();
+                                if (op_m_extend !== 'PARM' && op_m_extend !== 'KFLD') {
+                                    ranges.push({ range: new monaco.Range(i, 5, p - 1, 77), uri: model.uri });
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
+                            }
+                            break;
+                        }
+                    } else if (op_m === 'BEGSR') {
                         if (wordStr === op_1) {
                             ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
                             break;
@@ -290,20 +307,16 @@ const monacoLang = async () => {
                 return null;
             }
             let ranges = [];
-
-            let lineCount = model.getLineCount();
-
             let refDef = await normalRefDef.get(wordStr);
             if (typeof (refDef) !== 'undefined') {
                 ranges.push(refDef.location);
             }
-            
             return ranges;
         }
     });
 }
 const dds_DefinitionList = async (model, map, refName) => {
-    const createDescription = async (start_row, i, model, max) => {
+    const createDescription = async (start_row, i, model, max, loopCheck = 0) => {
         let sp_op_full = start_row.substring(44, 80).trim();
         let text_p = sp_op_full.indexOf("TEXT('");
         let colhdg_p = sp_op_full.indexOf("COLHDG('");
@@ -326,17 +339,30 @@ const dds_DefinitionList = async (model, map, refName) => {
                     console.log('MAX');
                     return start_row_desc;
                 }
-                let next_row = model.getLineContent(i + 1);
+                let next_row = await model.getLineContent(i + 1);
                 let value = next_row.substring(18, 24).trim();
                 if (next_row.substring(6, 7) === "*") {
                     console.log('COMMENT');
                     return start_row_desc;
                 } else if (value.length === 0) {
                     let sp_op_full_next = next_row.substring(44, 80).trim();
-                    let nextRow_desc = sp_op_full_next.substring(sp_op_full_next.indexOf("'") +1, sp_op_full_next.lastIndexOf("'"));
+                    let nextRow_desc = sp_op_full_next.substring(sp_op_full_next.indexOf("'") + 1, sp_op_full_next.lastIndexOf("'"));
 
                     return start_row_desc + nextRow_desc;
                 }
+            }
+        } else {
+            if (loopCheck >= 3 || max === i) {
+                return 'undefined';
+            } else {
+                for (let p = i + 1; p <= max; p++) {
+                    let nextText = await model.getLineContent(p);
+                    if (nextText.substring(5, 6) === 'A' && nextText.substring(6, 7) !== '*') {
+                        return createDescription(nextText, p, model, max, loopCheck + 1);
+                    }
+                }
+
+
             }
         }
     }
@@ -346,6 +372,7 @@ const dds_DefinitionList = async (model, map, refName) => {
     let rangeContinue_value = '';
     let description = "";
     let R_file = [];
+    let R_name = [];
     for (let i = 1; i <= lineCount; i++) {
         let row = model.getLineContent(i);
         let value = row.substring(18, 24).trim();
@@ -354,6 +381,7 @@ const dds_DefinitionList = async (model, map, refName) => {
 
         if (valType === 'R') {
             readStart = true;
+            R_name.push(value);
         }
         if (sp_op === 'PFILE') {
             readStart = false;
@@ -380,7 +408,7 @@ const dds_DefinitionList = async (model, map, refName) => {
                             break;
                         }
                     }
-                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 0, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : '+ description });
+                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 5, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description });
                     rangeContinue = i;
                     rangeContinue_value = value;
                     description = await createDescription(row, i, model, lineCount);
@@ -403,7 +431,7 @@ const dds_DefinitionList = async (model, map, refName) => {
                             break;
                         }
                     }
-                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 0, end, Number.MAX_VALUE), uri: model.uri }, description:refName + ' : '+  description });
+                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 5, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description });
                     rangeContinue = -1;
                 }
             } else {
@@ -417,12 +445,22 @@ const dds_DefinitionList = async (model, map, refName) => {
         }
         if (rangeContinue > 0 && lineCount === i) {
             console.log('Last');
-            map.set(rangeContinue_value, { location: { range: new monaco.Range(rangeContinue, Number.MIN_VALUE, i, Number.MAX_VALUE), uri: model.uri }, description:refName + ' : '+  description });
+            map.set(rangeContinue_value, { location: { range: new monaco.Range(rangeContinue, 5, i, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description });
         }
-
     }
+    let fileDescription = "FIleObject";
+    if (R_name.length > 0) {
+        for (let i = 1; i <= lineCount; i++) {
+            let row = model.getLineContent(i);
+            let value = row.substring(18, 24).trim();
 
-    map.set(refName, { location: { range: new monaco.Range(1, Number.MIN_VALUE, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : '+ 'FileObject' });
+            if (row.substring(5, 6) === 'A' && row.substring(6, 7) !== '*' && value === R_name[0]) {
+                fileDescription = await createDescription(row, i, model, lineCount)
+            }
+        }
+    }
+    console.log(refName, fileDescription);
+    map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription });
     if (R_file.length > 0) {
         for (let i = 0; i < R_file.length; i++) {
             additionalRefDef.add(R_file[i]);

@@ -133,7 +133,6 @@ const monacoStart = async () => {
     window.refDefStart = async () => {
       const model = await normalEditor.getModel();
       let refListFile = null;
-      console.log(model.getLanguageId);
       if (model.getLanguageId() === 'rpg-indent') {
         refListFile = await createRefList(model);
       } else if (model.getLanguageId() === 'dds') {
