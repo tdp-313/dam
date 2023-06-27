@@ -23,6 +23,7 @@ const monacoStart = async () => {
       stickyScroll: {
         enabled: true,
       },
+      readOnly: true,
     };
 
     var normalEditor = monaco.editor.create(document.getElementById('monaco-code'), {
@@ -86,6 +87,19 @@ const monacoStart = async () => {
       extraRulerChange.checked = isDisp;
     }
 
+    const readOnlyChange = (isWrite) => {
+      if (isWrite) {
+        normalEditor.updateOptions({ readOnly: false });
+        diffEditor.updateOptions({ readOnly: false });
+
+      } else {
+        normalEditor.updateOptions({ readOnly: true });
+        diffEditor.updateOptions({ readOnly: true });
+      }
+      const extraRulerChange = document.getElementById('control-extraReadOnly');
+      extraRulerChange.checked = isWrite;
+    }
+
     window.monacoRead2 = async (editModel, diffModel_original, diffModel_modified) => {
       const rpgEditorOption = () => {
         return ({
@@ -100,7 +114,7 @@ const monacoStart = async () => {
       //let editLang = editModel.getLanguageId();
       //let diff_originalLang = diffModel_original.getLanguageId();
       //let diff_modifiedLang = diffModel_modified.getLanguageId();
-      
+
       //Title
       document.title = editModel.uri.path;
       //normalEditor 
@@ -116,6 +130,11 @@ const monacoStart = async () => {
       normalEditor.updateOptions(rpgEditorOption());
       diffEditor.updateOptions(rpgEditorOption());
     }
+    const extraReadOnlyChange = document.getElementById('control-extraReadOnly');
+    extraReadOnlyChange.addEventListener('click', (e) => {
+      readOnlyChange(e.target.checked);
+      console.log(e.target.checked);
+    });
 
     const extraRulerChange = document.getElementById('control-extraRuler');
     extraRulerChange.addEventListener('click', (e) => {
@@ -149,7 +168,7 @@ const monacoStart = async () => {
         return null;
       }
       const LibLeft = document.getElementById('control-Library-Left');
-      
+
       if (LibLeft.value === '') {
         return null;
       }
@@ -244,10 +263,47 @@ const monacoStart = async () => {
       return { dds: dds, dsp: dsp }
     }
 
+    const reIndentProcess = () =>{
+      const model = normalEditor.getModel();
+      const fullRange = model.getFullModelRange();
+      const text = model.getValue();
+      const lines = text.split("\n");
+      const changeOperation = {
+        range: fullRange,
+        text: addIndent(revIndent(lines))
+      };
+      model.pushEditOperations([], [changeOperation], null);
+    }
+    
+    const spaceInputEnter = async () => {
+      var model = await normalEditor.getModel();
+
+      var position = normalEditor.getPosition();
+
+      // テキストを更新する
+      var editOperation = {
+        range: new monaco.Range(position.lineNumber + 1, 1, position.lineNumber + 1, 1),
+        text: " ".repeat(128) + "\n",
+      };
+      model.pushEditOperations([], [editOperation], null);
+      normalEditor.setPosition({
+        lineNumber: position.lineNumber + 1,
+        column: 6
+      });
+    }
+
     normalEditor.onKeyDown(function (e) {
       if (e.code === 'Insert') {
         isInsert = !isInsert;
         insertIconUpdate();
+      } else if (e.code === 'Enter') {
+        if (extraReadOnlyChange.checked) {
+          spaceInputEnter();
+          e.stopPropagation();
+          e.preventDefault();
+          reIndentProcess();
+        }
+        return null;
       }
       if (isInsert === true) {
         return null;
@@ -258,7 +314,6 @@ const monacoStart = async () => {
         return;
       }
       let overwriteText = e.browserEvent.key;
-      console.log(overwriteText);
       // カーソル位置を取得する
       var position = normalEditor.getPosition();
       var model = normalEditor.getModel();
@@ -278,6 +333,12 @@ const monacoStart = async () => {
 
       // デフォルトの動作をキャンセルする
       e.preventDefault();
+    });
+
+    normalEditor.addAction({
+      id: "rpg_reIndent",
+      label: "再インデント処理",
+      run: () => { reIndentProcess() }
     });
   });
 }

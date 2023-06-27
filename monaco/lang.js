@@ -4,6 +4,9 @@ const Operetor_OpenArray = [
     'DOWEQ', 'DOWNE', 'DOWLT', 'DOWGT', 'DOWLE', 'DOWGE',
     'SELEC',
 ];
+const Operetor_ElseArray = [
+    'ELSE ', 'WHEQ ', 'WHNE ', 'WHLT ', 'WHGT ', 'WHLE ', 'WHGE ', 'OTHER'
+];
 const Operetor_CloseArray = [
     'END  ', 'ENDDO', 'ENDIF', 'ENDSL'
 ];
@@ -22,8 +25,7 @@ const rpg_token = () => {
                 'CABEQ', 'CABNE', 'CABLT', 'CABGT', 'CABLE', 'CABGE', 'CAB  ', 'ITER ', 'LEAVE',
                 'ANDEQ', 'ANDNE', 'ANDLT', 'ANDGT', 'ANDLE', 'ANDGE', 'ELSE ',
                 'OREQ ', 'ORNE ', 'ORLT ', 'ORGT ', 'ORLE ', 'ORGE ', 'GOTO ',
-                'WHEQ ', 'WHNE ', 'WHLT ', 'WHGT ', 'WHLE ', 'WHGE ', 'OTHER'
-            ],
+            ].concat(Operetor_ElseArray),
             SubroutineOpen: Subroutine_OpenArray,
             SubroutineClose: Subroutine_CloseArray,
             SubroutineOther: [

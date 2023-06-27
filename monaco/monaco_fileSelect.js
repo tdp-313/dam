@@ -20,6 +20,7 @@ const monaco_handleName = "monaco";
 const monaco_handleName_Sub = "monaco-sub";
 const monaco_handleName_RefMaster = "monaco-ref";
 const fileNameExt = 'txt';
+
 let isFileSelectSync = true;
 const readFileButtonCreate = () => {
     const otherTabOpen = document.getElementById('control-otherTab');
@@ -339,11 +340,25 @@ function addSpaces(text) {
     return lines.join("\n");
 }
 
+function revIndent(textArray){
+    let rtn = "";
+    for (let i = 0; i < textArray.length; i++) {
+        if (textArray[i].substring(6, 7) !== "*" && textArray[i].substring(5, 6) === "C") {
+            rtn = rtn + textArray[i].substring(0,27) + textArray[i].substring(45,textArray[i].length) + "\n";
+        } else {
+            rtn = rtn + textArray[i] + "\n";
+        }
+    }
+    return (rtn);
+}
+        
+
 function addIndent(text) {
     const lines = text.split("\n");
     const maxLength = 80;
     const regPattern_Open = new RegExp(`(${Operetor_OpenArray.concat(Subroutine_OpenArray).join("|")})`);
     const regPattern_Close = new RegExp(`(${Operetor_CloseArray.concat(Subroutine_CloseArray).join("|")})`);
+    const regPattern_Else = new RegExp(`(${Operetor_ElseArray.join("|")})`);
     let counter_open = 0;
     let lastFormatType = "";
     let maxIndent = 0;
@@ -382,7 +397,7 @@ function addIndent(text) {
                     counter_open = 0;
                 }
             }
-            else if (lines[i].substring(27, 32) === "ELSE ") {
+            else if (regPattern_Else.test(lines[i].substring(27, 32))) {
                 insertText += 'L' + counter_open;
             }
             else {
