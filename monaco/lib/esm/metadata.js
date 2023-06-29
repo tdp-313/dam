@@ -37,7 +37,10 @@ exports.features = [
   },
   {
     "label": "colorPicker",
-    "entry": "vs/editor/contrib/colorPicker/browser/colorContributions"
+    "entry": [
+      "vs/editor/contrib/colorPicker/browser/colorContributions",
+      "vs/editor/contrib/colorPicker/browser/standaloneColorPickerActions"
+    ]
   },
   {
     "label": "comment",
@@ -46,10 +49,6 @@ exports.features = [
   {
     "label": "contextmenu",
     "entry": "vs/editor/contrib/contextmenu/browser/contextmenu"
-  },
-  {
-    "label": "copyPaste",
-    "entry": "vs/editor/contrib/copyPaste/browser/copyPasteContribution"
   },
   {
     "label": "cursorUndo",
@@ -64,8 +63,11 @@ exports.features = [
     "entry": "vs/editor/contrib/documentSymbols/browser/documentSymbols"
   },
   {
-    "label": "dropIntoEditor",
-    "entry": "vs/editor/contrib/dropIntoEditor/browser/dropIntoEditorContribution"
+    "label": "dropOrPasteInto",
+    "entry": [
+      "vs/editor/contrib/dropOrPasteInto/browser/copyPasteContribution",
+      "vs/editor/contrib/dropOrPasteInto/browser/dropIntoEditorContribution"
+    ]
   },
   {
     "label": "find",
@@ -120,7 +122,11 @@ exports.features = [
   },
   {
     "label": "inlineCompletions",
-    "entry": "vs/editor/contrib/inlineCompletions/browser/ghostText.contribution"
+    "entry": "vs/editor/contrib/inlineCompletions/browser/inlineCompletions.contribution"
+  },
+  {
+    "label": "inlineProgress",
+    "entry": "vs/editor/contrib/inlineProgress/browser/inlineProgress"
   },
   {
     "label": "inspectTokens",
@@ -570,6 +576,10 @@ exports.languages = [
   {
     "label": "vb",
     "entry": "vs/basic-languages/vb/vb.contribution"
+  },
+  {
+    "label": "wgsl",
+    "entry": "vs/basic-languages/wgsl/wgsl.contribution"
   },
   {
     "label": "xml",

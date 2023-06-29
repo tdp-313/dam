@@ -18,6 +18,7 @@ import { Disposable } from '../../../base/common/lifecycle.js';
 import { Range } from '../../common/core/range.js';
 import { Codicon } from '../../../base/common/codicons.js';
 import { ThemeIcon } from '../../../base/common/themables.js';
+import { isIOS } from '../../../base/common/platform.js';
 export class InlineDiffMargin extends Disposable {
     get visibility() {
         return this._visibility;
@@ -47,7 +48,7 @@ export class InlineDiffMargin extends Disposable {
         this._diffActions = document.createElement('div');
         this._diffActions.className = ThemeIcon.asClassName(Codicon.lightBulb) + ' lightbulb-glyph';
         this._diffActions.style.position = 'absolute';
-        const lineHeight = editor.getOption(63 /* EditorOption.lineHeight */);
+        const lineHeight = editor.getOption(64 /* EditorOption.lineHeight */);
         const lineFeed = editor.getModel().getEOL();
         this._diffActions.style.right = '0px';
         this._diffActions.style.visibility = 'hidden';
@@ -86,7 +87,7 @@ export class InlineDiffMargin extends Disposable {
             }));
             actions.push(copyLineAction);
         }
-        const readOnly = editor.getOption(86 /* EditorOption.readOnly */);
+        const readOnly = editor.getOption(88 /* EditorOption.readOnly */);
         if (!readOnly) {
             actions.push(new Action('diff.inline.revertChange', nls.localize('diff.inline.revertChange.label', "Revert this change"), undefined, true, () => __awaiter(this, void 0, void 0, function* () {
                 const range = new Range(diff.originalStartLineNumber, 1, diff.originalEndLineNumber, diff.originalModel.getLineMaxColumn(diff.originalEndLineNumber));
@@ -112,8 +113,11 @@ export class InlineDiffMargin extends Disposable {
                 }
             })));
         }
+        const useShadowDOM = editor.getOption(123 /* EditorOption.useShadowDOM */) && !isIOS; // Do not use shadow dom on IOS #122035
         const showContextMenu = (x, y) => {
+            var _a;
             this._contextMenuService.showContextMenu({
+                domForShadowRoot: useShadowDOM ? (_a = editor.getDomNode()) !== null && _a !== void 0 ? _a : undefined : undefined,
                 getAnchor: () => {
                     return {
                         x,

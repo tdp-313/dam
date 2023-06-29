@@ -26,6 +26,7 @@ import { range } from '../../../base/common/arrays.js';
 import { ThrottledDelayer } from '../../../base/common/async.js';
 import { compareAnything } from '../../../base/common/comparers.js';
 import { memoize } from '../../../base/common/decorators.js';
+import { isCancellationError } from '../../../base/common/errors.js';
 import { Emitter, Event } from '../../../base/common/event.js';
 import { getCodiconAriaLabel, matchesFuzzyIconAware, parseLabelWithIcons } from '../../../base/common/iconLabels.js';
 import { DisposableStore, dispose } from '../../../base/common/lifecycle.js';
@@ -123,14 +124,15 @@ class ListElementRenderer {
         data.keybinding.set(mainItem.type === 'separator' ? undefined : mainItem.keybinding);
         // Meta
         if (element.saneDetail) {
+            data.detail.element.style.display = '';
             data.detail.setLabel(element.saneDetail, undefined, {
                 matches: detailHighlights,
                 title: element.saneDetail
             });
-        } /* else {
-            // TODO investigate potential detail bleeding into next quickpicks
-            data.detail.setLabel('');
-        } */
+        }
+        else {
+            data.detail.element.style.display = 'none';
+        }
         // Separator
         if (element.item && element.separator && element.separator.label) {
             data.separator.textContent = element.separator.label;
@@ -321,11 +323,19 @@ export class QuickInputList {
                 dom.isAncestor(e.browserEvent.relatedTarget, (_a = e.element) === null || _a === void 0 ? void 0 : _a.element)) {
                 return;
             }
-            yield delayer.trigger(() => __awaiter(this, void 0, void 0, function* () {
-                if (e.element) {
-                    this.showHover(e.element);
+            try {
+                yield delayer.trigger(() => __awaiter(this, void 0, void 0, function* () {
+                    if (e.element) {
+                        this.showHover(e.element);
+                    }
+                }));
+            }
+            catch (e) {
+                // Ignore cancellation errors due to mouse out
+                if (!isCancellationError(e)) {
+                    throw e;
                 }
-            }));
+            }
         })));
         this.disposables.push(this.list.onMouseOut(e => {
             var _a;
@@ -350,6 +360,12 @@ export class QuickInputList {
     }
     set scrollTop(scrollTop) {
         this.list.scrollTop = scrollTop;
+    }
+    get ariaLabel() {
+        return this.list.getHTMLElement().ariaLabel;
+    }
+    set ariaLabel(label) {
+        this.list.getHTMLElement().ariaLabel = label;
     }
     getAllVisibleChecked() {
         return this.allVisibleChecked(this.elements, false);
@@ -597,7 +613,11 @@ export class QuickInputList {
         }, false);
     }
     layout(maxHeight) {
-        this.list.getHTMLElement().style.maxHeight = maxHeight ? `calc(${Math.floor(maxHeight / 44) * 44}px)` : '';
+        this.list.getHTMLElement().style.maxHeight = maxHeight ? `${
+        // Make sure height aligns with list item heights
+        Math.floor(maxHeight / 44) * 44
+            // Add some extra height so that it's clear there's more to scroll
+            + 6}px` : '';
         this.list.layout();
     }
     filter(query) {
@@ -645,6 +665,13 @@ export class QuickInputList {
                     element.descriptionHighlights = undefined;
                     element.detailHighlights = undefined;
                     element.hidden = element.item ? !element.item.alwaysShow : true;
+                }
+                // Ensure separators are filtered out first before deciding if we need to bring them back
+                if (element.item) {
+                    element.separator = undefined;
+                }
+                else if (element.separator) {
+                    element.hidden = true;
                 }
                 // we can show the separator unless the list gets sorted by match
                 if (!this.sortByLabel) {

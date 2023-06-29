@@ -62,7 +62,7 @@ export class HoverOperation extends Disposable {
         super.dispose();
     }
     get _hoverTime() {
-        return this._editor.getOption(57 /* EditorOption.hover */).delay;
+        return this._editor.getOption(58 /* EditorOption.hover */).delay;
     }
     get _firstWaitTime() {
         return this._hoverTime / 2;
@@ -89,18 +89,13 @@ export class HoverOperation extends Disposable {
                 var _a, e_1, _b, _c;
                 try {
                     try {
-                        for (var _d = true, _e = __asyncValues(this._asyncIterable), _f; _f = yield _e.next(), _a = _f.done, !_a;) {
+                        for (var _d = true, _e = __asyncValues(this._asyncIterable), _f; _f = yield _e.next(), _a = _f.done, !_a; _d = true) {
                             _c = _f.value;
                             _d = false;
-                            try {
-                                const item = _c;
-                                if (item) {
-                                    this._result.push(item);
-                                    this._fireResult();
-                                }
-                            }
-                            finally {
-                                _d = true;
+                            const item = _c;
+                            if (item) {
+                                this._result.push(item);
+                                this._fireResult();
                             }
                         }
                     }

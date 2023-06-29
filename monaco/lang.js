@@ -23,7 +23,7 @@ const rpg_token = () => {
             OperatorClose: Operetor_CloseArray,
             OperatorOther: [
                 'CABEQ', 'CABNE', 'CABLT', 'CABGT', 'CABLE', 'CABGE', 'CAB  ', 'ITER ', 'LEAVE',
-                'ANDEQ', 'ANDNE', 'ANDLT', 'ANDGT', 'ANDLE', 'ANDGE', 'ELSE ',
+                'ANDEQ', 'ANDNE', 'ANDLT', 'ANDGT', 'ANDLE', 'ANDGE', 
                 'OREQ ', 'ORNE ', 'ORLT ', 'ORGT ', 'ORLE ', 'ORGE ', 'GOTO ',
             ].concat(Operetor_ElseArray),
             SubroutineOpen: Subroutine_OpenArray,
@@ -150,6 +150,7 @@ const rpg_token = () => {
                                     '[\*]IN[0-9][0-9].*': 'type',
                                     '[\*].*': 'predefined',
                                     "'.*'.*": 'string',
+                                    '.*[,].*':'variable',
                                     '@default': 'identifier'
                                 }
                             }, {//28-32
@@ -184,11 +185,13 @@ const rpg_token = () => {
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*].*': 'string',
                                     "'.*'.*": 'string',
+                                    '.*[,].*':'variable',
                                     '@default': 'identifier'
                                 }
                             }, {//43-48
                                 cases: {
                                     '[\*].*': 'string',
+                                    '.*[,].*':'variable',
                                     '@default': 'identifier'
                                 }
                             }, {//49-51
@@ -266,10 +269,9 @@ const rpg_token2 = () => {
             OperatorClose: Operetor_CloseArray,
             OperatorOther: [
                 'CABEQ', 'CABNE', 'CABLT', 'CABGT', 'CABLE', 'CABGE', 'CAB  ', 'ITER ', 'LEAVE',
-                'ANDEQ', 'ANDNE', 'ANDLT', 'ANDGT', 'ANDLE', 'ANDGE', 'ELSE ',
+                'ANDEQ', 'ANDNE', 'ANDLT', 'ANDGT', 'ANDLE', 'ANDGE',
                 'OREQ ', 'ORNE ', 'ORLT ', 'ORGT ', 'ORLE ', 'ORGE ', 'GOTO ',
-                'WHEQ ', 'WHNE ', 'WHLT ', 'WHGT ', 'WHLE ', 'WHGE ', 'OTHER'
-            ],
+            ].concat(Operetor_ElseArray),
             SubroutineOpen: Subroutine_OpenArray,
             SubroutineClose: Subroutine_CloseArray,
             SubroutineOther: [
@@ -415,6 +417,7 @@ const rpg_token2 = () => {
                                     '[\*]IN[0-9][0-9].*': 'type',
                                     '[\*].*': 'predefined',
                                     "'.*'.*": 'string',
+                                    '.*[,].*':'variable',
                                     '@default': 'identifier'
                                 }
                             }, 'support', {//28-32
@@ -449,11 +452,13 @@ const rpg_token2 = () => {
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*].*': 'string',
                                     "'.*'.*": 'string',
+                                    '.*[,].*':'variable',
                                     '@default': 'identifier'
                                 }
                             }, {//43-48
                                 cases: {
                                     '[\*].*': 'string',
+                                    '.*[,].*':'variable',
                                     '@default': 'identifier'
                                 }
                             }, {//49-51
@@ -518,7 +523,7 @@ const rpg_token2 = () => {
                             }, 'comment', ''
                         ]
                     ],
-                ],
+                ],                
             },
 
         }
