@@ -9,7 +9,6 @@ require.config({
 });
 
 const monacoStart = async () => {
-
   require(["vs/editor/editor.main"], async function () {
     monacoLang();
 
@@ -29,6 +28,7 @@ const monacoStart = async () => {
     var normalEditor = monaco.editor.create(document.getElementById('monaco-code'), {
       automaticLayout: true,
     });
+
     normalEditor.updateOptions(editorOptionGeneral);
     var diffEditor = monaco.editor.createDiffEditor(document.getElementById('monaco-diff'), {
       renderSideBySide: true,
@@ -53,7 +53,7 @@ const monacoStart = async () => {
     modeChangeCode.addEventListener('click', (e) => {
       setModeChange('code');
       normalEditor.layout();
-      extraControlClick(false);
+      extraControlClick(false, "init");
     });
     const modeChangeDiff = document.getElementById('control-EditorModeChange-diff');
     modeChangeDiff.addEventListener('click', (e) => {
@@ -61,6 +61,8 @@ const monacoStart = async () => {
       diffEditor.layout();
       extraControlClick(true);
     });
+
+    extraControlClick(false, "init");
     let isInsert = true;
     const insertChange = document.getElementById('control-extraInsertText');
     insertChange.addEventListener('click', (e) => {
@@ -99,7 +101,17 @@ const monacoStart = async () => {
       const extraRulerChange = document.getElementById('control-extraReadOnly');
       extraRulerChange.checked = isWrite;
     }
+    window.getNormalEditor_Model = async () => {
+      return normalEditor.getModel();
+    }
 
+    window.getNormalEditor_Model_URI = async (uri_parm) => {
+      return monaco.editor.getModel(uri_parm);
+    }
+
+    window.setNormalEditor_Model = (model) => {
+      normalEditor.setModel(model);
+    }
     window.monacoRead2 = async (editModel, diffModel_original, diffModel_modified) => {
       const rpgEditorOption = () => {
         return ({
@@ -111,9 +123,6 @@ const monacoStart = async () => {
           folding: true,
         });
       }
-      //let editLang = editModel.getLanguageId();
-      //let diff_originalLang = diffModel_original.getLanguageId();
-      //let diff_modifiedLang = diffModel_modified.getLanguageId();
 
       //Title
       document.title = editModel.uri.path;
@@ -201,18 +210,47 @@ const monacoStart = async () => {
         if (additionalRefDef.size > 0) {//PFILE
           normalRefDef = await refDefCreate('QDDSSRC', folderHandle, normalRefDef, [...additionalRefDef]);
         }
+        createUseFileList(normalRefDef);
       }
     }
+    window.sourceRefDefStart = async (refModel, refDef) => {
+      refDef.clear();
+      var lineCount = await refModel.getLineCount();
+      let mode = "";
+      for (let i = 1; i <= lineCount; i++) {
+        // 行のテキストを取得
+        let row = refModel.getLineContent(i);
+        if (row.substring(5, 6) === "C" && row.substring(6, 7) !== "*") {
+          let op_1 = row.substring(17, 27).trim();
+          let op_m = row.substring(45, 50).trim();
+          let op_2 = row.substring(50, 60).trim();
+          let fieldLen = row.substring(67, 70).trim();
+          let result = row.substring(60, 66).trim();
 
+          if (op_1 === "*ENTRY" && op_m === "PLIST") {
+            mode = "ENTRY";
+          } else if (op_m === "PARM") {
+            if (result !== "") {
+              refDef.set(result, { location: { range: new monaco.Range(i, 5, i, 77), uri: refModel.uri }, s_description: mode + " PARAMETER", sourceType: "definition", description: result + " : " + mode + " PARAMETER" })
+            }
+          } else {
+            mode = ""
+          }
+          if (op_m === 'BEGSR') {
+            refDef.set(op_2, { location: { range: new monaco.Range(i, 5, i, 77), uri: refModel.uri }, s_description: "SUB ROUTINE", sourceType: "definition", description: op_2 + " : " + "SUB ROUTINE" })
+          }
+        }
+      }
+      return refDef;
+    }
     const refDefCreate = async (FileName, handle, refDef, reflist) => {
       let current_SRC = await createFolderExistList(handle, FileName);
-
       for (let i = 0; i < reflist.length; i++) {
-        let uri = monaco.Uri.parse(handle.name + '/' + FileName + '/' + reflist[i]);
+        let uri = monaco.Uri.parse(handle.name + '/' + FileName + '/' + reflist[i] + '.txt');
         let textData = await getFolderExistList_Text(current_SRC, reflist[i]);
         if (textData !== null) {
-          let model = await modelChange(textData, 'dds', uri);
-          refDef = await dds_DefinitionList(model, refDef, reflist[i]);
+          let model = await modelChange(textData.text, 'dds', uri);
+          refDef = await dds_DefinitionList(model, refDef, reflist[i], textData.handle);
         } else {
           if (FileName === "QDDSSRC") {
             notExist_DDS.add(reflist[i]);
@@ -263,7 +301,7 @@ const monacoStart = async () => {
       return { dds: dds, dsp: dsp }
     }
 
-    const reIndentProcess = () =>{
+    const reIndentProcess = () => {
       const model = normalEditor.getModel();
       const fullRange = model.getFullModelRange();
       const text = model.getValue();
@@ -274,7 +312,7 @@ const monacoStart = async () => {
       };
       model.pushEditOperations([], [changeOperation], null);
     }
-    
+
     const spaceInputEnter = async () => {
       var model = await normalEditor.getModel();
 
@@ -354,9 +392,26 @@ const modelChange = async (text, lang, uri) => {
 window.onload = async () => {
   await SettingLoad();
   await monacoStart();
-  await readFileButtonCreate();
+  await rightSidebarRead();
+  readFileButtonCreate();
+  tabs_eventStart();
   //setting Load
 }
+
+const rightSidebarRead = async () => {
+  const r_sidebar_contents = document.getElementById('right-sideBar-contents');
+  r_sidebar_contents.addEventListener('click', async (e) => {
+    let click_node = e.target.parentNode;
+    let filename = click_node.getElementsByClassName('sidebar-filename')[0].innerText;
+    let selectMap = await normalRefDef.get(filename);
+    if (typeof (selectMap) !== 'undefined') {
+      let model = await getNormalEditor_Model_URI(selectMap.location.uri);
+      tabs_add(model);
+    }
+  });
+
+}
+
 
 const SettingLoad = async () => {
   let loadData = await idbKeyval.get('monaco-setting');
@@ -412,6 +467,7 @@ class localSetting {
   }
 }
 var normalRefDef = new Map();
+var sourceRefDef = new Map();
 var additionalRefDef = new Set();
 var notExist_DDS = new Set();
 var notExist_DSP = new Set();

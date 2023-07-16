@@ -42,12 +42,14 @@ const monacoLang = async () => {
                     let op_2 = row.substring(50, 60).trim();
                     let fieldLen = row.substring(67, 70).trim();
                     let result = row.substring(60, 66).trim();
-                    if (op_m === 'PARM' || op_m === 'DEFN') {
+                    if (op_m === 'DEFN') {
                         if (wordStr === result) {
                             ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
                             break;
                         }
-                    } else if (op_m === 'PLIST' || op_m === 'KLIST') {
+                    } else if (op_m === 'PARM') {
+                    }
+                    else if (op_m === 'PLIST' || op_m === 'KLIST') {
                         if (wordStr === op_1) {
                             let found = false;
                             for (let p = i + 1; p <= lineCount; p++) {
@@ -62,11 +64,6 @@ const monacoLang = async () => {
                             if (!found) {
                                 ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
                             }
-                            break;
-                        }
-                    } else if (op_m === 'BEGSR') {
-                        if (wordStr === op_1) {
-                            ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
                             break;
                         }
                     } else {
@@ -101,6 +98,12 @@ const monacoLang = async () => {
             let refDef = await normalRefDef.get(wordStr);
             if (typeof (refDef) !== 'undefined') {
                 ranges.push(refDef.location);
+            } else {
+                sourceRefDef = await sourceRefDefStart(model, sourceRefDef);
+                let sourceDef = await sourceRefDef.get(wordStr);
+                if (typeof (sourceDef) !== 'undefined') {
+                    ranges.push(sourceDef.location);
+                }
             }
             return ranges;
         }
@@ -180,6 +183,9 @@ const monacoLang = async () => {
             if (wordStr.length === 0) {
                 return null;
             }
+            //rpg-source create
+            sourceRefDef = await sourceRefDefStart(model, sourceRefDef);
+
             let tooltip_text = await hoverTextCreate(text, wordStr);
             // ホバー情報の作成
             return {
@@ -267,7 +273,12 @@ const monacoLang = async () => {
             if (typeof (refDef) !== 'undefined') {
                 tooltip_text[1] = refDef.description;
             } else {
-                tooltip_text[1] = window[target].description;
+                let sourceDef = await sourceRefDef.get(wordStr);
+                if (typeof (sourceDef) !== 'undefined') {
+                    tooltip_text[1] = sourceDef.description;
+                } else {
+                    tooltip_text[1] = window[target].description;
+                }
             }
         }
         return tooltip_text;
@@ -315,7 +326,7 @@ const monacoLang = async () => {
         }
     });
 }
-const dds_DefinitionList = async (model, map, refName) => {
+const dds_DefinitionList = async (model, map, refName, handle) => {
     const createDescription = async (start_row, i, model, max, loopCheck = 0) => {
         let sp_op_full = start_row.substring(44, 80).trim();
         let text_p = sp_op_full.indexOf("TEXT('");
@@ -408,7 +419,7 @@ const dds_DefinitionList = async (model, map, refName) => {
                             break;
                         }
                     }
-                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 5, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description });
+                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 5, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description, s_description: description, sourceType: "definition",handle:handle });
                     rangeContinue = i;
                     rangeContinue_value = value;
                     description = await createDescription(row, i, model, lineCount);
@@ -431,7 +442,7 @@ const dds_DefinitionList = async (model, map, refName) => {
                             break;
                         }
                     }
-                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 5, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description });
+                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 5, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description, s_description: description, sourceType: "definition" ,handle:handle});
                     rangeContinue = -1;
                 }
             } else {
@@ -444,8 +455,7 @@ const dds_DefinitionList = async (model, map, refName) => {
             }
         }
         if (rangeContinue > 0 && lineCount === i) {
-            console.log('Last');
-            map.set(rangeContinue_value, { location: { range: new monaco.Range(rangeContinue, 5, i, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description });
+            map.set(rangeContinue_value, { location: { range: new monaco.Range(rangeContinue, 5, i, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description, s_description: description, sourceType: "definition" ,handle:handle});
         }
     }
     let fileDescription = "FIleObject";
@@ -459,14 +469,50 @@ const dds_DefinitionList = async (model, map, refName) => {
             }
         }
     }
-    console.log(refName, fileDescription);
-    map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription });
+    //console.log(refName, fileDescription);
+    map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file",handle:handle });
     if (R_file.length > 0) {
         for (let i = 0; i < R_file.length; i++) {
             additionalRefDef.add(R_file[i]);
         }
     }
-    //
-    console.log(map);
+    //console.log(map);
     return map;
+}
+
+const createUseFileList = async (refDef) => {
+    let html = "";
+    const sidebar_contents = document.getElementById('right-sideBar-contents');
+    const selectedRadio = document.querySelector('input[name="rs-mode"]:checked');
+    mode = selectedRadio.value;
+    sidebar_contents.innerHTML = "";
+    const get_template = (fileName, desc, library,langIcon) => {
+        let temp = "";
+        temp += '<div id="sidebar-contents-' + fileName + ' " class="sidebar-contents hoverButton">';
+        temp += '<img  class="refSize control-iconButton" src="./icon/' + langIcon +'.svg">';
+        temp += '<span class="sidebar-filename">' + fileName + '</span>';
+        temp += '<span style="overflow: overlay; text-wrap: nowrap;">' + desc + '</span>';
+        temp += '<span style="font-size: 0.8rem; padding-left: 2rem;">' + library + '</span>';
+        temp += '</div>';
+        return (temp);
+    }
+    if (mode === 'file') {
+        refDef.forEach((value, key) => {
+            // 第一引数にキーが、第二引数に値が渡される
+            if (value.sourceType === 'file') {
+                html += get_template(key, value.s_description, value.location.uri.path,get_langIcon(value.location.uri.path));
+            }
+        });
+    }
+    if (mode === 'def') {
+        refDef.forEach((value, key) => {
+            // 第一引数にキーが、第二引数に値が渡される
+            if (value.sourceType === 'definition') {
+                html += get_template(key, value.s_description, value.location.uri.path,get_langIcon(value.location.uri.path));
+            }
+        });
+    }
+
+    sidebar_contents.innerHTML = html;
+
 }

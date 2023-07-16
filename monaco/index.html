@@ -13,6 +13,7 @@
     <script src="./monaco_fileSelect.js"></script>
     <script src="../src/fileSystem2.js"></script>
     <script src="./uml.js"></script>
+    <script src="./tabs.js"></script>
     <link rel="stylesheet" href="./monaco.css" />
 </head>
 
@@ -102,8 +103,35 @@
                     src="./icon/caret-down.svg"></span>
         </div>
     </header>
-    <div id="monaco-code" style="border: 1px solid grey;"></div>
-    <div id="monaco-diff" style="border: 1px solid grey;"></div>
+    <div id="main">
+        <div id="monaco-area">
+            <ul id="monaco-tab">
+            </ul>
+            <div id="monaco-code" style="border: 1px solid grey;"></div>
+            <div id="monaco-diff" style="border: 1px solid grey;"></div>
+        </div>
+        <div id="right-sideBar">
+            <div class="sidebar-mode">
+                <input type="radio" class="displayHide" id="rs-mode-file" name="rs-mode" value="file" checked></input>
+                <label for="rs-mode-file" class="control-iconButton"><img class="refSize"
+                        src="./icon/database-search.svg">File</label>
+                <input type="radio" class="displayHide" id="rs-mode-def" name="rs-mode" value="def"></input>
+                <label for="rs-mode-def" class="control-iconButton"><img class="refSize"
+                        src="./icon/code-asterix.svg">Definition</label>
+            </div>
+            <div class="verticalLine"></div>
+            <div id="right-sideBar-contents">
+                <div class="sidebar-contents hoverButton">
+                    <img class="refSize control-iconButton " src="./icon/file-symlink.svg">
+                    <span class="sidebar-filename">IC140</span>
+                    <span>I</span>
+                    <span style="font-size: 0.8rem; padding-left: 2rem;">XXXXXXXXXX/XXXXXXXXXX</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </body>
 
 </html>

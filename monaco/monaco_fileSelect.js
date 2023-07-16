@@ -1,10 +1,11 @@
 class monaco_file {
-    constructor(handle) {
+    constructor(handle,parent) {
         this.fullname = handle.name;
         this.prefix = this.fullname.indexOf('_') === -1 ? '' : this.fullname.substring(this.fullname.indexOf('_'), this.fullname.indexOf('.'));
         this.ext = this.fullname.substring(this.fullname.indexOf('.'), this.fullname.length);
         this.extFormat = this.fullname.substring(this.fullname.indexOf('.') + 1, this.fullname.length);
         this.handle = handle;
+        this.parent = parent;
         if (this.prefix.length === 0) {
             this.name = this.fullname.substring(0, this.fullname.indexOf('.'));
             if (this.name.length === 0) {
@@ -21,6 +22,7 @@ const monaco_handleName_Sub = "monaco-sub";
 const monaco_handleName_RefMaster = "monaco-ref";
 const fileNameExt = 'txt';
 
+let useFileList_Open = false;
 let isFileSelectSync = true;
 const readFileButtonCreate = () => {
     const otherTabOpen = document.getElementById('control-otherTab');
@@ -74,6 +76,14 @@ const readFileButtonCreate = () => {
     control_extraArea.addEventListener('click', () => {
         const modeChangeCode = document.getElementById('control-EditorModeChange-code');
         if (modeChangeCode.checked) {
+            if (useFileList_Open) {
+                extraControlClick(extraControl, "close");
+                useFileList_Open = false;
+            } else {
+                extraControlClick(extraControl, "open");
+                useFileList_Open = true;
+            }
+            
             return null;
         }
 
@@ -130,10 +140,9 @@ const readFileButtonCreate = () => {
         let diffEditorModel_Original = await modelChange(await addSpaces(LeftText), lang[1],LeftUri);
         let normalEditorModel_Modified = await modelChange(await addSpaces(RightText), lang[2],RightUri);
         await monacoRead2(normalEditorModel, diffEditorModel_Original, normalEditorModel_Modified);
-        //
-        
         await refDefStart();
-       
+
+        tabs_add(normalEditorModel);
     }
     const fileSelectSync_Process = async (target, fullname, fileType) => {
         let reverse = target === 'Left' ? 'Right' : 'Left';
@@ -183,22 +192,61 @@ const readFileButtonCreate = () => {
             await fileReadBoth();
         });
     });
+    const sidebar_mode_file = document.getElementById('rs-mode-file');
+    sidebar_mode_file.addEventListener('click', async (event) => {
+        await createUseFileList(normalRefDef);
+    });
+    const sidebar_mode_def = document.getElementById('rs-mode-def');
+    sidebar_mode_def.addEventListener('click', async (event) => {
+        await createUseFileList(normalRefDef);
+    });
 }
 let extraControl = false;
-const extraControlClick = (open) => {
+const extraControlClick = (open,mode = "") => {
     const control_extraArea = document.getElementById('control-extraButton');
     let img = control_extraArea.querySelector("img");
     const upIcon = "./icon/caret-up.svg";
+    const rightIcon = "./icon/caret-right.svg";
+    const leftIcon = "./icon/caret-left.svg";
     const downIcon = "./icon/caret-down.svg";
     const control_extra = document.getElementById('control-subArea');
+    const sidebar = document.getElementById('right-sideBar');
+    const mainArea = document.getElementById('monaco-area'); 
+    const tabArea = document.getElementById('monaco-tab');
+    console.log(open,mode);
+    if (mode !== "") {
+        if (mode === "open") {
+            img.src = rightIcon;
+            sidebar.classList.add("r-side-open");
+            mainArea.classList.add("monaco-area-sidebar-open");
+        } else {
+            img.src = leftIcon;
+            sidebar.classList.remove("r-side-open");
+            mainArea.classList.remove("monaco-area-sidebar-open");
+        }
+        if (mode !== "init") {
+            return;
+        }
+    }
+    useFileList_Open = false;
+    sidebar.classList.remove("r-side-open");
+    mainArea.classList.remove("monaco-area-sidebar-open");
+    mainArea.classList.add('monaco-area-tab-hidden');
     if (open) {
+        tabArea.classList.add('displayHide');
         img.src = upIcon;
         if (!control_extra.classList.contains('close')) {
             control_extra.classList.add('close');
         }
-
+        
     } else {
-        img.src = downIcon;
+        if (mode === "init") {
+            img.src = leftIcon;
+            mainArea.classList.remove("monaco-area-tab-hidden");
+            tabArea.classList.remove('displayHide');
+        } else {
+            img.src = downIcon;
+        }
         if (control_extra.classList.contains('close')) {
             control_extra.classList.remove('close');
         }
@@ -283,7 +331,7 @@ async function monaco_pulldownCreate(create_target, L_R, readHandle, readKind) {
         insert.value = handle.name;
         insert.text = handle.name;
         await create_target.appendChild(insert);
-        let file_set = new monaco_file(handle);
+        let file_set = new monaco_file(handle,readHandle.name);
         FileList[L_R][readKind][file_set.fullname] = file_set;
         if (backup_target.name === file_set.name) {
             //console.log("Restore", backup_target.name);
@@ -299,7 +347,7 @@ const createFolderExistList = async (libHandle, folder) => {
         if (handle.kind === 'directory' && handle.name === folder) {
             for await (const fileHandle of handle.values()) {
                 if (fileHandle.kind === 'file') {
-                    rtn.push(new monaco_file(fileHandle));
+                    rtn.push(new monaco_file(fileHandle,libHandle.name));
                 }
             }
             break;
@@ -312,7 +360,9 @@ const getFolderExistList_Text = async (List, target) => {
     for (let i = 0; i < List.length; i++) {
         if (List[i].name === target) {
             let text = await file_read_text(List[i].fullname, List[i].handle, false, 'text', false, false);
-            return await addSpaces(text);
+            return {
+                text: await addSpaces(text), handle: List[i].handle
+            };
         }
     }
     return null;

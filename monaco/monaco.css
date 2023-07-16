@@ -1,7 +1,8 @@
-:root{
+:root {
     --backgroundColor: #EFF5F5;
-    --headerHeight :1.3rem;
+    --headerHeight: 1.3rem;
 }
+
 ::-webkit-scrollbar {
     display: none;
 }
@@ -11,52 +12,102 @@ body {
     flex-direction: column;
     flex-wrap: nowrap;
     background-color: var(--backgroundColor);
+    overflow: hidden;
+}
+
+#main {
+    width: 100%;
+    height: calc(100% - 2rem);
+    display: flex;
+
 }
 
 header {
     height: var(--headerHeight);
     display: grid;
-    grid-template-columns: 3rem 3rem 1rem 2rem 1rem  1fr 2rem;
+    grid-template-columns: 3rem 3rem 1rem 2rem 1rem 1fr 2rem;
     margin-bottom: 0.5rem;
     user-select: none;
     position: relative;
 }
 
-#monaco-code, #monaco-diff{
-    height: calc(100% - 2rem);
+#monaco-area {
+    width: 100%;
+    height: calc(100% - 1.5rem);
+    position: relative;
+    transition: 0.3s;
+}
+.monaco-area-sidebar-open {
+    width: calc(100% - max(25%, 20rem))!important;
+}
+.monaco-area-tab-hidden {
+    height: 100%!important;
+}
+#monaco-code,
+#monaco-diff {
+    height: 100%;
     width: 100%;
 }
 
+#monaco-tab {
+ height: 1.5rem;
+ display: flex;
+ margin: 0;
+ padding: 0;
+ overflow: scroll;
+}
+.tab-libnameText {
+    font-size: 0.6rem;
+    display: inline-flex;
+    overflow: scroll;
+    padding-left: 0.2rem;
+    align-items: flex-end;
+}
+.tab-libnameArea {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
 .triangle-left {
     display: inline-block;
     border-style: solid;
     border-width: 0.5rem 1rem 0.5rem 0;
     border-color: transparent #000 transparent transparent;
-  }
+}
 
 .displayHide {
-    display: none;
+    display: none!important;
 }
 
 .alignLine {
     background-color: black;
     width: 0.15rem;
     height: 100%;
-    
+
     margin: auto;
 }
-
+.verticalLine {
+    background-color: black;
+    width: 100%;
+    height: 0.15rem;
+    margin: 0.2rem auto;
+}
 .refSize {
     height: var(--headerHeight);
 }
+
 /***********************/
 .hoverButton {
     transition: 0.3s;
 }
-header input[type="radio"]:checked + label,.hoverButton:hover,#control-subArea input[type="checkbox"]:checked + label{
-    background-color: rgba(0,0,0,0.2)
-  }
-  
+
+header input[type="radio"]:checked+label,
+.hoverButton:hover,
+#control-subArea input[type="checkbox"]:checked+label ,
+#right-sideBar input[type="radio"]:checked+label , 
+#monaco-tab input[type="radio"]:checked+label {
+    background-color: rgba(0, 0, 0, 0.2)
+}
+
 .control-iconButton {
     width: 100%;
     height: 100%;
@@ -70,24 +121,79 @@ header input[type="radio"]:checked + label,.hoverButton:hover,#control-subArea i
     pointer-events: auto;
 }
 
-#control-Reload:active{
+#control-Reload:active {
     rotate: 360deg;
 }
+
 .control-FolderFileArea {
     width: 100%;
     display: grid;
     grid-template-columns: 35% 30% 35%;
 }
+
 #control-subArea {
     position: absolute;
     background-color: var(--backgroundColor);
     right: 0;
-    top:0;
+    top: 0;
     width: calc(50% + 0.5rem);
     display: grid;
     grid-template-columns: 0.5rem 2rem 2rem 2rem 0.5rem 2rem 2rem 2rem 0.5rem 2rem 1fr 2rem 0.5rem 2rem;
     transition: 0.3s ease;
 }
-#control-subArea.close{
-    top:2rem;
+
+#control-subArea.close {
+    top: 2rem;
+}
+
+#right-sideBar {
+    width: max(25%, 20rem);
+    margin-left: 9px;
+    height: 100%;
+    position: absolute;
+    transition: 0.3s;
+    right: calc(-1 * max(25%, 20rem));
+}
+.r-side-open {
+    right: 0!important;
+}
+
+#right-sideBar .sidebar-mode {
+    display: flex;
+    width: calc(100% - 0.4rem * 2 - 0.2rem * 2);
+    align-items: center;
+    height: 2.5rem;
+    padding: 0.4rem;
+    border: 0.2rem;
+}
+#right-sideBar .sidebar-mode label {
+    align-items: center;
+    min-width: 5rem;
+    margin: auto;
+}
+#right-sideBar-contents {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+#right-sideBar-contents .sidebar-contents {
+    display: grid;
+    grid-template-columns: 2rem 6rem 1fr;
+    grid-template-rows: 1.5rem 0.8rem;
+    align-items: center;
+    padding: 0.2rem;
+    margin-top: 0.5rem;
+    border-left: 0.2rem solid black;
+}
+#monaco-tab .tab-design {
+    display: flex;
+    justify-content: space-around;
+    padding: 0 0.3rem;
+    width: 10rem;
+    height: 1.5rem;
+    border: 2px solid rgb(0, 0, 0);
+    overflow: hidden;
+    word-wrap: normal;
+}
+#monaco-tab li {
+    display: block;
 }

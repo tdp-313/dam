@@ -144,7 +144,7 @@ const rpg_token = () => {
                             }, {//18-27
                                 cases: {
                                     '[0-9].*.*': 'number',
-                                    '[\*](LOVAL|HIVAL).*': 'number',
+                                    '(UDATE|TIME|[\*]YEAR).*': 'number',
                                     'UDATE.*': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*]IN[0-9][0-9].*': 'type',
@@ -181,7 +181,7 @@ const rpg_token = () => {
                                 cases: {
                                     '[0-9].*.*': 'number',
                                     '[\*](LOVAL|HIVAL).*': 'number',
-                                    'UDATE.*': 'number',
+                                    '(UDATE|TIME|[\*]YEAR).*': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*].*': 'string',
                                     "'.*'.*": 'string',
@@ -412,7 +412,7 @@ const rpg_token2 = () => {
                                 cases: {
                                     '[0-9].*.*': 'number',
                                     '[\*](LOVAL|HIVAL).*': 'number',
-                                    'UDATE.*': 'number',
+                                    '(UDATE|TIME|[\*]YEAR).*': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*]IN[0-9][0-9].*': 'type',
                                     '[\*].*': 'predefined',
@@ -448,7 +448,7 @@ const rpg_token2 = () => {
                                 cases: {
                                     '[0-9].*.*': 'number',
                                     '[\*](LOVAL|HIVAL).*': 'number',
-                                    'UDATE.*': 'number',
+                                    '(UDATE|TIME|[\*]YEAR).*': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*].*': 'string',
                                     "'.*'.*": 'string',
