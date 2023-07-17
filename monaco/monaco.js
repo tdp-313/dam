@@ -7,7 +7,7 @@ require.config({
     }
   }
 });
-
+let InitModel = null;
 const monacoStart = async () => {
   require(["vs/editor/editor.main"], async function () {
     monacoLang();
@@ -101,6 +101,7 @@ const monacoStart = async () => {
       const extraRulerChange = document.getElementById('control-extraReadOnly');
       extraRulerChange.checked = isWrite;
     }
+    
     window.getNormalEditor_Model = async () => {
       return normalEditor.getModel();
     }

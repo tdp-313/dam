@@ -23,24 +23,25 @@ const tabs_eventStart = () => {
                 for (const [key, value] of tabs.entries()) {
                     entries.push(key);
                 }
-                for (let i = 0; i < entries.length; i++){
+                console.log(entries);
+                for (let i = 0; i < entries.length; i++) {
                     if (entries[i] === selectedRadio.value) {
                         if (i === 0) {
                             if (entries.length === 1) {
-                                return null;
+                                break;
                             }
-                            nextTabID = entries[i - 1];
+                            nextTabID = entries[i + 1];
                             nextTabValue = tabs.get(nextTabID);
                         } else {
                             nextTabID = entries[i - 1];
                             nextTabValue = tabs.get(nextTabID);
                         }
+                        const next_input = document.getElementById('monaco-tab-' + nextTabID);
+                        next_input.checked = true;
+                        setNormalEditor_Model(nextTabValue);
                         break;
                     }
                 }
-                const next_input = document.getElementById('monaco-tab-' + nextTabID);
-                next_input.checked = true;
-                setNormalEditor_Model(nextTabValue);
             } else {
                 selectedRadio.checked = true;
             }
@@ -54,27 +55,52 @@ const tabs_replace = (model) => {
     const selectedRadio = document.querySelector('input[name="rs-tab"]:checked');
 }
 
-const tabs_add = async (model) => {
-    let id = model.id
+const tabs_add = async (model, new_data = true) => {
+
+    let id = "";
+    let path = model.uri.path;
+    let name = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf(".") === -1 ? path.length : path.lastIndexOf("."));
+    let lang_icon = "";
+    
+    if (new_data) {
+        id = model.id;
+        lang_icon = get_langIcon(path);
+    }
+    else {
+        id = "*"
+        lang_icon = "code-asterix";
+    }
+    console.log(path, name);
     let tab_check = await tabs.get(id);
+
     if (typeof (tab_check) !== 'undefined') {
-        await setNormalEditor_Model(tab_check);
         const input_dom = document.getElementById('monaco-tab-' + id);
+        
+        if (new_data) {
+            await setNormalEditor_Model(tab_check);
+        } else {
+            await setNormalEditor_Model(model);
+            const libnameArea = input_dom.parentNode.getElementsByClassName('tab-libnameArea')[0];
+            libnameArea.textContent = name;
+            let pathArea = document.createElement('span');
+            pathArea.textContent = path;
+            pathArea.classList.add("tab-libnameText");
+            libnameArea.appendChild(pathArea);
+            tabs.set(id, model);
+        }
         input_dom.checked = true;
         await refDefStart();
         return null;
     }
-    let path = model.uri.path;
-    let name = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf(".") === -1 ? path.length : path.lastIndexOf("."));
-    let lang_icon = get_langIcon(path);
 
-    const tabs_html = (name, id, lang,path) => {
+
+    const tabs_html = (name, id, lang, path) => {
         let li = document.createElement("li");
         let temp = "";
         temp += '<input type="radio" class="displayHide" id="monaco-tab-' + id + '" name="rs-tab" value="' + id + '" checked></input>';
         temp += '<label for="monaco-tab-' + id + '" class="tab-design">';
         temp += '<img class="refSize" style="width: 1rem; " src="./icon/' + lang + '.svg">';
-        temp += '<span class="tab-libnameArea">' + name + '<span class="tab-libnameText">'+ path.substring(1,path.lastIndexOf('/')) +'</span></span>';
+        temp += '<span class="tab-libnameArea">' + name + '<span class="tab-libnameText">' + path.substring(1, path.lastIndexOf('/')) + '</span></span>';
         temp += '<img class="refSize control-iconButton" style="width: 1.5rem;" src="./icon/x.svg">';
         temp += '<span class="tab-item" style="display: none;">' + id + '</span>';
         temp += '</label>';
@@ -84,7 +110,7 @@ const tabs_add = async (model) => {
     }
     await setNormalEditor_Model(model);
     const tabs_dom = document.getElementById('monaco-tab');
-    tabs_dom.appendChild(tabs_html(name, id, lang_icon,path));
+    tabs_dom.appendChild(tabs_html(name, id, lang_icon, path));
     tabs.set(id, model);
 }
 

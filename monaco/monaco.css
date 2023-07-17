@@ -19,7 +19,6 @@ body {
     width: 100%;
     height: calc(100% - 2rem);
     display: flex;
-
 }
 
 header {
@@ -54,12 +53,13 @@ header {
  display: flex;
  margin: 0;
  padding: 0;
- overflow: scroll;
+ overflow-x: scroll;
+ overflow-y: hidden;
 }
 .tab-libnameText {
     font-size: 0.6rem;
     display: inline-flex;
-    overflow: scroll;
+    overflow: hidden;
     padding-left: 0.2rem;
     align-items: flex-end;
 }
@@ -149,7 +149,7 @@ header input[type="radio"]:checked+label,
 #right-sideBar {
     width: max(25%, 20rem);
     margin-left: 9px;
-    height: 100%;
+    height: calc(100% - 3rem);
     position: absolute;
     transition: 0.3s;
     right: calc(-1 * max(25%, 20rem));
@@ -172,16 +172,17 @@ header input[type="radio"]:checked+label,
     margin: auto;
 }
 #right-sideBar-contents {
+    height: calc(100% - 3.7rem);
     overflow-x: hidden;
     overflow-y: scroll;
 }
 #right-sideBar-contents .sidebar-contents {
     display: grid;
     grid-template-columns: 2rem 6rem 1fr;
-    grid-template-rows: 1.5rem 0.8rem;
+    grid-template-rows: 1.2rem 0.6rem;
     align-items: center;
     padding: 0.2rem;
-    margin-top: 0.5rem;
+    margin-top: 0.2rem;
     border-left: 0.2rem solid black;
 }
 #monaco-tab .tab-design {

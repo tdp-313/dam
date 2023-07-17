@@ -27,7 +27,7 @@ let isFileSelectSync = true;
 const readFileButtonCreate = () => {
     const otherTabOpen = document.getElementById('control-otherTab');
     otherTabOpen.addEventListener('click', async () => {
-        window.open('/dam/monaco');
+        tabs_add(await getNormalEditor_Model());
     });
     otherTabOpen.addEventListener('contextmenu', async (event) => {
         event.preventDefault();
@@ -141,8 +141,7 @@ const readFileButtonCreate = () => {
         let normalEditorModel_Modified = await modelChange(await addSpaces(RightText), lang[2],RightUri);
         await monacoRead2(normalEditorModel, diffEditorModel_Original, normalEditorModel_Modified);
         await refDefStart();
-
-        tabs_add(normalEditorModel);
+        tabs_add(normalEditorModel, false);
     }
     const fileSelectSync_Process = async (target, fullname, fileType) => {
         let reverse = target === 'Left' ? 'Right' : 'Left';
