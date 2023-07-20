@@ -105,7 +105,13 @@ const monacoStart = async () => {
     window.getNormalEditor_Model = async () => {
       return normalEditor.getModel();
     }
-
+    window.getNormalEditor_View = async () => {
+      return normalEditor.saveViewState();
+    }
+    window.setNormalEditor_View = async (view) => {
+      normalEditor.restoreViewState(view);
+      return null;
+    }
     window.getNormalEditor_Model_URI = async (uri_parm) => {
       return monaco.editor.getModel(uri_parm);
     }

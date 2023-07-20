@@ -5,10 +5,16 @@ const tabs_eventStart = () => {
     document.getElementById('monaco-tab').addEventListener('click', async (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'radio') {
             let now_model = await getNormalEditor_Model();
-            tabs.set(now_model.id, now_model);
+            let now_view = await getNormalEditor_View();
+            let id = "*";
+            if (e.target.id.substring(-1) !== "*") {
+                id = now_model.id;
+            }
+            tabs.set(id, { model: now_model ,view:now_view});
             let select_tabs_MAP = await tabs.get(e.target.value);
             if (typeof (select_tabs_MAP) !== 'undefined') {
-                setNormalEditor_Model(select_tabs_MAP);
+                setNormalEditor_Model(select_tabs_MAP.model);
+                setNormalEditor_View(select_tabs_MAP.view);
             }
         }
 
@@ -38,7 +44,7 @@ const tabs_eventStart = () => {
                         }
                         const next_input = document.getElementById('monaco-tab-' + nextTabID);
                         next_input.checked = true;
-                        setNormalEditor_Model(nextTabValue);
+                        setNormalEditor_Model(nextTabValue.model);
                         break;
                     }
                 }
@@ -50,9 +56,6 @@ const tabs_eventStart = () => {
         }
 
     });
-}
-const tabs_replace = (model) => {
-    const selectedRadio = document.querySelector('input[name="rs-tab"]:checked');
 }
 
 const tabs_add = async (model, new_data = true) => {
@@ -70,14 +73,15 @@ const tabs_add = async (model, new_data = true) => {
         id = "*"
         lang_icon = "code-asterix";
     }
-    console.log(path, name);
+    console.log(path, name,new_data);
     let tab_check = await tabs.get(id);
 
     if (typeof (tab_check) !== 'undefined') {
         const input_dom = document.getElementById('monaco-tab-' + id);
         
         if (new_data) {
-            await setNormalEditor_Model(tab_check);
+            await setNormalEditor_Model(tab_check.model);
+            await setNormalEditor_View(tab_check.view);
         } else {
             await setNormalEditor_Model(model);
             const libnameArea = input_dom.parentNode.getElementsByClassName('tab-libnameArea')[0];
@@ -86,8 +90,9 @@ const tabs_add = async (model, new_data = true) => {
             pathArea.textContent = path;
             pathArea.classList.add("tab-libnameText");
             libnameArea.appendChild(pathArea);
-            tabs.set(id, model);
+            tabs.set(id, { model: model ,view:setNormalEditor_View()});
         }
+        console.log(id);
         input_dom.checked = true;
         await refDefStart();
         return null;
@@ -111,7 +116,7 @@ const tabs_add = async (model, new_data = true) => {
     await setNormalEditor_Model(model);
     const tabs_dom = document.getElementById('monaco-tab');
     tabs_dom.appendChild(tabs_html(name, id, lang_icon, path));
-    tabs.set(id, model);
+    tabs.set(id, { model: model ,view:setNormalEditor_View()});
 }
 
 const get_langIcon = (path) => {

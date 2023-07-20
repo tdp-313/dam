@@ -185,6 +185,13 @@ header input[type="radio"]:checked+label,
     margin-top: 0.2rem;
     border-left: 0.2rem solid black;
 }
+#right-sideBar-contents::-webkit-scrollbar {
+    display: block;
+}
+#right-sideBar-contents::-webkit-scrollbar-thumb {
+    background: #aeaeae;
+    border-radius: 0.3rem;
+}
 #monaco-tab .tab-design {
     display: flex;
     justify-content: space-around;
