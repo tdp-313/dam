@@ -1,5 +1,5 @@
 class monaco_file {
-    constructor(handle,parent) {
+    constructor(handle, parent) {
         this.fullname = handle.name;
         this.prefix = this.fullname.indexOf('_') === -1 ? '' : this.fullname.substring(this.fullname.indexOf('_'), this.fullname.indexOf('.'));
         this.ext = this.fullname.substring(this.fullname.indexOf('.'), this.fullname.length);
@@ -83,7 +83,7 @@ const readFileButtonCreate = () => {
                 extraControlClick(extraControl, "open");
                 useFileList_Open = true;
             }
-            
+
             return null;
         }
 
@@ -111,6 +111,7 @@ const readFileButtonCreate = () => {
             separateFolder.checked = Setting.getHandleSeparate;
         }
         fileReadStart(true);
+
     });
     const fileReadBoth = async () => {
         const FileLeft = document.getElementById('control-File-Left');
@@ -126,7 +127,7 @@ const readFileButtonCreate = () => {
 
         let NormalUri = monaco.Uri.parse(control_LibLeft.value + '/' + FolderLeft.value + '/' + FileLeft.value);
         let LeftUri = monaco.Uri.parse('DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + FileLeft.value);
-        let RightUri = monaco.Uri.parse('DIFF/' +control_LibRight.value + '/' + FolderRight.value + '/' + FileRight.value);
+        let RightUri = monaco.Uri.parse('DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + FileRight.value);
 
         let lang = ['', '', ''];//normal original modified
         if (FolderLeft.value === 'QRPGSRC') {
@@ -135,13 +136,13 @@ const readFileButtonCreate = () => {
             lang = ['dds', 'dds', 'dds'];
         }
 
-        
+
         let normalEditorModel = await modelChange(await addIndent(LeftText), lang[0], NormalUri);
-        let diffEditorModel_Original = await modelChange(await addSpaces(LeftText), lang[1],LeftUri);
-        let normalEditorModel_Modified = await modelChange(await addSpaces(RightText), lang[2],RightUri);
+        let diffEditorModel_Original = await modelChange(await addSpaces(LeftText), lang[1], LeftUri);
+        let normalEditorModel_Modified = await modelChange(await addSpaces(RightText), lang[2], RightUri);
         await monacoRead2(normalEditorModel, diffEditorModel_Original, normalEditorModel_Modified);
-        await refDefStart();
-        tabs_add(normalEditorModel, false);
+
+        await tabs_add(normalEditorModel, false);
     }
     const fileSelectSync_Process = async (target, fullname, fileType) => {
         let reverse = target === 'Left' ? 'Right' : 'Left';
@@ -199,9 +200,61 @@ const readFileButtonCreate = () => {
     sidebar_mode_def.addEventListener('click', async (event) => {
         await createUseFileList(normalRefDef);
     });
+    const exLinkFile = document.getElementById('control-extraLinkFile');
+    exLinkFile.addEventListener('click', async () => {
+
+        if (typeof (linkStatus[monaco_handleName_RefMaster]) === 'undefined') {
+            return null;
+        }
+        let handle = linkStatus[monaco_handleName_RefMaster].handle;
+        let path = handle.name + "/";
+        let now_model = await getNormalEditor_Model();
+        let array_uri_path = now_model.uri.path.split('/').filter(str => str !== '');
+        let preText = "";
+        let libText = array_uri_path[0].substring(0, 3) + "*";
+        if (array_uri_path.length === 3) {
+            path += libText + "/" + array_uri_path[1] + "/";
+        }
+        let text = prompt('参照先から反映\n' + path, preText);
+        if (text === null) {
+            return null;
+        }
+        if (text.indexOf('.txt') === -1) {
+            text += '.txt';
+        }
+        console.log(libText, array_uri_path[1], text);
+        await readText_Model(array_uri_path[0] + "*", array_uri_path[1], text, handle);
+    });
+    exLinkFile.addEventListener('contextmenu', async (e) => {
+        e.preventDefault();
+        if (typeof (linkStatus[monaco_handleName_RefMaster]) === 'undefined') {
+            return null;
+        }
+        let handle = linkStatus[monaco_handleName_RefMaster].handle;
+        let path = handle.name + "/";
+        let now_model = await getNormalEditor_Model();
+        let array_uri_path = now_model.uri.path.split('/').filter(str => str !== '');
+        let preText = "";
+        if (array_uri_path.length === 3) {
+            preText += array_uri_path[0] + "/" + array_uri_path[1] + "/";
+        }
+        let text = prompt('参照先から反映\n' + path, preText);
+        if (text === null) {
+            return null;
+        }
+        if (text.indexOf('.txt') === -1) {
+            text += '.txt';
+        }
+        let result_array = text.split('/').filter(str => str !== '');
+        if (result_array.length !== 3) {
+            return null;
+        }
+        console.log(result_array[0], result_array[1], result_array[2]);
+        await readText_Model(result_array[0], result_array[1], result_array[2], handle);
+    });
 }
 let extraControl = false;
-const extraControlClick = (open,mode = "") => {
+const extraControlClick = (open, mode = "") => {
     const control_extraArea = document.getElementById('control-extraButton');
     let img = control_extraArea.querySelector("img");
     const upIcon = "./icon/caret-up.svg";
@@ -210,9 +263,9 @@ const extraControlClick = (open,mode = "") => {
     const downIcon = "./icon/caret-down.svg";
     const control_extra = document.getElementById('control-subArea');
     const sidebar = document.getElementById('right-sideBar');
-    const mainArea = document.getElementById('monaco-area'); 
+    const mainArea = document.getElementById('monaco-area');
     const tabArea = document.getElementById('monaco-tab');
-    console.log(open,mode);
+    console.log(open, mode);
     if (mode !== "") {
         if (mode === "open") {
             img.src = rightIcon;
@@ -237,7 +290,7 @@ const extraControlClick = (open,mode = "") => {
         if (!control_extra.classList.contains('close')) {
             control_extra.classList.add('close');
         }
-        
+
     } else {
         if (mode === "init") {
             img.src = leftIcon;
@@ -330,7 +383,7 @@ async function monaco_pulldownCreate(create_target, L_R, readHandle, readKind) {
         insert.value = handle.name;
         insert.text = handle.name;
         await create_target.appendChild(insert);
-        let file_set = new monaco_file(handle,readHandle.name);
+        let file_set = new monaco_file(handle, readHandle.name);
         FileList[L_R][readKind][file_set.fullname] = file_set;
         if (backup_target.name === file_set.name) {
             //console.log("Restore", backup_target.name);
@@ -346,7 +399,7 @@ const createFolderExistList = async (libHandle, folder) => {
         if (handle.kind === 'directory' && handle.name === folder) {
             for await (const fileHandle of handle.values()) {
                 if (fileHandle.kind === 'file') {
-                    rtn.push(new monaco_file(fileHandle,libHandle.name));
+                    rtn.push(new monaco_file(fileHandle, libHandle.name));
                 }
             }
             break;
@@ -389,18 +442,18 @@ function addSpaces(text) {
     return lines.join("\n");
 }
 
-function revIndent(textArray){
+function revIndent(textArray) {
     let rtn = "";
     for (let i = 0; i < textArray.length; i++) {
         if (textArray[i].substring(6, 7) !== "*" && textArray[i].substring(5, 6) === "C") {
-            rtn = rtn + textArray[i].substring(0,27) + textArray[i].substring(45,textArray[i].length) + "\n";
+            rtn = rtn + textArray[i].substring(0, 27) + textArray[i].substring(45, textArray[i].length) + "\n";
         } else {
             rtn = rtn + textArray[i] + "\n";
         }
     }
     return (rtn);
 }
-        
+
 
 function addIndent(text) {
     const lines = text.split("\n");
@@ -536,3 +589,58 @@ function addIndent(text) {
     return lines.join("\n");
 }
 
+const readText_Model = async (lib, file, member, r_handle) => {
+    let libHandle = null;
+    let fileHandle = null;
+    let memberHandle = null;
+    console.log(lib);
+    if (lib.indexOf('*') !== -1) {
+        for await (const handle of r_handle.values()) {
+            if (handle.name.indexOf(lib.substring(0, 3)) !== -1) {
+                libHandle = handle;
+                break;
+            }
+        }
+    } else {
+        for await (const handle of r_handle.values()) {
+            if (handle.name === lib) {
+                libHandle = handle;
+                break;
+            }
+        }
+    }
+
+    if (libHandle === null) {
+        return null; //end
+    }
+    for await (const handle of libHandle.values()) {
+        if (handle.name === file) {
+            fileHandle = handle;
+            break;
+        }
+    }
+    if (fileHandle === null) {
+        return null; //end
+    }
+    for await (const handle of fileHandle.values()) {
+        if (handle.name === member) {
+            memberHandle = handle;
+            break;
+        }
+    }
+    if (memberHandle === null) {
+        return null; //end
+    }
+
+    //Found !!
+    let new_uri = monaco.Uri.parse(libHandle.name + '/' + file + '/' + member);
+    let source_text = await file_read_text(memberHandle.name, memberHandle, false, "text", false);
+    let lang = "js";
+    if (file === 'QRPGSRC') {
+        lang = 'rpg-indent';
+    } else if (file === 'QDSPSRC' || file === 'QDDSSRC') {
+        lang = 'dds';
+    }
+    let normalEditorModel = await modelChange(await addIndent(source_text), lang, new_uri);
+    await tabs_add(normalEditorModel, true);
+}

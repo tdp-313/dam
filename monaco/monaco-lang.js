@@ -486,10 +486,11 @@ const createUseFileList = async (refDef) => {
     const selectedRadio = document.querySelector('input[name="rs-mode"]:checked');
     mode = selectedRadio.value;
     sidebar_contents.innerHTML = "";
-    const get_template = (fileName, desc, library,langIcon) => {
+    let filter_style = themeCSS_FilterStyle();
+    const get_template = (fileName, desc, library,langIcon,filter) => {
         let temp = "";
         temp += '<div id="sidebar-contents-' + fileName + ' " class="sidebar-contents hoverButton">';
-        temp += '<img  class="refSize control-iconButton" src="./icon/' + langIcon +'.svg">';
+        temp += '<img  class="refSize control-iconButton" style="filter: ' + filter + ';" src="./icon/' + langIcon +'.svg">';
         temp += '<span class="sidebar-filename">' + fileName + '</span>';
         temp += '<span style="overflow: overlay; text-wrap: nowrap;">' + desc + '</span>';
         temp += '<span style="font-size: 0.8rem; padding-left: 2rem;">' + library + '</span>';
@@ -500,7 +501,7 @@ const createUseFileList = async (refDef) => {
         refDef.forEach((value, key) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'file') {
-                html += get_template(key, value.s_description, value.location.uri.path,get_langIcon(value.location.uri.path));
+                html += get_template(key, value.s_description, value.location.uri.path,get_langIcon(value.location.uri.path),filter_style);
             }
         });
     }
@@ -508,7 +509,7 @@ const createUseFileList = async (refDef) => {
         refDef.forEach((value, key) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'definition') {
-                html += get_template(key, value.s_description, value.location.uri.path,get_langIcon(value.location.uri.path));
+                html += get_template(key, value.s_description, value.location.uri.path,get_langIcon(value.location.uri.path),filter_style);
             }
         });
     }

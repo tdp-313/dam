@@ -101,7 +101,7 @@ const monacoStart = async () => {
       const extraRulerChange = document.getElementById('control-extraReadOnly');
       extraRulerChange.checked = isWrite;
     }
-    
+
     window.getNormalEditor_Model = async () => {
       return normalEditor.getModel();
     }
@@ -160,47 +160,70 @@ const monacoStart = async () => {
     const extraTerminal = document.getElementById('control-extraTerminal');
     extraTerminal.addEventListener('click', async (e) => {
       //monaco.editor.showCommands();
-      await refDefStart();
-      const model = await normalEditor.getModel();
-      console.log(await createUML(model));
+      //await refDefStart();
+      //const model = await normalEditor.getModel();
+      //console.log(await createUML(model));
     });
 
-    window.refDefStart = async () => {
-      const model = await normalEditor.getModel();
+    window.refDefStart = async (model) => {
       let refListFile = null;
+      const libFileName = model.uri.path.split('/').filter(str => str !== '');
+
+      if (libFileName.length !== 3) {
+        return null;
+      }
+
+      let mainRootHandle = linkStatus[monaco_handleName].handle;
+      let refRootHandle = linkStatus[monaco_handleName_RefMaster].handle;
+      let rootLibName = libFileName[0];
+
       if (model.getLanguageId() === 'rpg-indent') {
         refListFile = await createRefList(model);
       } else if (model.getLanguageId() === 'dds') {
-        const leftFolder = document.getElementById('control-Folder-Left');
-        const leftFile = document.getElementById('control-File-Left');
-        if (leftFolder.value === 'QDDSSRC') {
-          refListFile = { dds: [FileList.Left.File[leftFile.value].name], dsp: [] };
-        } else if (leftFolder.value === 'QDSPSRC') {
-          refListFile = { dds: [], dsp: [FileList.Left.File[leftFile.value].name] };
+        if (libFileName[1].indexOf('DDS') !== -1) {
+          refListFile = { dds: [libFileName[2].substring(0,libFileName[2].indexOf('.'))], dsp: [] };
+        } else if (libFileName[1].indexOf('DSP') !== -1) {
+          refListFile = { dds: [], dsp: [libFileName[2].substring(0,libFileName[2].indexOf('.'))] };
         } else {
           return null;
         }
       } else {
         return null;
       }
-      const LibLeft = document.getElementById('control-Library-Left');
-
-      if (LibLeft.value === '') {
-        return null;
+      let rootFolderHandle = null;
+      let refOnly = false;
+      for await (const handle of mainRootHandle.values()) {
+        if (handle.name === rootLibName) {
+          rootFolderHandle = handle;
+          break;
+        }
       }
+      if (rootFolderHandle === null) {
+        refOnly = true;
+        for await (const handle of refRootHandle.values()) {
+          if (handle.name === rootLibName) {
+            rootFolderHandle = handle;
+            break;
+          }
+        }
+        if (rootFolderHandle === null) {
+          return null; //end
+        }
+      }
+
       normalRefDef.clear();
       additionalRefDef.clear();
       notExist_DSP.clear();
       notExist_DDS.clear();
-      normalRefDef = await refDefCreate('QDDSSRC', FileList.Left.Library[LibLeft.value].handle, normalRefDef, refListFile.dds);
-      normalRefDef = await refDefCreate('QDSPSRC', FileList.Left.Library[LibLeft.value].handle, normalRefDef, refListFile.dsp);
+      normalRefDef = await refDefCreate('QDDSSRC', rootFolderHandle, normalRefDef, refListFile.dds);
+      normalRefDef = await refDefCreate('QDSPSRC', rootFolderHandle, normalRefDef, refListFile.dsp);
       if (additionalRefDef.size > 0) {//PFILE
-        normalRefDef = await refDefCreate('QDDSSRC', FileList.Left.Library[LibLeft.value].handle, normalRefDef, [...additionalRefDef]);
+        normalRefDef = await refDefCreate('QDDSSRC', rootFolderHandle, normalRefDef, [...additionalRefDef]);
       }
-      if (Setting.getRefMaster) {
+      if (Setting.getRefMaster && !refOnly) {
         await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read');
-        let refRootHandle = linkStatus[monaco_handleName_RefMaster].handle;
-        let searchLibName = LibLeft.value.substring(0, 3);
+        
+        let searchLibName = rootLibName.substring(0, 3);
         let folderHandle = null;
         for await (const handle of refRootHandle.values()) {
           if (handle.name.indexOf(searchLibName) !== -1) {
@@ -269,24 +292,46 @@ const monacoStart = async () => {
       return refDef;
     }
     const extraThemeChange = document.getElementById('control-extraTheme');
-    extraThemeChange.addEventListener('click', () => themeApply((Setting.getTheme) + 1));
+    extraThemeChange.addEventListener('click', () => { themeApply((Setting.getTheme) + 1) });
     const themeApply = (themeState) => {
       switch (themeState) {
-        case 0:
+        case 1:
+          theme_blackSetting();
           monaco.editor.defineTheme('myTheme', theme_dark2);
           break;
-        case 1:
+        case 2:
+          theme_blackSetting();
           monaco.editor.defineTheme('myTheme', theme_dark3);
           break;
-        case 2:
+        case 3:
+          //white
+          theme_whiteSetting();
           monaco.editor.defineTheme('myTheme', theme_white);
           break;
+        case 4:
+          theme_blackSetting();
+          monaco.editor.defineTheme('myTheme', theme_dark4);
+          break;
         default:
+          theme_blackSetting();
           monaco.editor.defineTheme('myTheme', theme_dark);
           themeState = 0;
       }
       Setting.setTheme = themeState;
     }
+    extraThemeChange.addEventListener('contextmenu', (event) => { themeDiffApply((Setting.getDiffTheme) + 1); event.preventDefault(); });
+    const themeDiffApply = (themeState) => {
+      switch (themeState) {
+        case 1:
+          diffEditor.updateOptions({ renderSideBySide: true });
+          break;
+        default:
+          diffEditor.updateOptions({ renderSideBySide: false });
+          themeState = 0;
+      }
+      Setting.setDiffTheme = themeState;
+    }
+    themeDiffApply(Setting.getDiffTheme);
     themeApply(Setting.getTheme);
     const createRefList = async (refModel) => {
       var lineCount = await refModel.getLineCount();
@@ -401,19 +446,23 @@ window.onload = async () => {
   await monacoStart();
   await rightSidebarRead();
   readFileButtonCreate();
-  tabs_eventStart();
+  await tabs_eventStart();
   //setting Load
 }
 
 const rightSidebarRead = async () => {
   const r_sidebar_contents = document.getElementById('right-sideBar-contents');
   r_sidebar_contents.addEventListener('click', async (e) => {
+    console.log(e);
+    if (e.target.id === 'right-sideBar-contents') {
+      return null;
+    }
     let click_node = e.target.parentNode;
     let filename = click_node.getElementsByClassName('sidebar-filename')[0].innerText;
     let selectMap = await normalRefDef.get(filename);
     if (typeof (selectMap) !== 'undefined') {
       let model = await getNormalEditor_Model_URI(selectMap.location.uri);
-      tabs_add(model);
+      await tabs_add(model);
     }
   });
 
@@ -444,6 +493,7 @@ class localSetting {
     this.handleSeparate = typeof (data.handleSeparate) === 'undefined' ? false : data.handleSeparate;
     this.theme = typeof (data.theme) === 'undefined' ? 0 : data.theme;
     this.refMaster = typeof (data.refMaster) === 'undefined' ? false : data.refMaster;
+    this.diffTheme = typeof (data.theme) === 'undefined' ? 0 : data.theme;
   }
   get getAll() {
     return this;
@@ -454,6 +504,17 @@ class localSetting {
   get getTheme() {
     return this.theme;
   }
+  get getDiffTheme() {
+    return this.diffTheme;
+  }
+  get getThemeType() {
+    if (this.theme === 3) {
+      return 'white';
+    }
+    else {
+      return 'black';
+    }
+  }
   get getRefMaster() {
     return this.refMaster;
   }
@@ -463,6 +524,10 @@ class localSetting {
   }
   set setTheme(theme) {
     this.theme = theme;
+    this.save();
+  }
+  set setDiffTheme(theme) {
+    this.diffTheme = theme;
     this.save();
   }
   set setRefMaster(isMaster) {

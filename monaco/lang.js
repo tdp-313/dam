@@ -439,8 +439,8 @@ const rpg_token2 = () => {
                                     '@Arithmetics': 'regexp',
                                     '@StringOrders': 'regexp',
                                     '@ZoneTransfers': 'regexp',
-                                    '@FileIOs': 'entity',
-                                    '@FilePreIOs': 'keyword',
+                                    '@FileIOs': 'storage',
+                                    '@FilePreIOs': 'storage',
 
                                     '@default': 'invalid'
                                 },
