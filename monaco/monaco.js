@@ -276,7 +276,7 @@ const monacoStart = async () => {
     const refDefCreate = async (FileName, handle, refDef, reflist) => {
       let current_SRC = await createFolderExistList(handle, FileName);
       for (let i = 0; i < reflist.length; i++) {
-        let uri = monaco.Uri.parse(handle.name + '/' + FileName + '/' + reflist[i] + '.txt');
+        let uri = monaco.Uri.parse(handle.name + '/' + FileName + '/' + reflist[i]);
         let textData = await getFolderExistList_Text(current_SRC, reflist[i]);
         if (textData !== null) {
           let model = await modelChange(textData.text, 'dds', uri);

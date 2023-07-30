@@ -28,7 +28,6 @@ const tabs_eventStart = async () => {
             if (li.getElementsByClassName('tab-item')[0].innerText === selectedRadio.value) {
                 let nextTabID = "";
                 let nextTabValue = null;
-                let breakOK = false;
                 const entries = [];
                 for (const [key, value] of tabs.entries()) {
                     entries.push(key);

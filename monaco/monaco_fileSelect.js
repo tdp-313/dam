@@ -124,10 +124,11 @@ const readFileButtonCreate = () => {
 
         let LeftText = await file_read_text(Left.fullname, Left.handle, false, "text", false);
         let RightText = await file_read_text(Right.fullname, Right.handle, false, "text", false);
-
-        let NormalUri = monaco.Uri.parse(control_LibLeft.value + '/' + FolderLeft.value + '/' + FileLeft.value);
-        let LeftUri = monaco.Uri.parse('DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + FileLeft.value);
-        let RightUri = monaco.Uri.parse('DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + FileRight.value);
+        let LeftFileName = FileLeft.value.indexOf('.') !== -1 ? FileLeft.value.substring(0, FileLeft.value.indexOf('.')) : FileLeft.value;
+        let RightFileName = FileRight.value.indexOf('.') !== -1 ? FileRight.value.substring(0, FileRight.value.indexOf('.')) : FileRight.value;
+        let NormalUri = monaco.Uri.parse(control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
+        let LeftUri = monaco.Uri.parse('DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
+        let RightUri = monaco.Uri.parse('DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + RightFileName);
 
         let lang = ['', '', ''];//normal original modified
         if (FolderLeft.value === 'QRPGSRC') {
@@ -219,10 +220,6 @@ const readFileButtonCreate = () => {
         if (text === null) {
             return null;
         }
-        if (text.indexOf('.txt') === -1) {
-            text += '.txt';
-        }
-        console.log(libText, array_uri_path[1], text);
         await readText_Model(array_uri_path[0] + "*", array_uri_path[1], text, handle);
     });
     exLinkFile.addEventListener('contextmenu', async (e) => {
@@ -241,9 +238,6 @@ const readFileButtonCreate = () => {
         let text = prompt('参照先から反映\n' + path, preText);
         if (text === null) {
             return null;
-        }
-        if (text.indexOf('.txt') === -1) {
-            text += '.txt';
         }
         let result_array = text.split('/').filter(str => str !== '');
         if (result_array.length !== 3) {
@@ -593,7 +587,6 @@ const readText_Model = async (lib, file, member, r_handle) => {
     let libHandle = null;
     let fileHandle = null;
     let memberHandle = null;
-    console.log(lib);
     if (lib.indexOf('*') !== -1) {
         for await (const handle of r_handle.values()) {
             if (handle.name.indexOf(lib.substring(0, 3)) !== -1) {
@@ -623,7 +616,9 @@ const readText_Model = async (lib, file, member, r_handle) => {
         return null; //end
     }
     for await (const handle of fileHandle.values()) {
-        if (handle.name === member) {
+        console.log(handle);
+        let filename = handle.name.indexOf('.') !== -1 ? handle.name.substring(0, handle.name.indexOf('.')) : handle.name;
+        if (filename === member) {
             memberHandle = handle;
             break;
         }
@@ -631,9 +626,8 @@ const readText_Model = async (lib, file, member, r_handle) => {
     if (memberHandle === null) {
         return null; //end
     }
-
     //Found !!
-    let new_uri = monaco.Uri.parse(libHandle.name + '/' + file + '/' + member);
+    let new_uri = monaco.Uri.parse(libHandle.name + '/' + file + '/' + filename);
     let source_text = await file_read_text(memberHandle.name, memberHandle, false, "text", false);
     let lang = "js";
     if (file === 'QRPGSRC') {
