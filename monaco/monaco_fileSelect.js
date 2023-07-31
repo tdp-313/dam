@@ -615,11 +615,12 @@ const readText_Model = async (lib, file, member, r_handle) => {
     if (fileHandle === null) {
         return null; //end
     }
+    let filename_c = "";
     for await (const handle of fileHandle.values()) {
-        console.log(handle);
         let filename = handle.name.indexOf('.') !== -1 ? handle.name.substring(0, handle.name.indexOf('.')) : handle.name;
         if (filename === member) {
             memberHandle = handle;
+            filename_c = filename;
             break;
         }
     }
@@ -627,7 +628,7 @@ const readText_Model = async (lib, file, member, r_handle) => {
         return null; //end
     }
     //Found !!
-    let new_uri = monaco.Uri.parse(libHandle.name + '/' + file + '/' + filename);
+    let new_uri = monaco.Uri.parse(libHandle.name + '/' + file + '/' + filename_c);
     let source_text = await file_read_text(memberHandle.name, memberHandle, false, "text", false);
     let lang = "js";
     if (file === 'QRPGSRC') {
