@@ -493,7 +493,7 @@ class localSetting {
     this.handleSeparate = typeof (data.handleSeparate) === 'undefined' ? false : data.handleSeparate;
     this.theme = typeof (data.theme) === 'undefined' ? 0 : data.theme;
     this.refMaster = typeof (data.refMaster) === 'undefined' ? false : data.refMaster;
-    this.diffTheme = typeof (data.theme) === 'undefined' ? 0 : data.theme;
+    this.diffTheme = typeof (data.diffTheme) === 'undefined' ? 0 : data.diffTheme;
   }
   get getAll() {
     return this;
