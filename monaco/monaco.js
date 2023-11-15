@@ -181,9 +181,9 @@ const monacoStart = async () => {
         refListFile = await createRefList(model);
       } else if (model.getLanguageId() === 'dds') {
         if (libFileName[1].indexOf('DDS') !== -1) {
-          refListFile = { dds: [libFileName[2].substring(0,libFileName[2].indexOf('.'))], dsp: [] };
+          refListFile = { dds: [libFileName[2].substring(0, libFileName[2].indexOf('.'))], dsp: [] };
         } else if (libFileName[1].indexOf('DSP') !== -1) {
-          refListFile = { dds: [], dsp: [libFileName[2].substring(0,libFileName[2].indexOf('.'))] };
+          refListFile = { dds: [], dsp: [libFileName[2].substring(0, libFileName[2].indexOf('.'))] };
         } else {
           return null;
         }
@@ -220,9 +220,10 @@ const monacoStart = async () => {
       if (additionalRefDef.size > 0) {//PFILE
         normalRefDef = await refDefCreate('QDDSSRC', rootFolderHandle, normalRefDef, [...additionalRefDef]);
       }
+
       if (Setting.getRefMaster && !refOnly) {
         await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read');
-        
+
         let searchLibName = rootLibName.substring(0, 3);
         let folderHandle = null;
         for await (const handle of refRootHandle.values()) {
@@ -240,8 +241,9 @@ const monacoStart = async () => {
         if (additionalRefDef.size > 0) {//PFILE
           normalRefDef = await refDefCreate('QDDSSRC', folderHandle, normalRefDef, [...additionalRefDef]);
         }
-        createUseFileList(normalRefDef);
       }
+      //sidebar
+      createUseFileList(normalRefDef);
     }
     window.sourceRefDefStart = async (refModel, refDef) => {
       refDef.clear();
@@ -429,6 +431,118 @@ const monacoStart = async () => {
       id: "rpg_reIndent",
       label: "再インデント処理",
       run: () => { reIndentProcess() }
+    });
+    let nowork = normalEditor.addCommand(0, () => { }, "");
+
+    monaco.languages.registerCodeLensProvider("rpg-indent", {
+      provideCodeLenses: async function (model, token) {
+        var lineCount = model.getLineCount();
+        let rtn = { lenses: [], dispose: () => { }, };
+        for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
+          // 行のテキストを取得
+          let lineText = model.getLineContent(lineNumber);
+          let op_m = lineText.substring(45, 50).trim();
+          let op_1 = lineText.substring(17, 27).trim();
+          let op_2 = lineText.substring(50, 60).trim();
+          if (op_m.indexOf("BEGSR") !== -1) {
+            rtn.lenses.push({
+              range: {
+                startLineNumber: lineNumber,
+                startColumn: 45,
+                endLineNumber: lineNumber,
+                endColumn: 70,
+              },
+              id: "LINE-" + lineNumber,
+              command: {
+                id: nowork,
+                title: "   subroutine : " + op_1,
+              },
+            });
+          } else if (op_m.indexOf("CALL") !== -1) {
+            rtn.lenses.push({
+              range: {
+                startLineNumber: lineNumber,
+                startColumn: 45,
+                endLineNumber: lineNumber,
+                endColumn: 70,
+              },
+              id: "LINE-" + lineNumber,
+              command: {
+                id: nowork,
+                title: "   CALL : " + op_2,
+              },
+            });
+          } else if (op_m.indexOf("ENDDO") !== -1) {
+            rtn.lenses.push({
+              range: {
+                startLineNumber: lineNumber + 1,
+                startColumn: 45,
+                endLineNumber: lineNumber + 1,
+                endColumn: 70,
+              },
+              id: "LINE-" + lineNumber,
+              command: {
+                id: nowork,
+                title: "",
+              },
+            });
+          } else if (op_m.indexOf("ENDSR") !== -1) {
+            rtn.lenses.push({
+              range: {
+                startLineNumber: lineNumber + 1,
+                startColumn: 45,
+                endLineNumber: lineNumber + 1,
+                endColumn: 70,
+              },
+              id: "LINE-" + lineNumber,
+              command: {
+                id: nowork,
+                title: "",
+              },
+            });
+          } else if (op_m.indexOf("DO") !== -1) {
+            rtn.lenses.push({
+              range: {
+                startLineNumber: lineNumber,
+                startColumn: 45,
+                endLineNumber: lineNumber,
+                endColumn: 70,
+              },
+              id: "LINE-" + lineNumber,
+              command: {
+                id: nowork,
+                title: "   DO : " + op_2,
+              },
+            });
+          }/*else if (lineText.substring(5, 6) === "F") {
+            if (lineText.substring(6, 14).trim() !== "" && lineText.substring(6, 7) !== "*") {
+              let fileID = lineText.substring(6, 14).trim();
+              let sourceDef = await sourceRefDef.get(fileID);
+              
+              if (typeof (sourceDef) !== 'undefined') {
+                fileID = sourceDef.description;
+              }
+              rtn.lenses.push({
+                range: {
+                  startLineNumber: lineNumber+1,
+                  startColumn: 6,
+                  endLineNumber: lineNumber+1,
+                  endColumn: 70,
+                },
+                id: "LINE-" + lineNumber,
+                command: {
+                  id: nowork,
+                  title: fileID,
+                },
+              });
+            }
+          }*/
+        }
+        return rtn;
+      },
+      resolveCodeLens: function (model, codeLens, token) {
+        return codeLens;
+      },
     });
   });
 }

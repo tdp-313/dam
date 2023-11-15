@@ -16,6 +16,16 @@ const Subroutine_OpenArray = [
 const Subroutine_CloseArray = [
     'ENDSR'
 ];
+const RPG400_ConstantsArray = [
+    '*BLANK    ', '*BLANKS   ', '*ALL      ', '*CANCL    ', '*DETC     ',
+    '*DETL     ', '*GETIN    ', '*INIT     ', '*OFL      ', '*TERM     ',
+    '*TOTC     ', '*TOTL     ', '*DEFN     ', '*ENTRY    ', '*INZSR    ', '*LDA      ', '*LIKE     ', 
+    '*PDA      ', '*PSSR     ', '*FILE     ', '*EQUATE   ', '*PLACE    ','*LOCK     ', '*NAMVAR   '
+];
+const RPG400_Constants_NUMArray = [
+    '*ZERO     ', '*ZEROS    ', '*HIVAL    ', '*LOVAL    ', '*DATE     ', 'UDATE     ', '*MONTH    ', 'UMONTH    ',
+    '*DAY      ', 'UDAY      ', '*YEAR     ', 'UYEAR     '
+];
 const rpg_token = () => {
     return (
         {
@@ -23,11 +33,13 @@ const rpg_token = () => {
             OperatorClose: Operetor_CloseArray,
             OperatorOther: [
                 'CABEQ', 'CABNE', 'CABLT', 'CABGT', 'CABLE', 'CABGE', 'CAB  ', 'ITER ', 'LEAVE',
-                'ANDEQ', 'ANDNE', 'ANDLT', 'ANDGT', 'ANDLE', 'ANDGE', 
+                'ANDEQ', 'ANDNE', 'ANDLT', 'ANDGT', 'ANDLE', 'ANDGE',
                 'OREQ ', 'ORNE ', 'ORLT ', 'ORGT ', 'ORLE ', 'ORGE ', 'GOTO ',
             ].concat(Operetor_ElseArray),
             SubroutineOpen: Subroutine_OpenArray,
             SubroutineClose: Subroutine_CloseArray,
+            RPG400_Constants: RPG400_ConstantsArray,
+            RPG400_Constants_NUM:RPG400_Constants_NUMArray,
             SubroutineOther: [
                 'EXSR ', 'CASGT', 'CASLT', 'CASEQ', 'CASNE', 'CASGE', 'CASLE', 'CAS  ', 'ENDCS', 'COMP '
             ],
@@ -144,13 +156,13 @@ const rpg_token = () => {
                             }, {//18-27
                                 cases: {
                                     '[0-9].*.*': 'number',
-                                    '(UDATE|TIME|[\*]YEAR).*': 'number',
-                                    'UDATE.*': 'number',
+                                    '@RPG400_Constants': 'predefined',
+                                    '@RPG400_Constants_NUM': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*]IN[0-9][0-9].*': 'type',
                                     '[\*].*': 'predefined',
                                     "'.*'.*": 'string',
-                                    '.*[,].*':'variable',
+                                    '.*[,].*': 'variable',
                                     '@default': 'identifier'
                                 }
                             }, {//28-32
@@ -180,18 +192,18 @@ const rpg_token = () => {
                             }, {// 33-42
                                 cases: {
                                     '[0-9].*.*': 'number',
-                                    '[\*](LOVAL|HIVAL).*': 'number',
-                                    '(UDATE|TIME|[\*]YEAR).*': 'number',
+                                    '@RPG400_Constants': 'predefined',
+                                    '@RPG400_Constants_NUM': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*].*': 'string',
                                     "'.*'.*": 'string',
-                                    '.*[,].*':'variable',
+                                    '.*[,].*': 'variable',
                                     '@default': 'identifier'
                                 }
                             }, {//43-48
                                 cases: {
                                     '[\*].*': 'string',
-                                    '.*[,].*':'variable',
+                                    '.*[,].*': 'variable',
                                     '@default': 'identifier'
                                 }
                             }, {//49-51
@@ -274,6 +286,8 @@ const rpg_token2 = () => {
             ].concat(Operetor_ElseArray),
             SubroutineOpen: Subroutine_OpenArray,
             SubroutineClose: Subroutine_CloseArray,
+            RPG400_Constants: RPG400_ConstantsArray,
+            RPG400_Constants_NUM:RPG400_Constants_NUMArray,
             SubroutineOther: [
                 'EXSR ', 'CASGT', 'CASLT', 'CASEQ', 'CASNE', 'CASGE', 'CASLE', 'CAS  ', 'ENDCS', 'COMP '
             ],
@@ -411,13 +425,13 @@ const rpg_token2 = () => {
                             }, {//18-27
                                 cases: {
                                     '[0-9].*.*': 'number',
-                                    '[\*](LOVAL|HIVAL).*': 'number',
-                                    '(UDATE|TIME|[\*]YEAR).*': 'number',
+                                    '@RPG400_Constants': 'predefined',
+                                    '@RPG400_Constants_NUM': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*]IN[0-9][0-9].*': 'type',
                                     '[\*].*': 'predefined',
                                     "'.*'.*": 'string',
-                                    '.*[,].*':'variable',
+                                    '.*[,].*': 'variable',
                                     '@default': 'identifier'
                                 }
                             }, 'support', {//28-32
@@ -447,18 +461,18 @@ const rpg_token2 = () => {
                             }, {// 33-42
                                 cases: {
                                     '[0-9].*.*': 'number',
-                                    '[\*](LOVAL|HIVAL).*': 'number',
-                                    '(UDATE|TIME|[\*]YEAR).*': 'number',
+                                    '@RPG400_Constants': 'predefined',
+                                    '@RPG400_Constants_NUM': 'number',
                                     '[\*](OFF|ON).*': 'type',
                                     '[\*].*': 'string',
                                     "'.*'.*": 'string',
-                                    '.*[,].*':'variable',
+                                    '.*[,].*': 'variable',
                                     '@default': 'identifier'
                                 }
                             }, {//43-48
                                 cases: {
                                     '[\*].*': 'string',
-                                    '.*[,].*':'variable',
+                                    '.*[,].*': 'variable',
                                     '@default': 'identifier'
                                 }
                             }, {//49-51
@@ -523,7 +537,7 @@ const rpg_token2 = () => {
                             }, 'comment', ''
                         ]
                     ],
-                ],                
+                ],
             },
 
         }

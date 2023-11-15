@@ -143,6 +143,9 @@ class AsyncDataTreeNodeListDragAndDrop {
         var _a, _b;
         (_b = (_a = this.dnd).onDragEnd) === null || _b === void 0 ? void 0 : _b.call(_a, originalEvent);
     }
+    dispose() {
+        this.dnd.dispose();
+    }
 }
 function asObjectTreeOptions(options) {
     return options && Object.assign(Object.assign({}, options), { collapseByDefault: true, identityProvider: options.identityProvider && {
@@ -196,6 +199,7 @@ function dfs(node, fn) {
     node.children.forEach(child => dfs(child, fn));
 }
 export class AsyncDataTree {
+    get onDidScroll() { return this.tree.onDidScroll; }
     get onDidChangeFocus() { return Event.map(this.tree.onDidChangeFocus, asTreeEvent); }
     get onDidChangeSelection() { return Event.map(this.tree.onDidChangeSelection, asTreeEvent); }
     get onMouseDblClick() { return Event.map(this.tree.onMouseDblClick, asTreeMouseEvent); }
@@ -254,6 +258,12 @@ export class AsyncDataTree {
     }
     set scrollTop(scrollTop) {
         this.tree.scrollTop = scrollTop;
+    }
+    get scrollHeight() {
+        return this.tree.scrollHeight;
+    }
+    get renderHeight() {
+        return this.tree.renderHeight;
     }
     domFocus() {
         this.tree.domFocus();
@@ -633,6 +643,7 @@ export class AsyncDataTree {
     }
     dispose() {
         this.disposables.dispose();
+        this.tree.dispose();
     }
 }
 class CompressibleAsyncDataTreeNodeWrapper {

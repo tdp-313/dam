@@ -12,9 +12,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 import { addDisposableListener } from '../../../base/browser/dom.js';
+import { StandardMouseEvent } from '../../../base/browser/mouseEvent.js';
 import { ToolBar } from '../../../base/browser/ui/toolbar/toolbar.js';
 import { Separator, toAction } from '../../../base/common/actions.js';
 import { coalesceInPlace } from '../../../base/common/arrays.js';
+import { intersection } from '../../../base/common/collections.js';
+import { Iterable } from '../../../base/common/iterator.js';
 import { DisposableStore } from '../../../base/common/lifecycle.js';
 import { localize } from '../../../nls.js';
 import { IMenuService, MenuItemAction, SubmenuItemAction } from '../common/actions.js';
@@ -30,7 +33,7 @@ import { ITelemetryService } from '../../telemetry/common/telemetry.js';
  *
  * See {@link MenuWorkbenchToolBar} for a toolbar that is backed by a menu.
  */
-export let WorkbenchToolBar = class WorkbenchToolBar extends ToolBar {
+let WorkbenchToolBar = class WorkbenchToolBar extends ToolBar {
     constructor(container, _options, _menuService, _contextKeyService, _contextMenuService, keybindingService, telemetryService) {
         super(container, _contextMenuService, Object.assign(Object.assign({ 
             // defaults
@@ -51,7 +54,7 @@ export let WorkbenchToolBar = class WorkbenchToolBar extends ToolBar {
     setActions(_primary, _secondary = [], menuIds) {
         var _a, _b, _c;
         this._sessionDisposables.clear();
-        const primary = _primary.slice();
+        const primary = _primary.slice(); // for hiding and overflow we set some items to undefined
         const secondary = _secondary.slice();
         const toggleActions = [];
         let toggleActionsCheckedCount = 0;
@@ -84,19 +87,26 @@ export let WorkbenchToolBar = class WorkbenchToolBar extends ToolBar {
             }
         }
         // count for max
-        if (((_c = this._options) === null || _c === void 0 ? void 0 : _c.maxNumberOfItems) !== undefined) {
+        if (((_c = this._options) === null || _c === void 0 ? void 0 : _c.overflowBehavior) !== undefined) {
+            const exemptedIds = intersection(new Set(this._options.overflowBehavior.exempted), Iterable.map(primary, a => a === null || a === void 0 ? void 0 : a.id));
+            const maxItems = this._options.overflowBehavior.maxItems - exemptedIds.size;
             let count = 0;
             for (let i = 0; i < primary.length; i++) {
                 const action = primary[i];
                 if (!action) {
                     continue;
                 }
-                if (++count >= this._options.maxNumberOfItems) {
+                count++;
+                if (exemptedIds.has(action.id)) {
+                    continue;
+                }
+                if (count >= maxItems) {
                     primary[i] = undefined;
                     extraSecondary[i] = action;
                 }
             }
         }
+        // coalesce turns Array<IAction|undefined> into IAction[]
         coalesceInPlace(primary);
         coalesceInPlace(extraSecondary);
         super.setActions(primary, Separator.join(extraSecondary, secondary));
@@ -104,12 +114,13 @@ export let WorkbenchToolBar = class WorkbenchToolBar extends ToolBar {
         if (toggleActions.length > 0) {
             this._sessionDisposables.add(addDisposableListener(this.getElement(), 'contextmenu', e => {
                 var _a, _b, _c, _d, _e;
-                const action = this.getItemAction(e.target);
+                const event = new StandardMouseEvent(e);
+                const action = this.getItemAction(event.target);
                 if (!(action)) {
                     return;
                 }
-                e.preventDefault();
-                e.stopPropagation();
+                event.preventDefault();
+                event.stopPropagation();
                 let noHide = false;
                 // last item cannot be hidden when using ignore strategy
                 if (toggleActionsCheckedCount === 1 && ((_a = this._options) === null || _a === void 0 ? void 0 : _a.hiddenItemStrategy) === 0 /* HiddenItemStrategy.Ignore */) {
@@ -159,7 +170,7 @@ export let WorkbenchToolBar = class WorkbenchToolBar extends ToolBar {
                     }));
                 }
                 this._contextMenuService.showContextMenu({
-                    getAnchor: () => e,
+                    getAnchor: () => event,
                     getActions: () => actions,
                     // add context menu actions (iff appicable)
                     menuId: (_c = this._options) === null || _c === void 0 ? void 0 : _c.contextMenu,
@@ -178,3 +189,4 @@ WorkbenchToolBar = __decorate([
     __param(5, IKeybindingService),
     __param(6, ITelemetryService)
 ], WorkbenchToolBar);
+export { WorkbenchToolBar };

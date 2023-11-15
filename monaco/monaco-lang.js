@@ -342,9 +342,9 @@ const dds_DefinitionList = async (model, map, refName, handle) => {
             } else {
                 let start_row_desc = "";
                 if (text_p !== -1) {
-                    start_row_desc = sp_op_full.substring(text_p + 6, sp_op_full.lastIndexOf("'"));
+                    start_row_desc = sp_op_full.substring(text_p + 6, sp_op_full.lastIndexOf("+"));
                 } else if (colhdg_p !== -1) {
-                    start_row_desc = sp_op_full.substring(colhdg_p + 8, sp_op_full.lastIndexOf("'"));
+                    start_row_desc = sp_op_full.substring(colhdg_p + 8, sp_op_full.lastIndexOf("+"));
                 }
                 if (max === i) {
                     console.log('MAX');
@@ -357,7 +357,7 @@ const dds_DefinitionList = async (model, map, refName, handle) => {
                     return start_row_desc;
                 } else if (value.length === 0) {
                     let sp_op_full_next = next_row.substring(44, 80).trim();
-                    let nextRow_desc = sp_op_full_next.substring(sp_op_full_next.indexOf("'") + 1, sp_op_full_next.lastIndexOf("'"));
+                    let nextRow_desc = sp_op_full_next.substring(0, sp_op_full_next.lastIndexOf("'"));
 
                     return start_row_desc + nextRow_desc;
                 }

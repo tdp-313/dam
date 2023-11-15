@@ -25,6 +25,9 @@ export class ColorPickerHeader extends Disposable {
         this._domNode = $('.colorpicker-header');
         dom.append(container, this._domNode);
         this._pickedColorNode = dom.append(this._domNode, $('.picked-color'));
+        dom.append(this._pickedColorNode, $('span.codicon.codicon-color-mode'));
+        this._pickedColorPresentation = dom.append(this._pickedColorNode, document.createElement('span'));
+        this._pickedColorPresentation.classList.add('picked-color-presentation');
         const tooltip = localize('clickToToggleColorOptions', "Click to toggle color options (rgb/hsl/hex)");
         this._pickedColorNode.setAttribute('title', tooltip);
         this._originalColorNode = dom.append(this._domNode, $('.original-color'));
@@ -64,8 +67,7 @@ export class ColorPickerHeader extends Disposable {
         this.onDidChangePresentation();
     }
     onDidChangePresentation() {
-        this._pickedColorNode.textContent = this.model.presentation ? this.model.presentation.label : '';
-        this._pickedColorNode.prepend($('.codicon.codicon-color-mode'));
+        this._pickedColorPresentation.textContent = this.model.presentation ? this.model.presentation.label : '';
     }
 }
 class CloseButton extends Disposable {
@@ -178,7 +180,7 @@ class SaturationBox extends Disposable {
             this.onDidChangePosition(e.offsetX, e.offsetY);
         }
         this.monitor.startMonitoring(e.target, e.pointerId, e.buttons, event => this.onDidChangePosition(event.pageX - origin.left, event.pageY - origin.top), () => null);
-        const pointerUpListener = dom.addDisposableListener(document, dom.EventType.POINTER_UP, () => {
+        const pointerUpListener = dom.addDisposableListener(e.target.ownerDocument, dom.EventType.POINTER_UP, () => {
             this._onColorFlushed.fire();
             pointerUpListener.dispose();
             if (this.monitor) {
@@ -225,11 +227,13 @@ class SaturationBox extends Disposable {
         this.selection.style.left = `${s * this.width}px`;
         this.selection.style.top = `${this.height - v * this.height}px`;
     }
-    onDidChangeColor() {
+    onDidChangeColor(color) {
         if (this.monitor && this.monitor.isMonitoring()) {
             return;
         }
         this.paint();
+        const hsva = color.hsva;
+        this.paintSelection(hsva.s, hsva.v);
     }
 }
 class Strip extends Disposable {
@@ -251,11 +255,16 @@ class Strip extends Disposable {
         this.slider = dom.append(this.domNode, $('.slider'));
         this.slider.style.top = `0px`;
         this._register(dom.addDisposableListener(this.domNode, dom.EventType.POINTER_DOWN, e => this.onPointerDown(e)));
+        this._register(model.onDidChangeColor(this.onDidChangeColor, this));
         this.layout();
     }
     layout() {
         this.height = this.domNode.offsetHeight - this.slider.offsetHeight;
         const value = this.getValue(this.model.color);
+        this.updateSliderPosition(value);
+    }
+    onDidChangeColor(color) {
+        const value = this.getValue(color);
         this.updateSliderPosition(value);
     }
     onPointerDown(e) {
@@ -269,7 +278,7 @@ class Strip extends Disposable {
             this.onDidChangeTop(e.offsetY);
         }
         monitor.startMonitoring(e.target, e.pointerId, e.buttons, event => this.onDidChangeTop(event.pageY - origin.top), () => null);
-        const pointerUpListener = dom.addDisposableListener(document, dom.EventType.POINTER_UP, () => {
+        const pointerUpListener = dom.addDisposableListener(e.target.ownerDocument, dom.EventType.POINTER_UP, () => {
             this._onColorFlushed.fire();
             pointerUpListener.dispose();
             monitor.stopMonitoring(true);
@@ -289,10 +298,10 @@ class OpacityStrip extends Strip {
     constructor(container, model, showingStandaloneColorPicker = false) {
         super(container, model, showingStandaloneColorPicker);
         this.domNode.classList.add('opacity-strip');
-        this._register(model.onDidChangeColor(this.onDidChangeColor, this));
         this.onDidChangeColor(this.model.color);
     }
     onDidChangeColor(color) {
+        super.onDidChangeColor(color);
         const { r, g, b } = color.rgba;
         const opaque = new Color(new RGBA(r, g, b, 1));
         const transparent = new Color(new RGBA(r, g, b, 0));

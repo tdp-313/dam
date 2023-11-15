@@ -13,13 +13,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 import { DeferredPromise } from '../../../base/common/async.js';
 import { CancellationTokenSource } from '../../../base/common/cancellation.js';
-import { once } from '../../../base/common/functional.js';
+import { Event } from '../../../base/common/event.js';
 import { Disposable, DisposableStore, toDisposable } from '../../../base/common/lifecycle.js';
 import { IInstantiationService } from '../../instantiation/common/instantiation.js';
 import { DefaultQuickAccessFilterValue, Extensions } from '../common/quickAccess.js';
 import { IQuickInputService, ItemActivation } from '../common/quickInput.js';
 import { Registry } from '../../registry/common/platform.js';
-export let QuickAccessController = class QuickAccessController extends Disposable {
+let QuickAccessController = class QuickAccessController extends Disposable {
     constructor(quickInputService, instantiationService) {
         super();
         this.quickInputService = quickInputService;
@@ -93,7 +93,7 @@ export let QuickAccessController = class QuickAccessController extends Disposabl
         let pickPromise = undefined;
         if (pick) {
             pickPromise = new DeferredPromise();
-            disposables.add(once(picker.onWillAccept)(e => {
+            disposables.add(Event.once(picker.onWillAccept)(e => {
                 e.veto();
                 picker.hide();
             }));
@@ -109,7 +109,7 @@ export let QuickAccessController = class QuickAccessController extends Disposabl
         }
         // Finally, trigger disposal and cancellation when the picker
         // hides depending on items selected or not.
-        once(picker.onDidHide)(() => {
+        Event.once(picker.onDidHide)(() => {
             if (picker.selectedItems.length === 0) {
                 cts.cancel();
             }
@@ -190,3 +190,4 @@ QuickAccessController = __decorate([
     __param(0, IQuickInputService),
     __param(1, IInstantiationService)
 ], QuickAccessController);
+export { QuickAccessController };

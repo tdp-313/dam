@@ -31,7 +31,7 @@ const readFileButtonCreate = () => {
     });
     otherTabOpen.addEventListener('contextmenu', async (event) => {
         event.preventDefault();
-        window.open('/dam/monaco', Math.random(), "popup");
+        window.open('/monaco', Math.random(), "popup");
     });
     const modeChangeSync = document.getElementById('control-Reload');
     modeChangeSync.addEventListener('contextmenu', async (event) => {
@@ -153,7 +153,7 @@ const readFileButtonCreate = () => {
         }
         for (let i = 0; i < search_target.length; i++) {
             if (FileList[target][fileType][fullname].name === FileList[reverse][fileType][search_target[i]].name) {
-                console.log("Sync");
+                //console.log("Sync");
                 let revPulldown = document.getElementById('control-' + fileType + '-' + reverse);
                 revPulldown.selectedIndex = i;
                 break;
@@ -190,6 +190,7 @@ const readFileButtonCreate = () => {
             if (isFileSelectSync) {
                 await fileSelectSync_Process(L_R, FileLR.value, file);
             }
+            await pullDownCreate();
             await fileReadBoth();
         });
     });

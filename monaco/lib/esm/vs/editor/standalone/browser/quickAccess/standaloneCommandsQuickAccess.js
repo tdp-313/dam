@@ -25,7 +25,6 @@ import { Extensions } from '../../../../platform/quickinput/common/quickAccess.j
 import { QuickCommandNLS } from '../../../common/standaloneStrings.js';
 import { ICodeEditorService } from '../../../browser/services/codeEditorService.js';
 import { AbstractEditorCommandsQuickAccessProvider } from '../../../contrib/quickAccess/browser/commandsQuickAccess.js';
-import { withNullAsUndefined } from '../../../../base/common/types.js';
 import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
 import { IKeybindingService } from '../../../../platform/keybinding/common/keybinding.js';
 import { ICommandService } from '../../../../platform/commands/common/commands.js';
@@ -34,8 +33,8 @@ import { IDialogService } from '../../../../platform/dialogs/common/dialogs.js';
 import { EditorAction, registerEditorAction } from '../../../browser/editorExtensions.js';
 import { EditorContextKeys } from '../../../common/editorContextKeys.js';
 import { IQuickInputService } from '../../../../platform/quickinput/common/quickInput.js';
-export let StandaloneCommandsQuickAccessProvider = class StandaloneCommandsQuickAccessProvider extends AbstractEditorCommandsQuickAccessProvider {
-    get activeTextEditorControl() { return withNullAsUndefined(this.codeEditorService.getFocusedCodeEditor()); }
+let StandaloneCommandsQuickAccessProvider = class StandaloneCommandsQuickAccessProvider extends AbstractEditorCommandsQuickAccessProvider {
+    get activeTextEditorControl() { var _a; return (_a = this.codeEditorService.getFocusedCodeEditor()) !== null && _a !== void 0 ? _a : undefined; }
     constructor(instantiationService, codeEditorService, keybindingService, commandService, telemetryService, dialogService) {
         super({ showAlias: false }, instantiationService, keybindingService, commandService, telemetryService, dialogService);
         this.codeEditorService = codeEditorService;
@@ -62,6 +61,7 @@ StandaloneCommandsQuickAccessProvider = __decorate([
     __param(4, ITelemetryService),
     __param(5, IDialogService)
 ], StandaloneCommandsQuickAccessProvider);
+export { StandaloneCommandsQuickAccessProvider };
 export class GotoLineAction extends EditorAction {
     constructor() {
         super({

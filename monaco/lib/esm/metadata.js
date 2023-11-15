@@ -51,6 +51,10 @@ exports.features = [
     "entry": "vs/editor/contrib/cursorUndo/browser/cursorUndo"
   },
   {
+    "label": "diffEditor",
+    "entry": "vs/editor/browser/widget/diffEditor/diffEditor.contribution"
+  },
+  {
     "label": "dnd",
     "entry": "vs/editor/contrib/dnd/browser/dnd"
   },
@@ -405,6 +409,10 @@ exports.languages = [
   {
     "label": "markdown",
     "entry": "vs/basic-languages/markdown/markdown.contribution"
+  },
+  {
+    "label": "mdx",
+    "entry": "vs/basic-languages/mdx/mdx.contribution"
   },
   {
     "label": "mips",

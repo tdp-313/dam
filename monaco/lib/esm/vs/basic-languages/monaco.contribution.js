@@ -1,7 +1,7 @@
 import '../editor/editor.api.js';
 /*!-----------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
- * Version: 0.40.0(83b3cf23ca80c94cccca7c5b3e48351b220f8e35)
+ * Version: 0.44.0(3e047efd345ff102c8c61b5398fb30845aaac166)
  * Released under the MIT license
  * https://github.com/microsoft/monaco-editor/blob/main/LICENSE.txt
  *-----------------------------------------------------------------------------*/
@@ -43,6 +43,7 @@ import "./lua/lua.contribution.js";
 import "./liquid/liquid.contribution.js";
 import "./m3/m3.contribution.js";
 import "./markdown/markdown.contribution.js";
+import "./mdx/mdx.contribution.js";
 import "./mips/mips.contribution.js";
 import "./msdax/msdax.contribution.js";
 import "./mysql/mysql.contribution.js";

@@ -27,19 +27,19 @@ import { ICodeEditorService } from '../../browser/services/codeEditorService.js'
 import { IContextKeyService } from '../../../platform/contextkey/common/contextkey.js';
 import { registerSingleton } from '../../../platform/instantiation/common/extensions.js';
 import { IThemeService } from '../../../platform/theme/common/themeService.js';
-export let StandaloneCodeEditorService = class StandaloneCodeEditorService extends AbstractCodeEditorService {
+let StandaloneCodeEditorService = class StandaloneCodeEditorService extends AbstractCodeEditorService {
     constructor(contextKeyService, themeService) {
         super(themeService);
-        this.onCodeEditorAdd(() => this._checkContextKey());
-        this.onCodeEditorRemove(() => this._checkContextKey());
+        this._register(this.onCodeEditorAdd(() => this._checkContextKey()));
+        this._register(this.onCodeEditorRemove(() => this._checkContextKey()));
         this._editorIsOpen = contextKeyService.createKey('editorIsOpen', false);
         this._activeCodeEditor = null;
-        this.registerCodeEditorOpenHandler((input, source, sideBySide) => __awaiter(this, void 0, void 0, function* () {
+        this._register(this.registerCodeEditorOpenHandler((input, source, sideBySide) => __awaiter(this, void 0, void 0, function* () {
             if (!source) {
                 return null;
             }
             return this.doOpenEditor(source, input);
-        }));
+        })));
     }
     _checkContextKey() {
         let hasCodeEditor = false;
@@ -99,4 +99,5 @@ StandaloneCodeEditorService = __decorate([
     __param(0, IContextKeyService),
     __param(1, IThemeService)
 ], StandaloneCodeEditorService);
+export { StandaloneCodeEditorService };
 registerSingleton(ICodeEditorService, StandaloneCodeEditorService, 0 /* InstantiationType.Eager */);

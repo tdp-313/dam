@@ -20,7 +20,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { $, addDisposableListener, append, asCSSUrl, EventType, ModifierKeyEmitter, prepend } from '../../../base/browser/dom.js';
+import { $, addDisposableListener, append, asCSSUrl, EventType, ModifierKeyEmitter, prepend, reset } from '../../../base/browser/dom.js';
 import { StandardKeyboardEvent } from '../../../base/browser/keyboardEvent.js';
 import { ActionViewItem, BaseActionViewItem, SelectActionViewItem } from '../../../base/browser/ui/actionbar/actionViewItems.js';
 import { DropdownMenuActionViewItem } from '../../../base/browser/ui/dropdown/dropdownActionViewItem.js';
@@ -44,6 +44,7 @@ import { isDark } from '../../theme/common/theme.js';
 import { assertType } from '../../../base/common/types.js';
 import { asCssVariable, selectBorder } from '../../theme/common/colorRegistry.js';
 import { defaultSelectBoxStyles } from '../../theme/browser/defaultStyles.js';
+import { IAccessibilityService } from '../../accessibility/common/accessibility.js';
 export function createAndFillInContextMenuActions(menu, options, target, primaryGroup) {
     const groups = menu.getActions(options);
     const modifierKeyEmitter = ModifierKeyEmitter.getInstance();
@@ -100,19 +101,20 @@ function fillInActions(groups, target, useAlternativeActions, isPrimaryAction = 
         // inlining submenus with length 0 or 1 is easy,
         // larger submenus need to be checked with the overall limit
         const submenuActions = action.actions;
-        if (submenuActions.length <= 1 && shouldInlineSubmenu(action, group, target.length)) {
+        if (shouldInlineSubmenu(action, group, target.length)) {
             target.splice(index, 1, ...submenuActions);
         }
     }
 }
-export let MenuEntryActionViewItem = class MenuEntryActionViewItem extends ActionViewItem {
-    constructor(action, options, _keybindingService, _notificationService, _contextKeyService, _themeService, _contextMenuService) {
+let MenuEntryActionViewItem = class MenuEntryActionViewItem extends ActionViewItem {
+    constructor(action, options, _keybindingService, _notificationService, _contextKeyService, _themeService, _contextMenuService, _accessibilityService) {
         super(undefined, action, { icon: !!(action.class || action.item.icon), label: !action.class && !action.item.icon, draggable: options === null || options === void 0 ? void 0 : options.draggable, keybinding: options === null || options === void 0 ? void 0 : options.keybinding, hoverDelegate: options === null || options === void 0 ? void 0 : options.hoverDelegate });
         this._keybindingService = _keybindingService;
         this._notificationService = _notificationService;
         this._contextKeyService = _contextKeyService;
         this._themeService = _themeService;
         this._contextMenuService = _contextMenuService;
+        this._accessibilityService = _accessibilityService;
         this._wantsAltCommand = false;
         this._itemClassDispose = this._register(new MutableDisposable());
         this._altKey = ModifierKeyEmitter.getInstance();
@@ -142,9 +144,12 @@ export let MenuEntryActionViewItem = class MenuEntryActionViewItem extends Actio
             this._updateItemClass(this._menuItemAction.item);
         }
         if (this._menuItemAction.alt) {
-            const updateAltState = (keyStatus) => {
+            let isMouseOver = false;
+            const updateAltState = () => {
                 var _a;
-                const wantsAltCommand = !!((_a = this._commandAction.alt) === null || _a === void 0 ? void 0 : _a.enabled) && (keyStatus.altKey || ((isWindows || isLinux) && keyStatus.shiftKey));
+                const wantsAltCommand = !!((_a = this._menuItemAction.alt) === null || _a === void 0 ? void 0 : _a.enabled) &&
+                    (!this._accessibilityService.isMotionReduced() || isMouseOver) && (this._altKey.keyStatus.altKey ||
+                    (this._altKey.keyStatus.shiftKey && isMouseOver));
                 if (wantsAltCommand !== this._wantsAltCommand) {
                     this._wantsAltCommand = wantsAltCommand;
                     this.updateLabel();
@@ -153,7 +158,15 @@ export let MenuEntryActionViewItem = class MenuEntryActionViewItem extends Actio
                 }
             };
             this._register(this._altKey.event(updateAltState));
-            updateAltState(this._altKey.keyStatus);
+            this._register(addDisposableListener(container, 'mouseleave', _ => {
+                isMouseOver = false;
+                updateAltState();
+            }));
+            this._register(addDisposableListener(container, 'mouseenter', _ => {
+                isMouseOver = true;
+                updateAltState();
+            }));
+            updateAltState();
         }
     }
     updateLabel() {
@@ -211,14 +224,21 @@ export let MenuEntryActionViewItem = class MenuEntryActionViewItem extends Actio
             });
         }
         else {
-            // icon path/url
-            label.style.backgroundImage = (isDark(this._themeService.getColorTheme().type)
+            // icon path/url - add special element with SVG-mask and icon color background
+            const svgUrl = isDark(this._themeService.getColorTheme().type)
                 ? asCSSUrl(icon.dark)
-                : asCSSUrl(icon.light));
+                : asCSSUrl(icon.light);
+            const svgIcon = $('span');
+            svgIcon.style.webkitMask = svgIcon.style.mask = `${svgUrl} no-repeat 50% 50%`;
+            svgIcon.style.background = 'var(--vscode-icon-foreground)';
+            svgIcon.style.display = 'inline-block';
+            svgIcon.style.width = '100%';
+            svgIcon.style.height = '100%';
+            label.appendChild(svgIcon);
             label.classList.add('icon');
             this._itemClassDispose.value = combinedDisposable(toDisposable(() => {
-                label.style.backgroundImage = '';
                 label.classList.remove('icon');
+                reset(label);
             }), this._themeService.onDidColorThemeChange(() => {
                 // refresh when the theme changes in case we go between dark <-> light
                 this.updateClass();
@@ -231,9 +251,11 @@ MenuEntryActionViewItem = __decorate([
     __param(3, INotificationService),
     __param(4, IContextKeyService),
     __param(5, IThemeService),
-    __param(6, IContextMenuService)
+    __param(6, IContextMenuService),
+    __param(7, IAccessibilityService)
 ], MenuEntryActionViewItem);
-export let SubmenuEntryActionViewItem = class SubmenuEntryActionViewItem extends DropdownMenuActionViewItem {
+export { MenuEntryActionViewItem };
+let SubmenuEntryActionViewItem = class SubmenuEntryActionViewItem extends DropdownMenuActionViewItem {
     constructor(action, options, _keybindingService, _contextMenuService, _themeService) {
         var _a, _b, _c;
         const dropdownOptions = Object.assign(Object.assign({}, options), { menuAsChild: (_a = options === null || options === void 0 ? void 0 : options.menuAsChild) !== null && _a !== void 0 ? _a : false, classNames: (_b = options === null || options === void 0 ? void 0 : options.classNames) !== null && _b !== void 0 ? _b : (ThemeIcon.isThemeIcon(action.item.icon) ? ThemeIcon.asClassName(action.item.icon) : undefined), keybindingProvider: (_c = options === null || options === void 0 ? void 0 : options.keybindingProvider) !== null && _c !== void 0 ? _c : (action => _keybindingService.lookupKeybinding(action.id)) });
@@ -270,7 +292,8 @@ SubmenuEntryActionViewItem = __decorate([
     __param(3, IContextMenuService),
     __param(4, IThemeService)
 ], SubmenuEntryActionViewItem);
-export let DropdownWithDefaultActionViewItem = class DropdownWithDefaultActionViewItem extends BaseActionViewItem {
+export { SubmenuEntryActionViewItem };
+let DropdownWithDefaultActionViewItem = class DropdownWithDefaultActionViewItem extends BaseActionViewItem {
     constructor(submenuAction, options, _keybindingService, _notificationService, _contextMenuService, _menuService, _instaService, _storageService) {
         var _a, _b, _c;
         super(null, submenuAction);
@@ -399,6 +422,7 @@ DropdownWithDefaultActionViewItem = __decorate([
     __param(6, IInstantiationService),
     __param(7, IStorageService)
 ], DropdownWithDefaultActionViewItem);
+export { DropdownWithDefaultActionViewItem };
 let SubmenuEntrySelectActionViewItem = class SubmenuEntrySelectActionViewItem extends SelectActionViewItem {
     constructor(action, contextViewService) {
         super(null, action, action.actions.map(a => ({

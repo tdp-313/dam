@@ -19,7 +19,7 @@ import { Event } from '../../../base/common/event.js';
 import { Disposable } from '../../../base/common/lifecycle.js';
 import { IOpenerService } from '../common/opener.js';
 import './link.css';
-export let Link = class Link extends Disposable {
+let Link = class Link extends Disposable {
     get enabled() {
         return this._enabled;
     }
@@ -55,10 +55,8 @@ export let Link = class Link extends Disposable {
         this.el.setAttribute('role', 'button');
         const onClickEmitter = this._register(new DomEmitter(this.el, 'click'));
         const onKeyPress = this._register(new DomEmitter(this.el, 'keypress'));
-        const onEnterPress = Event.chain(onKeyPress.event)
-            .map(e => new StandardKeyboardEvent(e))
-            .filter(e => e.keyCode === 3 /* KeyCode.Enter */)
-            .event;
+        const onEnterPress = Event.chain(onKeyPress.event, $ => $.map(e => new StandardKeyboardEvent(e))
+            .filter(e => e.keyCode === 3 /* KeyCode.Enter */));
         const onTap = this._register(new DomEmitter(this.el, TouchEventType.Tap)).event;
         this._register(Gesture.addTarget(this.el));
         const onOpen = Event.any(onClickEmitter.event, onEnterPress, onTap);
@@ -80,3 +78,4 @@ export let Link = class Link extends Disposable {
 Link = __decorate([
     __param(3, IOpenerService)
 ], Link);
+export { Link };

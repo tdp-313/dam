@@ -35,13 +35,13 @@ class SimplePasteAndDropProvider {
     provideDocumentPasteEdits(_model, _ranges, dataTransfer, token) {
         return __awaiter(this, void 0, void 0, function* () {
             const edit = yield this.getEdit(dataTransfer, token);
-            return edit ? { id: this.id, insertText: edit.insertText, label: edit.label, detail: edit.detail, priority: edit.priority } : undefined;
+            return edit ? { insertText: edit.insertText, label: edit.label, detail: edit.detail, handledMimeType: edit.handledMimeType, yieldTo: edit.yieldTo } : undefined;
         });
     }
     provideDocumentOnDropEdits(_model, _position, dataTransfer, token) {
         return __awaiter(this, void 0, void 0, function* () {
             const edit = yield this.getEdit(dataTransfer, token);
-            return edit ? { id: this.id, insertText: edit.insertText, label: edit.label, priority: edit.priority } : undefined;
+            return edit ? { insertText: edit.insertText, label: edit.label, handledMimeType: edit.handledMimeType, yieldTo: edit.yieldTo } : undefined;
         });
     }
 }
@@ -65,8 +65,7 @@ class DefaultTextProvider extends SimplePasteAndDropProvider {
             }
             const insertText = yield textEntry.asString();
             return {
-                id: this.id,
-                priority: 0,
+                handledMimeType: Mimes.text,
                 label: localize('text.label', "Insert Plain Text"),
                 detail: builtInLabel,
                 insertText
@@ -113,8 +112,7 @@ class PathProvider extends SimplePasteAndDropProvider {
                     : localize('defaultDropProvider.uriList.path', "Insert Path");
             }
             return {
-                id: this.id,
-                priority: 0,
+                handledMimeType: Mimes.uriList,
                 insertText,
                 label,
                 detail: builtInLabel,
@@ -144,8 +142,7 @@ let RelativePathProvider = class RelativePathProvider extends SimplePasteAndDrop
                 return;
             }
             return {
-                id: this.id,
-                priority: 0,
+                handledMimeType: Mimes.uriList,
                 insertText: relativeUris.join(' '),
                 label: entries.length > 1
                     ? localize('defaultDropProvider.uriList.relativePaths', "Insert Relative Paths")
@@ -177,7 +174,7 @@ function extractUriList(dataTransfer) {
         return entries;
     });
 }
-export let DefaultDropProvidersFeature = class DefaultDropProvidersFeature extends Disposable {
+let DefaultDropProvidersFeature = class DefaultDropProvidersFeature extends Disposable {
     constructor(languageFeaturesService, workspaceContextService) {
         super();
         this._register(languageFeaturesService.documentOnDropEditProvider.register('*', new DefaultTextProvider()));
@@ -189,7 +186,8 @@ DefaultDropProvidersFeature = __decorate([
     __param(0, ILanguageFeaturesService),
     __param(1, IWorkspaceContextService)
 ], DefaultDropProvidersFeature);
-export let DefaultPasteProvidersFeature = class DefaultPasteProvidersFeature extends Disposable {
+export { DefaultDropProvidersFeature };
+let DefaultPasteProvidersFeature = class DefaultPasteProvidersFeature extends Disposable {
     constructor(languageFeaturesService, workspaceContextService) {
         super();
         this._register(languageFeaturesService.documentPasteEditProvider.register('*', new DefaultTextProvider()));
@@ -201,3 +199,4 @@ DefaultPasteProvidersFeature = __decorate([
     __param(0, ILanguageFeaturesService),
     __param(1, IWorkspaceContextService)
 ], DefaultPasteProvidersFeature);
+export { DefaultPasteProvidersFeature };

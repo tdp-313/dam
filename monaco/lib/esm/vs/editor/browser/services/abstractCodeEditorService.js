@@ -20,7 +20,7 @@ import { Emitter } from '../../../base/common/event.js';
 import { Disposable, toDisposable } from '../../../base/common/lifecycle.js';
 import { LinkedList } from '../../../base/common/linkedList.js';
 import { IThemeService } from '../../../platform/theme/common/themeService.js';
-export let AbstractCodeEditorService = class AbstractCodeEditorService extends Disposable {
+let AbstractCodeEditorService = class AbstractCodeEditorService extends Disposable {
     constructor(_themeService) {
         super();
         this._themeService = _themeService;
@@ -62,11 +62,6 @@ export let AbstractCodeEditorService = class AbstractCodeEditorService extends D
     addDiffEditor(editor) {
         this._diffEditors[editor.getId()] = editor;
         this._onDiffEditorAdd.fire(editor);
-    }
-    removeDiffEditor(editor) {
-        if (delete this._diffEditors[editor.getId()]) {
-            this._onDiffEditorRemove.fire(editor);
-        }
     }
     listDiffEditors() {
         return Object.keys(this._diffEditors).map(id => this._diffEditors[id]);
@@ -135,6 +130,7 @@ export let AbstractCodeEditorService = class AbstractCodeEditorService extends D
 AbstractCodeEditorService = __decorate([
     __param(0, IThemeService)
 ], AbstractCodeEditorService);
+export { AbstractCodeEditorService };
 export class GlobalStyleSheet {
     constructor(styleSheet) {
         this._styleSheet = styleSheet;
