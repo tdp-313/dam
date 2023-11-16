@@ -3,12 +3,43 @@ const monacoLang = async () => {
     monaco.languages.register({ id: 'rpg-indent' });
     monaco.languages.register({ id: 'dds' });
     monaco.languages.register({ id: 'dsp' });
+    monaco.languages.register({ id: 'cl' });
 
     monaco.languages.setLanguageConfiguration('dds', {
-        brackets: [
-            ['(', ')'],
+        // symbols used as brackets
+        "brackets": [
+            ["{", "}"],
+            ["[", "]"],
+            ["(", ")"]
         ],
+        // symbols that that can be used to surround a selection
+        "surroundingPairs": [
+            ["{", "}"],
+            ["[", "]"],
+            ["(", ")"],
+            ["\"", "\""],
+            ["'", "'"]
+        ]
+    });
 
+    monaco.languages.setLanguageConfiguration('cl', {
+        // symbols used as brackets
+        "brackets": [
+            ["{", "}"],
+            ["[", "]"],
+            ["(", ")"]
+        ],
+        // symbols that that can be used to surround a selection
+        "surroundingPairs": [
+            ["{", "}"],
+            ["[", "]"],
+            ["(", ")"],
+            ["\"", "\""],
+            ["'", "'"]
+        ],
+        "comments": {
+            "blockComment": ["/*", "*/"]
+        }
     });
     monaco.languages.setLanguageConfiguration('rpg-indent', {
         indentSize: 2,
@@ -21,6 +52,7 @@ const monacoLang = async () => {
     monaco.languages.setMonarchTokensProvider('rpg', rpg_token());
     monaco.languages.setMonarchTokensProvider('rpg-indent', rpg_token2());
     monaco.languages.setMonarchTokensProvider('dds', dds_token());
+    monaco.languages.setMonarchTokensProvider('cl', cl_token());
 
     const flag_regex = /\*IN[0-9][0-9]/;
     monaco.languages.registerDefinitionProvider('rpg-indent', {
@@ -419,7 +451,7 @@ const dds_DefinitionList = async (model, map, refName, handle) => {
                             break;
                         }
                     }
-                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 5, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description, s_description: description, sourceType: "definition",handle:handle });
+                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 5, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description, s_description: description, sourceType: "definition", handle: handle });
                     rangeContinue = i;
                     rangeContinue_value = value;
                     description = await createDescription(row, i, model, lineCount);
@@ -442,7 +474,7 @@ const dds_DefinitionList = async (model, map, refName, handle) => {
                             break;
                         }
                     }
-                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 5, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description, s_description: description, sourceType: "definition" ,handle:handle});
+                    map.set(rangeContinue_value, { location: { range: new monaco.Range(start, 5, end, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description, s_description: description, sourceType: "definition", handle: handle });
                     rangeContinue = -1;
                 }
             } else {
@@ -455,7 +487,7 @@ const dds_DefinitionList = async (model, map, refName, handle) => {
             }
         }
         if (rangeContinue > 0 && lineCount === i) {
-            map.set(rangeContinue_value, { location: { range: new monaco.Range(rangeContinue, 5, i, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description, s_description: description, sourceType: "definition" ,handle:handle});
+            map.set(rangeContinue_value, { location: { range: new monaco.Range(rangeContinue, 5, i, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + description, s_description: description, sourceType: "definition", handle: handle });
         }
     }
     let fileDescription = "FIleObject";
@@ -470,7 +502,7 @@ const dds_DefinitionList = async (model, map, refName, handle) => {
         }
     }
     //console.log(refName, fileDescription);
-    map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file",handle:handle });
+    map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file", handle: handle });
     if (R_file.length > 0) {
         for (let i = 0; i < R_file.length; i++) {
             additionalRefDef.add(R_file[i]);
@@ -487,10 +519,10 @@ const createUseFileList = async (refDef) => {
     mode = selectedRadio.value;
     sidebar_contents.innerHTML = "";
     let filter_style = themeCSS_FilterStyle();
-    const get_template = (fileName, desc, library,langIcon,filter) => {
+    const get_template = (fileName, desc, library, langIcon, filter) => {
         let temp = "";
         temp += '<div id="sidebar-contents-' + fileName + ' " class="sidebar-contents hoverButton">';
-        temp += '<img  class="refSize control-iconButton" style="filter: ' + filter + ';" src="./icon/' + langIcon +'.svg">';
+        temp += '<img  class="refSize control-iconButton" style="filter: ' + filter + ';" src="./icon/' + langIcon + '.svg">';
         temp += '<span class="sidebar-filename">' + fileName + '</span>';
         temp += '<span style="overflow: overlay; text-wrap: nowrap;">' + desc + '</span>';
         temp += '<span style="font-size: 0.8rem; padding-left: 2rem;">' + library + '</span>';
@@ -501,7 +533,7 @@ const createUseFileList = async (refDef) => {
         refDef.forEach((value, key) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'file') {
-                html += get_template(key, value.s_description, value.location.uri.path,get_langIcon(value.location.uri.path),filter_style);
+                html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
             }
         });
     }
@@ -509,7 +541,7 @@ const createUseFileList = async (refDef) => {
         refDef.forEach((value, key) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'definition') {
-                html += get_template(key, value.s_description, value.location.uri.path,get_langIcon(value.location.uri.path),filter_style);
+                html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
             }
         });
     }

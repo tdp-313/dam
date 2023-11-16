@@ -135,6 +135,8 @@ const readFileButtonCreate = () => {
             lang = ['rpg-indent', 'rpg', 'rpg'];
         } else if (FolderLeft.value === 'QDSPSRC' || FolderLeft.value === 'QDDSSRC') {
             lang = ['dds', 'dds', 'dds'];
+        } else if (FolderLeft.value === "QCLSRC") {
+            lang = ['cl', 'cl', 'cl'];
         }
 
 
