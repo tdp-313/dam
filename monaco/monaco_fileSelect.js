@@ -123,6 +123,7 @@ const readFileButtonCreate = () => {
         let Right = FileList.Right.File[FileRight.value];
 
         let LeftText = await file_read_text(Left.fullname, Left.handle, false, "text", false);
+        let leftIndentText = LeftText;
         let RightText = await file_read_text(Right.fullname, Right.handle, false, "text", false);
         let LeftFileName = FileLeft.value.indexOf('.') !== -1 ? FileLeft.value.substring(0, FileLeft.value.indexOf('.')) : FileLeft.value;
         let RightFileName = FileRight.value.indexOf('.') !== -1 ? FileRight.value.substring(0, FileRight.value.indexOf('.')) : FileRight.value;
@@ -133,16 +134,19 @@ const readFileButtonCreate = () => {
         let lang = ['', '', ''];//normal original modified
         if (FolderLeft.value === 'QRPGSRC') {
             lang = ['rpg-indent', 'rpg', 'rpg'];
+            leftIndentText = await addIndent(LeftText);
+            LeftText = await addSpaces(LeftText);
+            RightText = await addSpaces(RightText);
+
         } else if (FolderLeft.value === 'QDSPSRC' || FolderLeft.value === 'QDDSSRC') {
             lang = ['dds', 'dds', 'dds'];
         } else if (FolderLeft.value === "QCLSRC") {
             lang = ['cl', 'cl', 'cl'];
         }
 
-
-        let normalEditorModel = await modelChange(await addIndent(LeftText), lang[0], NormalUri);
-        let diffEditorModel_Original = await modelChange(await addSpaces(LeftText), lang[1], LeftUri);
-        let normalEditorModel_Modified = await modelChange(await addSpaces(RightText), lang[2], RightUri);
+        let normalEditorModel = await modelChange(leftIndentText, lang[0], NormalUri);
+        let diffEditorModel_Original = await modelChange(LeftText, lang[1], LeftUri);
+        let normalEditorModel_Modified = await modelChange(RightText, lang[2], RightUri);
         await monacoRead2(normalEditorModel, diffEditorModel_Original, normalEditorModel_Modified);
 
         await tabs_add(normalEditorModel, false);
