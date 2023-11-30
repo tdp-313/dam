@@ -140,8 +140,14 @@ const readFileButtonCreate = () => {
 
         } else if (FolderLeft.value === 'QDSPSRC' || FolderLeft.value === 'QDDSSRC') {
             lang = ['dds', 'dds', 'dds'];
+            leftIndentText = await addSpaces(LeftText);
+            LeftText = leftIndentText;
+            RightText = await addSpaces(RightText);
         } else if (FolderLeft.value === "QCLSRC") {
             lang = ['cl', 'cl', 'cl'];
+            leftIndentText = await addSpaces(LeftText);
+            LeftText = leftIndentText;
+            RightText = await addSpaces(RightText);
         }
 
         let normalEditorModel = await modelChange(leftIndentText, lang[0], NormalUri);
@@ -196,7 +202,7 @@ const readFileButtonCreate = () => {
             if (isFileSelectSync) {
                 await fileSelectSync_Process(L_R, FileLR.value, file);
             }
-            await pullDownCreate();
+            //await pullDownCreate();
             await fileReadBoth();
         });
     });
@@ -421,26 +427,44 @@ const getFolderExistList_Text = async (List, target) => {
     return null;
 }
 
-function addSpaces(text) {
-    const lines = text.split("\n");
-    const maxLength = 80;
+function detectNewline(str) {
+    let regex = /(\r\n|\n|\r)/;
+    // 文字列に正規表現にマッチする部分があるかどうか調べる
+    let match = str.match(regex);
+    // マッチする部分があれば、その部分が改行文字である
+    if (match) {
+      // 改行文字を返す
+      return match[0];
+    } else {
+      // 改行文字が見つからなければ、空文字を返す
+      return "";
+    }
+}
 
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
-        let leadingSpaces = line.match(/^\s*/)[0];
-        line = line.trim();
-        let length = line.length;
-        let numSpaces = maxLength - length;
-        if (numSpaces > 0) {
-            let spaces = "";
-            for (let j = 0; j < numSpaces; j++) {
-                spaces += " ";
-            }
-            lines[i] = leadingSpaces + line + spaces;
+function addSpaces(str, limit = 80) {
+    // 改行コードを検出する
+    let newline = detectNewline(str);
+
+    // 改行コードで分割して配列にする
+    let lines = str.split(newline);
+    // 結果を格納する変数
+    let result = "";
+    // 配列の各要素に対して処理する
+    for (let line of lines) {
+        // 文字数が80文字未満なら、空白を追加する
+        if (line.length < limit) {
+            // 空白の数を計算する
+            let spaces = limit - line.length;
+            // 空白を生成する
+            let padding = " ".repeat(spaces);
+            // 結果に空白を追加した行を追加する
+            result += line + padding + newline;
+        } else {
+            // 文字数が80文字以上なら、そのまま結果に追加する
+            result += line + newline;
         }
     }
-
-    return lines.join("\n");
+    return result;
 }
 
 function revIndent(textArray) {
