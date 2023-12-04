@@ -125,6 +125,18 @@ const monacoLang = async () => {
                     if (wordStr === field) {
                         ranges.push({ range: new monaco.Range(i, 5, i, 80), uri: model.uri });
                     }
+                } else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "F" && row.substring(52, 53) === "K") {
+                    let field_2 = row.substring(59, 67).trim();
+                    if (wordStr === field_2) {
+                        for (let ri = i; ri > 0; ri--){
+                            row = model.getLineContent(ri);
+                            if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "F" && row.substring(52, 53) !== "K") {
+                                ranges.push({ range: new monaco.Range(ri, 7, ri, 16), uri: model.uri });
+                                break;
+                            }
+                        }
+                        
+                    }
                 }
             }
             let refDef = await normalRefDef.get(wordStr);
@@ -187,9 +199,15 @@ const monacoLang = async () => {
                         ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr), i, row.indexOf(wordStr) + wordStr.length), uri: model.uri });
                     }
                 }
-                else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "F") {
+                else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "F" && row.substring(52, 53) !== "K") {
                     let field = row.substring(6, 14).trim();
                     if (wordStr === field) {
+                        ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr), i, row.indexOf(wordStr) + wordStr.length), uri: model.uri });
+                    }
+                } else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "F" && row.substring(52, 53) === "K") {
+                    let field_1 = row.substring(18, 28).trim();
+                    let field_2 = row.substring(59, 67).trim();
+                    if (wordStr === field_2) {
                         ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr), i, row.indexOf(wordStr) + wordStr.length), uri: model.uri });
                     }
                 }

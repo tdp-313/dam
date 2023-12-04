@@ -19,8 +19,8 @@ const Subroutine_CloseArray = [
 const RPG400_ConstantsArray = [
     '*BLANK    ', '*BLANKS   ', '*ALL      ', '*CANCL    ', '*DETC     ',
     '*DETL     ', '*GETIN    ', '*INIT     ', '*OFL      ', '*TERM     ',
-    '*TOTC     ', '*TOTL     ', '*DEFN     ', '*ENTRY    ', '*INZSR    ', '*LDA      ', '*LIKE     ', 
-    '*PDA      ', '*PSSR     ', '*FILE     ', '*EQUATE   ', '*PLACE    ','*LOCK     ', '*NAMVAR   '
+    '*TOTC     ', '*TOTL     ', '*DEFN     ', '*ENTRY    ', '*INZSR    ', '*LDA      ', '*LIKE     ',
+    '*PDA      ', '*PSSR     ', '*FILE     ', '*EQUATE   ', '*PLACE    ', '*LOCK     ', '*NAMVAR   '
 ];
 const RPG400_Constants_NUMArray = [
     '*ZERO     ', '*ZEROS    ', '*HIVAL    ', '*LOVAL    ', '*DATE     ', 'UDATE     ', '*MONTH    ', 'UMONTH    ',
@@ -39,7 +39,7 @@ const rpg_token = () => {
             SubroutineOpen: Subroutine_OpenArray,
             SubroutineClose: Subroutine_CloseArray,
             RPG400_Constants: RPG400_ConstantsArray,
-            RPG400_Constants_NUM:RPG400_Constants_NUMArray,
+            RPG400_Constants_NUM: RPG400_Constants_NUMArray,
             SubroutineOther: [
                 'EXSR ', 'CASGT', 'CASLT', 'CASEQ', 'CASNE', 'CASGE', 'CASLE', 'CAS  ', 'ENDCS', 'COMP '
             ],
@@ -287,7 +287,7 @@ const rpg_token2 = () => {
             SubroutineOpen: Subroutine_OpenArray,
             SubroutineClose: Subroutine_CloseArray,
             RPG400_Constants: RPG400_ConstantsArray,
-            RPG400_Constants_NUM:RPG400_Constants_NUMArray,
+            RPG400_Constants_NUM: RPG400_Constants_NUMArray,
             SubroutineOther: [
                 'EXSR ', 'CASGT', 'CASLT', 'CASEQ', 'CASNE', 'CASGE', 'CASLE', 'CAS  ', 'ENDCS', 'COMP '
             ],
@@ -331,16 +331,27 @@ const rpg_token2 = () => {
             Initializes: [
                 'CLEAR', 'RESET'
             ],
+            file_R: [
+                'COMIT ','ID    ','IGNORE','IND   ','INFDS ','INFSR ','NUM   ','PASS  ','PLIST ','PRTCTL','RECNO ','RENAME','SAVDS ','SFILE ','SLN   '
+            ],
             tokenizer: {
                 root: [
                     [/.{6}\*.*/, { token: 'comment' }],
+                    [/^(.{1,5})(F)(.{1,12})(.{1,10})(.{1,18})(.{1,5})( )(K)(.{1,6})(.{1,8})(.*)$/,
+                        ['', 'tag', '', 'constant', '', 'constant','constant', 'type',{
+                            cases: {
+                                '@file_R': 'keyword',
+                                '@default': 'invalid'
+                            },
+                        },'identifier','']
+                    ],
                     [/^(.{1,5})(F)(.{1,8}.)(.)(.{1,23})(.{1,8})(.*)$/,
                         ['', 'tag', {
                             cases: {
                                 '.{1,8}.{0,8}I': 'type',
                                 '.{1,8}.{0,8}U': 'keyword',
                                 '.{1,8}.{0,8}O': 'string',
-                                '@default': 'ivalid'
+                                '@default': 'invalid'
                             },
                         }, {
                                 cases: {
@@ -640,18 +651,124 @@ const getRow_Text = (row, columns) => {
     }
 
     if (row.substring(5, 6) === "F") {
-        if (columns <= 5) {
-            return { text: "", startColumn: columns, endColumn: columns, type: 'none' };
-        }
-        else if (columns <= 14) {
-            return { text: row.substring(6, 14), startColumn: 7, endColumn: 15, type: 'memberName' };
-        }
-        else if (columns === 15) {
-            return { text: row.substring(14, 15), startColumn: 44, endColumn: 48, type: 'fileIO' };
+        if (row.substring(52, 53) !== "K") {
+            if (columns <= 5) {
+                return { text: "", startColumn: columns, endColumn: columns, type: 'none' };
+            }
+            else if (columns <= 14) {
+                return { text: row.substring(6, 14), startColumn: 7, endColumn: 15, type: 'memberName' };
+            }
+            else if (columns === 15) {
+                return { text: row.substring(14, 15), startColumn: 44, endColumn: 48, type: 'fileIO' };
+            }
+        } else {
+            if (columns <= 18) {
+                return { text: "", startColumn: columns, endColumn: columns, type: 'none' };
+            }
+            else if (columns <= 28) {
+                return { text: row.substring(18, 28), startColumn: 19, endColumn: 29, type: 'recordID' };
+            }
+            else if (columns <= 46) {
+                return { text: row.substring(28, 46), startColumn: 29, endColumn: 47, type: 'none' };
+            }
+            else if (columns <= 52) {
+                return { text: row.substring(46, 52), startColumn: 47, endColumn: 53, type: 'sfileID' };
+            }
+            else if (columns === 53) {
+                return { text: row.substring(52, 53), startColumn: 53, endColumn: 54, type: 'file_K' };
+            }
+            else if (columns <= 59) {
+                return { text: row.substring(53, 59), startColumn: 54, endColumn: 60, type: 'file_S' };
+            }
+            else if (columns <= 67) {
+                return { text: row.substring(59, 67), startColumn: 60, endColumn: 68, type: 'file_R' };
+            }
         }
     }
     console.log("nomatch");
     return { text: "", startColumn: columns, endColumn: columns };
+}
+var tip_sfileID = {
+    type: 'fixed',
+    description: "SFILEの相対レコードフィールド名",
+    detail: {}
+}
+var tip_file_K = {
+    type: 'fixed',
+    description: "継続記入行「K」",
+    detail: {}
+}
+var tip_file_R = {
+    type: 'auto-fixed',
+    description: "継続記入行オプションに対する記入項目",
+    detail: {}
+}
+var tip_file_S = {
+    type: 'simpleDetail',
+    description: "継続記入行オプション",
+    name: "仕様書タイプ",
+    detail: {
+        COMIT: {
+            name: "",
+            description: "コミットメント制御を受けるように指定"
+        },
+        ID: {
+            name: "",
+            description: "ファイル内で処理されているレコードを提供したプログラム装置の名前"
+        },
+        IND: {
+            name: "",
+            description: "配列に関する記述を行います。"
+        },
+        IGNORE: {
+            name: "",
+            description: "レコード様式を無視する。レコード様式が無いような状態で動作する。"
+        },
+        IND: {
+            name: "",
+            description: "NUMと同時指定、01から指定した番号までの標識を保管復元する。"
+        },
+        INFDS: {
+            name: "",
+            description: "ファイルに対して例外/エラー情報を入れるデータ構造を定義する。"
+        },
+        INFSR: {
+            name: "",
+            description: "指定したファイルに対して入力したSRへエラー後に移動することができる。"
+        },
+        NUM: {
+            name: "",
+            description: "デフォルト値1、ID,IND、SAVDSと同時に使用。"
+        },
+        PASS: {
+            name: "",
+            description: "*NOIND"
+        },
+        PLIST: {
+            name: "",
+            description: "装置がSPECIALのみ、渡すパラメータリストを入力。"
+        },
+        PRTCTL: {
+            name: "",
+            description: "印刷装置の動的制御オプション"
+        },
+        RECNO: {
+            name: "",
+            description: "相対レコード番号を使用する際に使用。"
+        },
+        RENAME: {
+            name: "",
+            description: "外部記述ファイルのレコード様式名の名前変更を行う。"
+        },
+        SFILE: {
+            name: "",
+            description: "サブファイルの相対レコード番号。レコード様式名を右に記入する。"
+        },
+        SLN: {
+            name: "",
+            description: "開始行番号を書き出す。"
+        }
+    }
 }
 var tip_page = {
     type: 'fixed',
@@ -1135,5 +1252,10 @@ var tip_fieldName = {
 var tip_memberName = {
     type: 'auto-fixed',
     description: "ファイルオブジェクト名",
+    detail: {}
+}
+var tip_recordID = {
+    type: 'fixed',
+    description: "レコード様式の外部名",
     detail: {}
 }
