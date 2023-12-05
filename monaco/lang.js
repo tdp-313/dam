@@ -83,10 +83,42 @@ const rpg_token = () => {
             Initializes: [
                 'CLEAR', 'RESET'
             ],
+            file_R: [
+                'COMIT ', 'ID    ', 'IGNORE', 'IND   ', 'INFDS ', 'INFSR ', 'NUM   ', 'PASS  ', 'PLIST ', 'PRTCTL', 'RECNO ', 'RENAME', 'SAVDS ', 'SFILE ', 'SLN   '
+            ],
             tokenizer: {
                 root: [
                     [/.{6}\*.*/, { token: 'comment' }],
-                    //     |       |       |  |   |            
+                    //     |       |       |  |   |     
+                    [/^(.{1,5})(F)(.{1,12})(.{1,10})(.{1,18})(.{1,5})( )(K)(.{1,6})(.{1,8})(.*)$/,
+                        ['', 'tag', '', 'constant', '', 'constant', 'constant', 'type', {
+                            cases: {
+                                '@file_R': 'keyword',
+                                '@default': 'invalid'
+                            },
+                        }, 'identifier', '']
+                    ],
+                    [/^(.{1,5})(F)(.{1,8}.)(.)(.{1,23})(.{1,8})(.*)$/,
+                        ['', 'tag', {
+                            cases: {
+                                '.{1,8}.{0,8}I': 'type',
+                                '.{1,8}.{0,8}U': 'keyword',
+                                '.{1,8}.{0,8}O': 'string',
+                                '@default': 'invalid'
+                            },
+                        }, {
+                                cases: {
+                                    ' ': 'overwhite',
+                                    '(F|R)': 'constant',
+                                    'P': 'entity',
+                                    'S': 'regexp',
+                                    '@default': 'invalid'
+                                }
+                            }, '', 'constant', '']
+                    ],
+                    [/^(.{1,5})(I)(.{1,37})(.{1,4})(.{1,4})(.)(.{1,6})(.*)$/,
+                        ['', 'tag', '', 'number', 'number', 'constant', 'identifier', '']
+                    ],
                     [/^(.{1,2})(.{1,3})(C)(..)(.)(.{1,2})(.)(.{1,2})(.)(.{1,2})(.{1,10})(.{1,5})(.{1,10})(.{1,6})(.{1,3})(.)(.)(.{1,2})(.{1,2})(.{1,2})(.{1,15})(.*)$/,
                         ['comment', '', 'tag',
                             {
@@ -332,18 +364,18 @@ const rpg_token2 = () => {
                 'CLEAR', 'RESET'
             ],
             file_R: [
-                'COMIT ','ID    ','IGNORE','IND   ','INFDS ','INFSR ','NUM   ','PASS  ','PLIST ','PRTCTL','RECNO ','RENAME','SAVDS ','SFILE ','SLN   '
+                'COMIT ', 'ID    ', 'IGNORE', 'IND   ', 'INFDS ', 'INFSR ', 'NUM   ', 'PASS  ', 'PLIST ', 'PRTCTL', 'RECNO ', 'RENAME', 'SAVDS ', 'SFILE ', 'SLN   '
             ],
             tokenizer: {
                 root: [
                     [/.{6}\*.*/, { token: 'comment' }],
                     [/^(.{1,5})(F)(.{1,12})(.{1,10})(.{1,18})(.{1,5})( )(K)(.{1,6})(.{1,8})(.*)$/,
-                        ['', 'tag', '', 'constant', '', 'constant','constant', 'type',{
+                        ['', 'tag', '', 'constant', '', 'constant', 'constant', 'type', {
                             cases: {
                                 '@file_R': 'keyword',
                                 '@default': 'invalid'
                             },
-                        },'identifier','']
+                        }, 'identifier', '']
                     ],
                     [/^(.{1,5})(F)(.{1,8}.)(.)(.{1,23})(.{1,8})(.*)$/,
                         ['', 'tag', {
@@ -546,6 +578,54 @@ const rpg_token2 = () => {
                                     '@default': 'invalid'
                                 }
                             }, 'comment', ''
+                        ]
+                    ],
+                    [/^(.{1,5})(O)(.{1,7})(.)(.)(.)(.)(.)(.{1,2})(.{1,2})(.{1,9})(.{1,6})( {37,37})(.*)$/,
+                        ['', 'tag', 'constant',
+                            {
+                                cases: {
+                                    '(A|O)': 'type',
+                                    '@default': 'invalid'
+                                }
+                            }, {
+                                cases: {
+                                    '(H|D|T|E)': 'keyword',
+                                    '(N|R)': 'type',
+                                    '@default': 'invalid'
+                                }
+                            }, {
+                                cases: {
+                                    '( |F|R)': 'type',
+                                    '(A|D)': 'type',
+                                    '@default': 'invalid'
+                                }
+                            }, {
+                                cases: {
+                                    '[0-3]': 'number',
+                                    '(D|E)': 'type',
+                                    '@default': 'invalid'
+                                }
+                            }, {
+                                cases: {
+                                    '[0-3]': 'number',
+                                    '(D|L)': 'type',
+                                    '@default': 'invalid'
+                                },
+                            }, {
+                                cases: {
+                                    '[0-9][0-9]': 'number',
+                                    'A[0-9]': 'number',
+                                    'B[0-2]': 'number',
+                                    '@default': 'invalid'
+                                },
+                            }, {
+                                cases: {
+                                    '[0-9][0-9]': 'number',
+                                    'A[0-9]': 'number',
+                                    'B[0-2]': 'number',
+                                    '@default': 'invalid'
+                                },
+                            }, 'type','identifier' , 'overwhite', 'comment'
                         ]
                     ],
                 ],
