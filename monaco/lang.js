@@ -625,7 +625,50 @@ const rpg_token2 = () => {
                                     'B[0-2]': 'number',
                                     '@default': 'invalid'
                                 },
-                            }, 'type','identifier' , 'overwhite', 'comment'
+                            }, 'type', 'identifier', 'overwhite', 'comment'
+                        ]
+                    ],
+                    [/^(.{1,5})(O)( {16,16})(.{1,9})(.{1,6})(.)(.)(.{1,4})(.)(.{1,26})(.{1,4})(.{1,5})(.*)$/,
+                        ['', 'tag', 'overwhite', 'type',
+                            {
+                                cases: {
+                                    '(UDATE |[\*]DATE |UDAY  |[\*]DAY  |UMONTH|[\*]MONTH|UYEAR |[\*]YEAR )': 'predefined',
+                                    '(PAGE  |PAGE[1-7] )': 'number',
+                                    '.*[,].*': 'variable',
+                                    '@default': 'identifier'
+                                }
+                            }, {
+                                cases: {
+                                    ' ': 'overwhite',
+                                    '[1-9]': 'keyword',
+                                    '([A-D]|[J-Q]|[X-Z])': 'keyword',
+                                    '@default': 'invalid'
+                                }
+                            }, {
+                                cases: {
+                                    ' ': 'overwhite',
+                                    'B': 'constant',
+                                    '@default': 'invalid'
+                                }
+                            }, {
+                                cases: {
+                                    ' {1,4}[0-9]{1,4}': 'number',
+                                    '  K[1-8]': 'number',
+                                    '@default': 'invalid'
+                                },
+                            }, {
+                                cases: {
+                                    '(P|B|L|R)': 'type',
+                                    ' ': 'overwhite',
+                                    '@default': 'invalid'
+                                },
+                            }, {
+                                cases: {
+                                    "'.*'.*": 'string',
+                                    '.*[,].*': 'variable',
+                                    '@default': 'identifier'
+                                },
+                            }, 'invalid', 'comment', 'invalid'
                         ]
                     ],
                 ],
