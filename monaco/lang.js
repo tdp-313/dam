@@ -1368,7 +1368,7 @@ var tip_ds_end = {
     detail: {}
 }
 var tip_fieldName = {
-    type: 'fixed',
+    type: 'auto-fixed',
     description: "定義するサブフィールド名",
     detail: {}
 }
@@ -1378,7 +1378,7 @@ var tip_memberName = {
     detail: {}
 }
 var tip_recordID = {
-    type: 'fixed',
+    type: 'auto-fixed',
     description: "レコード様式の外部名",
     detail: {}
 }
