@@ -36,6 +36,9 @@ const monacoStart = async () => {
       autoSurround: 'brackets',
       automaticLayout: true,
     });
+
+    fileReadStart();
+    
     diffEditor.updateOptions(editorOptionGeneral);
     var diff = {};
     diff.left = monaco.editor.createModel('function hello() {\n\talert("Hello world!");\n}', 'javascript');
@@ -567,7 +570,6 @@ window.onload = async () => {
 const rightSidebarRead = async () => {
   const r_sidebar_contents = document.getElementById('right-sideBar-contents');
   r_sidebar_contents.addEventListener('click', async (e) => {
-    console.log(e);
     if (e.target.id === 'right-sideBar-contents') {
       return null;
     }

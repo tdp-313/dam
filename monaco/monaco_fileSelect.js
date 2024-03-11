@@ -24,6 +24,22 @@ const fileNameExt = 'txt';
 
 let useFileList_Open = false;
 let isFileSelectSync = true;
+
+const extraRefButton = document.getElementById('control-extraRef');
+
+const fileReadStart = async (isNew = false) => {
+    const separate = document.getElementById('control-extraFolderSeparate');
+    console.log(await Directory_Handle_RegisterV2(monaco_handleName, isNew));
+    if (!separate.checked) {
+        console.log(await Directory_Handle_RegisterV2(monaco_handleName_Sub, isNew, 'read'));
+    }
+    if (extraRefButton.checked) {
+        console.log(await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read'));
+    }
+    await pullDownCreate();
+    await fileReadBoth();
+}
+
 const readFileButtonCreate = () => {
     const otherTabOpen = document.getElementById('control-otherTab');
     otherTabOpen.addEventListener('click', async () => {
@@ -38,18 +54,7 @@ const readFileButtonCreate = () => {
         event.preventDefault();
         fileReadStart(true);
     });
-    const fileReadStart = async (isNew = false) => {
-        const separate = document.getElementById('control-extraFolderSeparate');
-        console.log(await Directory_Handle_RegisterV2(monaco_handleName, isNew));
-        if (!separate.checked) {
-            console.log(await Directory_Handle_RegisterV2(monaco_handleName_Sub, isNew, 'read'));
-        }
-        if (extraRefButton.checked) {
-            console.log(await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read'));
-        }
-        await pullDownCreate();
-        await fileReadBoth();
-    }
+
     modeChangeSync.addEventListener('click', async (event) => {
         fileReadStart(false)
     });
@@ -66,7 +71,7 @@ const readFileButtonCreate = () => {
             e.target.src = "./icon/link.svg";
         }
     });
-    const extraRefButton = document.getElementById('control-extraRef');
+
     extraRefButton.addEventListener('click', async (event) => Setting.setRefMaster = event.target.checked);
     extraRefButton.checked = Setting.getRefMaster;
     const separateFolder = document.getElementById('control-extraFolderSeparate');
@@ -113,50 +118,7 @@ const readFileButtonCreate = () => {
         fileReadStart(true);
 
     });
-    const fileReadBoth = async () => {
-        const FileLeft = document.getElementById('control-File-Left');
-        const FileRight = document.getElementById('control-File-Right');
-        const FolderLeft = document.getElementById('control-Folder-Left');
-        const FolderRight = document.getElementById('control-Folder-Right');
 
-        let Left = FileList.Left.File[FileLeft.value];
-        let Right = FileList.Right.File[FileRight.value];
-
-        let LeftText = await file_read_text(Left.fullname, Left.handle, false, "text", false);
-        let leftIndentText = LeftText;
-        let RightText = await file_read_text(Right.fullname, Right.handle, false, "text", false);
-        let LeftFileName = FileLeft.value.indexOf('.') !== -1 ? FileLeft.value.substring(0, FileLeft.value.indexOf('.')) : FileLeft.value;
-        let RightFileName = FileRight.value.indexOf('.') !== -1 ? FileRight.value.substring(0, FileRight.value.indexOf('.')) : FileRight.value;
-        let NormalUri = monaco.Uri.parse(control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
-        let LeftUri = monaco.Uri.parse('DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
-        let RightUri = monaco.Uri.parse('DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + RightFileName);
-
-        let lang = ['', '', ''];//normal original modified
-        if (FolderLeft.value === 'QRPGSRC') {
-            lang = ['rpg-indent', 'rpg', 'rpg'];
-            leftIndentText = await addIndent(LeftText);
-            LeftText = await addSpaces(LeftText);
-            RightText = await addSpaces(RightText);
-
-        } else if (FolderLeft.value === 'QDSPSRC' || FolderLeft.value === 'QDDSSRC') {
-            lang = ['dds', 'dds', 'dds'];
-            leftIndentText = await addSpaces(LeftText);
-            LeftText = leftIndentText;
-            RightText = await addSpaces(RightText);
-        } else if (FolderLeft.value === "QCLSRC") {
-            lang = ['cl', 'cl', 'cl'];
-            leftIndentText = await addSpaces(LeftText);
-            LeftText = leftIndentText;
-            RightText = await addSpaces(RightText);
-        }
-
-        let normalEditorModel = await modelChange(leftIndentText, lang[0], NormalUri);
-        let diffEditorModel_Original = await modelChange(LeftText, lang[1], LeftUri);
-        let normalEditorModel_Modified = await modelChange(RightText, lang[2], RightUri);
-        await monacoRead2(normalEditorModel, diffEditorModel_Original, normalEditorModel_Modified);
-
-        await tabs_add(normalEditorModel, false);
-    }
     const fileSelectSync_Process = async (target, fullname, fileType) => {
         let reverse = target === 'Left' ? 'Right' : 'Left';
         let search_target = Object.keys(FileList[reverse][fileType]);
@@ -260,6 +222,55 @@ const readFileButtonCreate = () => {
         await readText_Model(result_array[0], result_array[1], result_array[2], handle);
     });
 }
+
+const fileReadBoth = async () => {
+    const FileLeft = document.getElementById('control-File-Left');
+    const FileRight = document.getElementById('control-File-Right');
+    const FolderLeft = document.getElementById('control-Folder-Left');
+    const FolderRight = document.getElementById('control-Folder-Right');
+
+    let Left = FileList.Left.File[FileLeft.value];
+    let Right = FileList.Right.File[FileRight.value];
+
+    const control_LibLeft = document.getElementById('control-Library-Left');
+    const control_LibRight = document.getElementById('control-Library-Right');
+
+    let LeftText = await file_read_text(Left.fullname, Left.handle, false, "text", false);
+    let leftIndentText = LeftText;
+    let RightText = await file_read_text(Right.fullname, Right.handle, false, "text", false);
+    let LeftFileName = FileLeft.value.indexOf('.') !== -1 ? FileLeft.value.substring(0, FileLeft.value.indexOf('.')) : FileLeft.value;
+    let RightFileName = FileRight.value.indexOf('.') !== -1 ? FileRight.value.substring(0, FileRight.value.indexOf('.')) : FileRight.value;
+    let NormalUri = monaco.Uri.parse(control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
+    let LeftUri = monaco.Uri.parse('DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
+    let RightUri = monaco.Uri.parse('DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + RightFileName);
+
+    let lang = ['', '', ''];//normal original modified
+    if (FolderLeft.value === 'QRPGSRC') {
+        lang = ['rpg-indent', 'rpg', 'rpg'];
+        leftIndentText = await addIndent(LeftText);
+        LeftText = await addSpaces(LeftText);
+        RightText = await addSpaces(RightText);
+
+    } else if (FolderLeft.value === 'QDSPSRC' || FolderLeft.value === 'QDDSSRC') {
+        lang = ['dds', 'dds', 'dds'];
+        leftIndentText = await addSpaces(LeftText);
+        LeftText = leftIndentText;
+        RightText = await addSpaces(RightText);
+    } else if (FolderLeft.value === "QCLSRC") {
+        lang = ['cl', 'cl', 'cl'];
+        leftIndentText = await addSpaces(LeftText);
+        LeftText = leftIndentText;
+        RightText = await addSpaces(RightText);
+    }
+
+    let normalEditorModel = await modelChange(leftIndentText, lang[0], NormalUri);
+    let diffEditorModel_Original = await modelChange(LeftText, lang[1], LeftUri);
+    let normalEditorModel_Modified = await modelChange(RightText, lang[2], RightUri);
+    await monacoRead2(normalEditorModel, diffEditorModel_Original, normalEditorModel_Modified);
+
+    await tabs_add(normalEditorModel, false);
+}
+
 let extraControl = false;
 const extraControlClick = (open, mode = "") => {
     const control_extraArea = document.getElementById('control-extraButton');
