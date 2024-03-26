@@ -36,9 +36,8 @@ const monacoStart = async () => {
       autoSurround: 'brackets',
       automaticLayout: true,
     });
-
-    fileReadStart();
     
+    fileReadStart(false,"init");
     diffEditor.updateOptions(editorOptionGeneral);
     var diff = {};
     diff.left = monaco.editor.createModel('function hello() {\n\talert("Hello world!");\n}', 'javascript');
@@ -227,23 +226,32 @@ const monacoStart = async () => {
       if (Setting.getRefMaster && !refOnly) {
         await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read');
 
-        let searchLibName = rootLibName.substring(0, 3);
-        let folderHandle = null;
+        let searchLibName = [rootLibName.substring(0, 3)];
+
+        if (Array.isArray(Setting.libraryList[searchLibName])) {
+          searchLibName = Setting.libraryList[searchLibName];
+        }
+        let folderHandle = [];
         for await (const handle of refRootHandle.values()) {
-          if (handle.name.indexOf(searchLibName) !== -1) {
-            folderHandle = handle;
-            break;
+          for (let i = 0; i < searchLibName.length; i++){
+            if (handle.name.indexOf(searchLibName[i]) !== -1) {
+              folderHandle.push(handle);
+            }
           }
         }
-        if (folderHandle === null) {
+
+        if (folderHandle.length === 0) {
           return null; //end
         }
         additionalRefDef.clear();
-        normalRefDef = await refDefCreate('QDDSSRC', folderHandle, normalRefDef, [...notExist_DDS]);
-        normalRefDef = await refDefCreate('QDSPSRC', folderHandle, normalRefDef, [...notExist_DSP]);
-        if (additionalRefDef.size > 0) {//PFILE
-          normalRefDef = await refDefCreate('QDDSSRC', folderHandle, normalRefDef, [...additionalRefDef]);
+        for (let i = 0; i < folderHandle.length; i++) {
+          normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, [...notExist_DDS]);
+          normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, [...notExist_DSP]);
+          if (additionalRefDef.size > 0) {//PFILE
+            normalRefDef = await refDefCreate('QDDSSRC', folderHandle, normalRefDef, [...additionalRefDef]);
+          }
         }
+
       }
       //sidebar
       createUseFileList(normalRefDef);
@@ -570,7 +578,8 @@ window.onload = async () => {
 const rightSidebarRead = async () => {
   const r_sidebar_contents = document.getElementById('right-sideBar-contents');
   r_sidebar_contents.addEventListener('click', async (e) => {
-    if (e.target.id === 'right-sideBar-contents') {
+    const selectedRadio = document.querySelector('input[name="rs-mode"]:checked');
+    if (e.target.id === 'right-sideBar-contents' || selectedRadio.value === "setting") {
       return null;
     }
     let click_node = e.target.parentNode;
@@ -606,17 +615,15 @@ const setModeChange = (mode) => {
 
 class localSetting {
   constructor(data) {
-    this.handleSeparate = typeof (data.handleSeparate) === 'undefined' ? false : data.handleSeparate;
     this.theme = typeof (data.theme) === 'undefined' ? 0 : data.theme;
     this.refMaster = typeof (data.refMaster) === 'undefined' ? false : data.refMaster;
     this.diffTheme = typeof (data.diffTheme) === 'undefined' ? 0 : data.diffTheme;
+    this.libraryList = typeof (data.libraryList) === 'undefined' ? {} : data.libraryList;
   }
   get getAll() {
     return this;
   }
-  get getHandleSeparate() {
-    return this.handleSeparate;
-  }
+
   get getTheme() {
     return this.theme;
   }
@@ -634,10 +641,6 @@ class localSetting {
   get getRefMaster() {
     return this.refMaster;
   }
-  set setHandleSeparate(handle_sepa) {
-    this.handleSeparate = handle_sepa;
-    this.save();
-  }
   set setTheme(theme) {
     this.theme = theme;
     this.save();
@@ -648,6 +651,10 @@ class localSetting {
   }
   set setRefMaster(isMaster) {
     this.refMaster = isMaster;
+    this.save();
+  }
+  set setLibList(LibList) {
+    this.libraryList = LibList;
     this.save();
   }
   save() {

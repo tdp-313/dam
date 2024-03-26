@@ -28,18 +28,21 @@
         <div class="alignLine"></div>
         <div style="display:flex; width: 100%;position:relative;overflow: hidden;">
             <div class="control-FolderFileArea">
+                <input type="checkbox" class="displayHide" id="control-dynamic-Left"></input>
+                <label for="control-dynamic-Left" class="control-iconButton"><img class="refSize"
+                        src="./icon/dynamic.svg"></label>
                 <select name="control-Folder-Left" id="control-Library-Left"
                     class="control-FileFolder-pulldown"></select>
                 <select name="control-Folder-Left" id="control-Folder-Left"
                     class="control-FileFolder-pulldown"></select>
                 <select name="control-File-Left" id="control-File-Left" class="control-FileFolder-pulldown"></select>
             </div>
-            <div style="margin: 0 0.3rem">
-                <span id="control-FileSelectSync" class="control-iconButton"><img class="refSize"
-                        src="./icon/link.svg"></span>
-            </div>
+
             <div class="control-FolderFileArea">
-                <select name="control-Folder-Left" id="control-Library-Right"
+                <input type="checkbox" class="displayHide" id="control-dynamic-Right"></input>
+                <label for="control-dynamic-Right" class="control-iconButton"><img class="refSize"
+                        src="./icon/dynamic.svg"></label>
+                <select name="control-Folder-Right" id="control-Library-Right"
                     class="control-FileFolder-pulldown"></select>
                 <select name="control-Folder-Right" id="control-Folder-Right"
                     class="control-FileFolder-pulldown"></select>
@@ -63,10 +66,9 @@
                             src="./icon/ruler-2.svg"></label>
                 </div>
                 <div class="alignLine"></div>
-                <div>
-                    <input type="checkbox" class="displayHide" id="control-extraFolderSeparate"></input>
-                    <label for="control-extraFolderSeparate" class="control-iconButton"><img class="refSize"
-                            src="./icon/folder-code.svg"></label>
+                <div style="margin: 0 0.3rem">
+                    <span id="control-FileSelectSync" class="control-iconButton hoverButton"><img class="refSize"
+                            src="./icon/link.svg"></span>
                 </div>
                 <span id="control-extraTheme" class="control-iconButton hoverButton"><img class="refSize"
                         src="./icon/palette.svg"></span>
@@ -108,6 +110,9 @@
                 <input type="radio" class="displayHide" id="rs-mode-def" name="rs-mode" value="def"></input>
                 <label for="rs-mode-def" class="control-iconButton"><img class="refSize"
                         src="./icon/code-asterix.svg">Definition</label>
+                <input type="radio" class="displayHide" id="rs-mode-setting" name="rs-mode" value="setting"></input>
+                <label for="rs-mode-setting" class="control-iconButton" style="width: 4rem;min-width: 0;"><img class="refSize"
+                        src="./icon/setting.svg"></label>
             </div>
             <div class="verticalLine"></div>
             <div id="right-sideBar-contents">

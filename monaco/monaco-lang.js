@@ -128,14 +128,14 @@ const monacoLang = async () => {
                 } else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "F" && row.substring(52, 53) === "K") {
                     let field_2 = row.substring(59, 67).trim();
                     if (wordStr === field_2) {
-                        for (let ri = i; ri > 0; ri--){
+                        for (let ri = i; ri > 0; ri--) {
                             row = model.getLineContent(ri);
                             if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "F" && row.substring(52, 53) !== "K") {
                                 ranges.push({ range: new monaco.Range(ri, 7, ri, 16), uri: model.uri });
                                 break;
                             }
                         }
-                        
+
                     }
                 }
             }
@@ -551,7 +551,17 @@ const createUseFileList = async (refDef) => {
         refDef.forEach((value, key) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'file') {
-                html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
+                if (value.location.uri.path.indexOf("DSP") !== -1) {
+                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
+                }
+            }
+        });
+        refDef.forEach((value, key) => {
+            // 第一引数にキーが、第二引数に値が渡される
+            if (value.sourceType === 'file') {
+                if (value.location.uri.path.indexOf("DSP") === -1) {
+                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
+                }
             }
         });
     }
@@ -559,11 +569,45 @@ const createUseFileList = async (refDef) => {
         refDef.forEach((value, key) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'definition') {
-                html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
+                if (value.location.uri.path.indexOf("DSP") !== -1) {
+                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
+                }
+            }
+        });
+        refDef.forEach((value, key) => {
+            // 第一引数にキーが、第二引数に値が渡される
+            if (value.sourceType === 'definition') {
+                if (value.location.uri.path.indexOf("DSP") === -1) {
+                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
+                }
             }
         });
     }
 
-    sidebar_contents.innerHTML = html;
 
+
+    if (mode === 'setting') {
+        html = "<h4>Library List Setting</h4>";
+        html += "<div></div>";
+        html += '<textarea id="settingLibraryList"rows="15" cols="41">'+ JSON.stringify(Setting.libraryList) +'</textarea>';
+        html += "<button onclick='settingSaveProcess()'>Save</button>";
+    }
+    sidebar_contents.innerHTML = html;
+}
+
+const settingSaveProcess = () => {
+    const settingLibraryList = document.getElementById('settingLibraryList');
+    let inputText = settingLibraryList.value;
+    isJSON(inputText);
+}
+
+const isJSON = (str) => {
+    try {
+        let data = JSON.parse(str);
+        Setting.setLibList = data;
+        console.log(data);
+    } catch (e) {
+        window.alert(e);
+        return;
+    }
 }

@@ -115,7 +115,8 @@ header input[type="radio"]:checked+label,
 .hoverButton:hover,
 #control-subArea input[type="checkbox"]:checked+label,
 #right-sideBar input[type="radio"]:checked+label,
-#monaco-tab input[type="radio"]:checked+label {
+#monaco-tab input[type="radio"]:checked+label ,
+.control-FolderFileArea input[type="checkbox"]:checked+label {
     background-color: rgba(255, 174, 0, 0.35)
 }
 
@@ -139,7 +140,7 @@ header input[type="radio"]:checked+label,
 .control-FolderFileArea {
     width: 100%;
     display: grid;
-    grid-template-columns: 35% 30% 35%;
+    grid-template-columns: 2rem calc(35% - 0.8rem) calc(30% - 0.4rem) calc(35% - 0.8rem);
 }
 
 #control-subArea {

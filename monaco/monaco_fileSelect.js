@@ -27,15 +27,16 @@ let isFileSelectSync = true;
 
 const extraRefButton = document.getElementById('control-extraRef');
 
-const fileReadStart = async (isNew = false) => {
-    const separate = document.getElementById('control-extraFolderSeparate');
+const fileReadStart = async (isNew = false, init = "reSync") => {
+
     console.log(await Directory_Handle_RegisterV2(monaco_handleName, isNew));
-    if (!separate.checked) {
-        console.log(await Directory_Handle_RegisterV2(monaco_handleName_Sub, isNew, 'read'));
-    }
+
     if (extraRefButton.checked) {
         console.log(await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read'));
     }
+
+    fileHandleChange(init);
+
     await pullDownCreate();
     await fileReadBoth();
 }
@@ -74,9 +75,7 @@ const readFileButtonCreate = () => {
 
     extraRefButton.addEventListener('click', async (event) => Setting.setRefMaster = event.target.checked);
     extraRefButton.checked = Setting.getRefMaster;
-    const separateFolder = document.getElementById('control-extraFolderSeparate');
-    separateFolder.addEventListener('click', async (event) => Setting.setHandleSeparate = event.target.checked);
-    separateFolder.checked = Setting.getHandleSeparate;
+
     const control_extraArea = document.getElementById('control-extraButton');
     control_extraArea.addEventListener('click', () => {
         const modeChangeCode = document.getElementById('control-EditorModeChange-code');
@@ -119,22 +118,7 @@ const readFileButtonCreate = () => {
 
     });
 
-    const fileSelectSync_Process = async (target, fullname, fileType) => {
-        let reverse = target === 'Left' ? 'Right' : 'Left';
-        let search_target = Object.keys(FileList[reverse][fileType]);
-        if (fileType === 'Library') {
-            return null;
-        }
-        for (let i = 0; i < search_target.length; i++) {
-            if (FileList[target][fileType][fullname].name === FileList[reverse][fileType][search_target[i]].name) {
-                //console.log("Sync");
-                let revPulldown = document.getElementById('control-' + fileType + '-' + reverse);
-                revPulldown.selectedIndex = i;
-                break;
-            }
-        }
 
-    }
     const fileFolderPulldown = document.querySelectorAll('.control-FileFolder-pulldown');
     fileFolderPulldown.forEach((pulldown) => {
         pulldown.addEventListener('change', async (e) => {
@@ -142,12 +126,8 @@ const readFileButtonCreate = () => {
             let L_R = e.target.id.substring(e.target.id.lastIndexOf("-") + 1, e.target.id.length);
             let FileLR = document.getElementById('control-' + file + '-' + L_R);
             if (file === 'Library') {
-                const separate = document.getElementById('control-extraFolderSeparate');
                 let handleName = monaco_handleName;
-                if (!separate.checked) {
-                    handleName = monaco_handleName_Sub;
-                }
-                await monaco_pulldownCreate(FileLR, L_R, linkStatus[handleName].handle, 'Library');
+                await monaco_pulldownCreate(FileLR, L_R, UsingHandle[L_R].handle, 'Library');
                 let FileLR_2 = document.getElementById('control-Folder-' + L_R);
                 await monaco_pulldownCreate(FileLR_2, L_R, FileList[L_R]['Library'][FileLR.value].handle, 'Folder');
                 let FileLR_3 = document.getElementById('control-File-' + L_R);
@@ -163,19 +143,28 @@ const readFileButtonCreate = () => {
             //sync 
             if (isFileSelectSync) {
                 await fileSelectSync_Process(L_R, FileLR.value, file);
+                await pullDownCreate();
             }
             //await pullDownCreate();
             await fileReadBoth();
         });
     });
     const sidebar_mode_file = document.getElementById('rs-mode-file');
+
     sidebar_mode_file.addEventListener('click', async (event) => {
         await createUseFileList(normalRefDef);
     });
+
     const sidebar_mode_def = document.getElementById('rs-mode-def');
     sidebar_mode_def.addEventListener('click', async (event) => {
         await createUseFileList(normalRefDef);
     });
+
+    const sidebar_mode_setting = document.getElementById('rs-mode-setting');
+    sidebar_mode_setting.addEventListener('click', async (event) => {
+        await createUseFileList(null);
+    });
+
     const exLinkFile = document.getElementById('control-extraLinkFile');
     exLinkFile.addEventListener('click', async () => {
 
@@ -221,6 +210,26 @@ const readFileButtonCreate = () => {
         console.log(result_array[0], result_array[1], result_array[2]);
         await readText_Model(result_array[0], result_array[1], result_array[2], handle);
     });
+    const dynamicHandle_Left = document.getElementById('control-dynamic-Left');
+    const dynamicHandle_Right = document.getElementById('control-dynamic-Right');
+    dynamicHandle_Left.addEventListener("click", (e) => fileHandleChange("Left", dynamicHandle_Left.checked));
+    dynamicHandle_Right.addEventListener("click", (e) => fileHandleChange("Right", dynamicHandle_Right.checked));
+}
+
+const fileSelectSync_Process = async (target, fullname, fileType) => {
+    let reverse = target === 'Left' ? 'Right' : 'Left';
+    let search_target = Object.keys(FileList[reverse][fileType]);
+    if (fileType === 'Library') {
+        return null;
+    }
+    for (let i = 0; i < search_target.length; i++) {
+        if (FileList[target][fileType][fullname].name === FileList[reverse][fileType][search_target[i]].name) {
+            //console.log("Sync");
+            let revPulldown = document.getElementById('control-' + fileType + '-' + reverse);
+            revPulldown.selectedIndex = i;
+            break;
+        }
+    }
 }
 
 const fileReadBoth = async () => {
@@ -283,7 +292,7 @@ const extraControlClick = (open, mode = "") => {
     const sidebar = document.getElementById('right-sideBar');
     const mainArea = document.getElementById('monaco-area');
     const tabArea = document.getElementById('monaco-tab');
-    console.log(open, mode);
+
     if (mode !== "") {
         if (mode === "open") {
             img.src = rightIcon;
@@ -322,24 +331,64 @@ const extraControlClick = (open, mode = "") => {
         }
     }
 }
-const pullDownCreate = async (target = 'All') => {
+let UsingHandle = { Left: { type: "normal", handle: null }, Right: { type: "noraml", handle: null } }
+const fileHandleChange = async (toggle_LR = "Init", mode = false) => {
+    if (toggle_LR === "init") {
+        UsingHandle.Left.handle = linkStatus[monaco_handleName].handle;
+        UsingHandle.Left.type = "normal";
+        UsingHandle.Right.handle = linkStatus[monaco_handleName].handle;
+        UsingHandle.type = "normal";
+        return;
+    } else if (toggle_LR === "reSync") {
+        return;
+    }
 
+    if (linkStatus[monaco_handleName_RefMaster].ishandle) {
+        if (mode) {
+            UsingHandle[toggle_LR].handle = linkStatus[monaco_handleName_RefMaster].handle;
+            UsingHandle.Left.type = "refMaster";
+        } else {
+            UsingHandle[toggle_LR].handle = linkStatus[monaco_handleName].handle;
+            UsingHandle.Left.type = "normal";
+        }
+        await pullDownCreate();
+        let reverse = toggle_LR === 'Left' ? 'Right' : 'Left';
+        let FileLR_1 = document.getElementById('control-Library-' + reverse);
+        let FileLR_2 = document.getElementById('control-Folder-' + reverse);
+        let FileLR_3 = document.getElementById('control-File-' + reverse);
+        //Library
+        let search_target = Object.keys(FileList[toggle_LR].Library);
+        for (i = 0; i < search_target.length; i++){
+            if (search_target[i].indexOf(FileList[reverse].Library[FileLR_1.value].name.substring(0, 3)) !== -1) {
+                let targetLib = document.getElementById('control-Library-' + toggle_LR);
+                targetLib.selectedIndex = i;
+                break;
+            }
+        }
+        //File
+        await fileSelectSync_Process(reverse, FileLR_2.value, "Folder");
+        await fileSelectSync_Process(reverse, FileLR_3.value, "File");
+        await fileReadBoth();
+    } else {
+        UsingHandle.Left.handle = linkStatus[monaco_handleName].handle;
+        UsingHandle.Left.type = "normal";
+        UsingHandle.Right.handle = linkStatus[monaco_handleName].handle;
+        UsingHandle.type = "normal";
+    }
+}
+
+const pullDownCreate = async (target = 'All') => {
     if (target === 'All' || target === 'Left') {
         const LibLeft = document.getElementById('control-Library-Left');
-        await monaco_pulldownCreate(LibLeft, "Left", linkStatus[monaco_handleName].handle, "Library");
+        await monaco_pulldownCreate(LibLeft, "Left", UsingHandle["Left"].handle, "Library");
         const FolderLeft = document.getElementById('control-Folder-Left');
         await monaco_pulldownCreate(FolderLeft, "Left", FileList["Left"]["Library"][LibLeft.value].handle, "Folder");
         const FileLeft = document.getElementById('control-File-Left');
         await monaco_pulldownCreate(FileLeft, "Left", FileList["Left"]["Folder"][FolderLeft.value].handle, "File");
     }
     if (target === 'All' || target === 'Right') {
-        const separate = document.getElementById('control-extraFolderSeparate');
-        let handleName = monaco_handleName;
-        if (!separate.checked) {
-            handleName = monaco_handleName_Sub;
-        }
         const LibRight = document.getElementById('control-Library-Right');
-        await monaco_pulldownCreate(LibRight, "Right", linkStatus[handleName].handle, "Library");
+        await monaco_pulldownCreate(LibRight, "Right", UsingHandle["Right"].handle, "Library");
         const FolderRight = document.getElementById('control-Folder-Right');
         await monaco_pulldownCreate(FolderRight, "Right", FileList["Right"]["Library"][LibRight.value].handle, "Folder");
         const FileRight = document.getElementById('control-File-Right');
@@ -444,11 +493,11 @@ function detectNewline(str) {
     let match = str.match(regex);
     // マッチする部分があれば、その部分が改行文字である
     if (match) {
-      // 改行文字を返す
-      return match[0];
+        // 改行文字を返す
+        return match[0];
     } else {
-      // 改行文字が見つからなければ、空文字を返す
-      return "";
+        // 改行文字が見つからなければ、空文字を返す
+        return "";
     }
 }
 
