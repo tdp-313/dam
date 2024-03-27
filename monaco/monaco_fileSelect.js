@@ -331,13 +331,13 @@ const extraControlClick = (open, mode = "") => {
         }
     }
 }
-let UsingHandle = { Left: { type: "normal", handle: null }, Right: { type: "noraml", handle: null } }
+let UsingHandle = { Left: { type: "UTF-8", handle: null }, Right: { type: "UTF-8", handle: null } }
 const fileHandleChange = async (toggle_LR = "Init", mode = false) => {
     if (toggle_LR === "init") {
         UsingHandle.Left.handle = linkStatus[monaco_handleName].handle;
-        UsingHandle.Left.type = "normal";
+        UsingHandle.Left.type = "UTF-8";
         UsingHandle.Right.handle = linkStatus[monaco_handleName].handle;
-        UsingHandle.type = "normal";
+        UsingHandle.type = "UTF-8";
         return;
     } else if (toggle_LR === "reSync") {
         return;
@@ -346,12 +346,12 @@ const fileHandleChange = async (toggle_LR = "Init", mode = false) => {
     if (linkStatus[monaco_handleName_RefMaster].ishandle) {
         if (mode) {
             UsingHandle[toggle_LR].handle = linkStatus[monaco_handleName_RefMaster].handle;
-            UsingHandle.Left.type = "refMaster";
+            UsingHandle[toggle_LR].type = "Shift-JIS";
         } else {
             UsingHandle[toggle_LR].handle = linkStatus[monaco_handleName].handle;
-            UsingHandle.Left.type = "normal";
+            UsingHandle[toggle_LR].type = "UTF-8";
         }
-        await pullDownCreate();
+        await pullDownCreate(toggle_LR,"Library");
         let reverse = toggle_LR === 'Left' ? 'Right' : 'Left';
         let FileLR_1 = document.getElementById('control-Library-' + reverse);
         let FileLR_2 = document.getElementById('control-Folder-' + reverse);
@@ -366,7 +366,9 @@ const fileHandleChange = async (toggle_LR = "Init", mode = false) => {
             }
         }
         //File
+        await pullDownCreate(toggle_LR,"Folder");
         await fileSelectSync_Process(reverse, FileLR_2.value, "Folder");
+        await pullDownCreate(toggle_LR,"File");
         await fileSelectSync_Process(reverse, FileLR_3.value, "File");
         await fileReadBoth();
     } else {
@@ -377,24 +379,37 @@ const fileHandleChange = async (toggle_LR = "Init", mode = false) => {
     }
 }
 
-const pullDownCreate = async (target = 'All') => {
-    if (target === 'All' || target === 'Left') {
-        const LibLeft = document.getElementById('control-Library-Left');
-        await monaco_pulldownCreate(LibLeft, "Left", UsingHandle["Left"].handle, "Library");
-        const FolderLeft = document.getElementById('control-Folder-Left');
-        await monaco_pulldownCreate(FolderLeft, "Left", FileList["Left"]["Library"][LibLeft.value].handle, "Folder");
-        const FileLeft = document.getElementById('control-File-Left');
-        await monaco_pulldownCreate(FileLeft, "Left", FileList["Left"]["Folder"][FolderLeft.value].handle, "File");
+const pullDownCreate = async (target = 'All', part = "All") => {
+    let targetA = [];
+    if (target === 'All') {
+        targetA.push("Left");
+        targetA.push("Right");
+    } else {
+        targetA.push(target);
     }
-    if (target === 'All' || target === 'Right') {
-        const LibRight = document.getElementById('control-Library-Right');
-        await monaco_pulldownCreate(LibRight, "Right", UsingHandle["Right"].handle, "Library");
-        const FolderRight = document.getElementById('control-Folder-Right');
-        await monaco_pulldownCreate(FolderRight, "Right", FileList["Right"]["Library"][LibRight.value].handle, "Folder");
-        const FileRight = document.getElementById('control-File-Right');
-        await monaco_pulldownCreate(FileRight, "Right", FileList["Right"]["Folder"][FolderRight.value].handle, "File");
+    let partA = [];
+    if (part === 'All') {
+        partA.push("Library");
+        partA.push("Folder");
+        partA.push("File");
+    } else {
+        partA.push(part);
     }
 
+    for (let i = 0; i < targetA.length; i++){
+        const LibLeft = document.getElementById('control-Library-' + targetA[i]);
+        if (partA.indexOf("Library") !== -1) {
+            await monaco_pulldownCreate(LibLeft, targetA[i], UsingHandle[targetA[i]].handle, "Library");
+        }
+        const FolderLeft = document.getElementById('control-Folder-' + targetA[i]);
+        if (partA.indexOf("Folder") !== -1) {
+            await monaco_pulldownCreate(FolderLeft, targetA[i], FileList[targetA[i]]["Library"][LibLeft.value].handle, "Folder");
+        }
+        const FileLeft = document.getElementById('control-File-' + targetA[i]);
+        if (partA.indexOf("File") !== -1) {
+            await monaco_pulldownCreate(FileLeft, targetA[i], FileList[targetA[i]]["Folder"][FolderLeft.value].handle, "File");
+        }
+    }
 }
 const Directory_Handle_RegisterV2 = async (name, isNew = false, rw_mode = 'readwrite') => {
     // Indexed Database から FileSystemDirectoryHandle オブジェクトを取得
@@ -446,12 +461,12 @@ async function monaco_pulldownCreate(create_target, L_R, readHandle, readKind) {
     create_target.innerHTML = '';
     FileList[L_R][readKind] = {};
     for await (const handle of readHandle.values()) {
-        let insert = document.createElement('option');
-        insert.value = handle.name;
-        insert.text = handle.name;
-        await create_target.appendChild(insert);
         let file_set = new monaco_file(handle, readHandle.name);
-        FileList[L_R][readKind][file_set.fullname] = file_set;
+        let insert = document.createElement('option');
+        insert.value = file_set.name;
+        insert.text = file_set.name;
+        await create_target.appendChild(insert);
+        FileList[L_R][readKind][file_set.name] = file_set;
         if (backup_target.name === file_set.name) {
             //console.log("Restore", backup_target.name);
             create_target.selectedIndex = count;
