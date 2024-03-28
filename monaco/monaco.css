@@ -27,10 +27,16 @@ body {
 header {
     height: var(--headerHeight);
     display: grid;
-    grid-template-columns: 3rem 3rem 1rem 2rem 1rem 1fr 2rem;
+    grid-template-columns: 10rem 1fr 2rem;
+
     margin-bottom: 0.5rem;
     user-select: none;
     position: relative;
+}
+
+header .editorModeArea {
+    display: grid;
+    grid-template-columns: 3rem 3rem 1rem 2rem 1rem;
 }
 
 #monaco-area {
@@ -115,9 +121,12 @@ header input[type="radio"]:checked+label,
 .hoverButton:hover,
 #control-subArea input[type="checkbox"]:checked+label,
 #right-sideBar input[type="radio"]:checked+label,
-#monaco-tab input[type="radio"]:checked+label ,
+#monaco-tab input[type="radio"]:checked+label,
 .control-FolderFileArea input[type="checkbox"]:checked+label {
     background-color: rgba(255, 174, 0, 0.35)
+}
+.control-FolderFileArea input[type="checkbox"]:checked~select {
+    background-color: rgba(38, 135, 38, 0.35)
 }
 
 .control-iconButton {
@@ -138,17 +147,20 @@ header input[type="radio"]:checked+label,
 }
 
 .control-FolderFileArea {
-    width: 100%;
+    width: calc(50vw - 10rem - 16px);
     display: grid;
-    grid-template-columns: 2rem calc(35% - 0.8rem) calc(30% - 0.4rem) calc(35% - 0.8rem);
+    grid-template-columns: 0.4rem 2rem 0.4rem 0.35fr 0.3fr 0.35fr;
+    justify-items: center;
 }
-
+.control-FolderFileArea select {
+    width: 100%;
+}
 #control-subArea {
     position: absolute;
     background-color: var(--backgroundColor);
     right: 0;
     top: 0;
-    width: calc(50% + 0.5rem);
+    width: calc(50vw - 1.2rem - 16px);
     display: grid;
     grid-template-columns: 0.5rem 2rem 2rem 2rem 0.5rem 2rem 2rem 2rem 0.5rem 2rem 1fr 2rem 0.5rem 2rem;
     transition: 0.3s ease;

@@ -98,26 +98,6 @@ const readFileButtonCreate = () => {
             extraControl = true;
         }
     });
-    const control_LibLeft = document.getElementById('control-Library-Left');
-    control_LibLeft.addEventListener('contextmenu', async (event) => {
-        event.preventDefault();
-        if (!Setting.getHandleSeparate) {
-            Setting.setHandleSeparate = true;
-            separateFolder.checked = Setting.getHandleSeparate;
-        }
-        fileReadStart(true);
-    });
-    const control_LibRight = document.getElementById('control-Library-Right');
-    control_LibRight.addEventListener('contextmenu', async (event) => {
-        event.preventDefault();
-        if (!Setting.getHandleSeparate) {
-            Setting.setHandleSeparate = true;
-            separateFolder.checked = Setting.getHandleSeparate;
-        }
-        fileReadStart(true);
-
-    });
-
 
     const fileFolderPulldown = document.querySelectorAll('.control-FileFolder-pulldown');
     fileFolderPulldown.forEach((pulldown) => {
@@ -249,9 +229,9 @@ const fileReadBoth = async () => {
     let RightText = await file_read_text(Right.fullname, Right.handle, false, "text", false);
     let LeftFileName = FileLeft.value.indexOf('.') !== -1 ? FileLeft.value.substring(0, FileLeft.value.indexOf('.')) : FileLeft.value;
     let RightFileName = FileRight.value.indexOf('.') !== -1 ? FileRight.value.substring(0, FileRight.value.indexOf('.')) : FileRight.value;
-    let NormalUri = monaco.Uri.parse(control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
-    let LeftUri = monaco.Uri.parse('DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
-    let RightUri = monaco.Uri.parse('DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + RightFileName);
+    let NormalUri = monaco.Uri.parse("file://" + FileList.Left.root.handle.name + "/" + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
+    let LeftUri = monaco.Uri.parse("file://" + FileList.Left.root.handle.name + "/" + 'DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
+    let RightUri = monaco.Uri.parse("file://" + FileList.Right.root.handle.name + "/" + 'DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + RightFileName);
 
     let lang = ['', '', ''];//normal original modified
     if (FolderLeft.value === 'QRPGSRC') {
@@ -331,13 +311,14 @@ const extraControlClick = (open, mode = "") => {
         }
     }
 }
-let UsingHandle = { Left: { type: "UTF-8", handle: null }, Right: { type: "UTF-8", handle: null } }
+let UsingHandle = { Left: { type: monaco_handleName, handle: null, name: monaco_handleName }, Right: { type: monaco_handleName, handle: null, name: monaco_handleName } }
 const fileHandleChange = async (toggle_LR = "Init", mode = false) => {
     if (toggle_LR === "init") {
         UsingHandle.Left.handle = linkStatus[monaco_handleName].handle;
-        UsingHandle.Left.type = "UTF-8";
+        UsingHandle.Left.type = monaco_handleName;
         UsingHandle.Right.handle = linkStatus[monaco_handleName].handle;
-        UsingHandle.type = "UTF-8";
+        UsingHandle.Right.type = monaco_handleName;
+
         return;
     } else if (toggle_LR === "reSync") {
         return;
@@ -346,19 +327,19 @@ const fileHandleChange = async (toggle_LR = "Init", mode = false) => {
     if (linkStatus[monaco_handleName_RefMaster].ishandle) {
         if (mode) {
             UsingHandle[toggle_LR].handle = linkStatus[monaco_handleName_RefMaster].handle;
-            UsingHandle[toggle_LR].type = "Shift-JIS";
+            UsingHandle[toggle_LR].type = monaco_handleName_RefMaster;
         } else {
             UsingHandle[toggle_LR].handle = linkStatus[monaco_handleName].handle;
-            UsingHandle[toggle_LR].type = "UTF-8";
+            UsingHandle[toggle_LR].type = monaco_handleName;
         }
-        await pullDownCreate(toggle_LR,"Library");
+        await pullDownCreate(toggle_LR, "Library");
         let reverse = toggle_LR === 'Left' ? 'Right' : 'Left';
         let FileLR_1 = document.getElementById('control-Library-' + reverse);
         let FileLR_2 = document.getElementById('control-Folder-' + reverse);
         let FileLR_3 = document.getElementById('control-File-' + reverse);
         //Library
         let search_target = Object.keys(FileList[toggle_LR].Library);
-        for (i = 0; i < search_target.length; i++){
+        for (i = 0; i < search_target.length; i++) {
             if (search_target[i].indexOf(FileList[reverse].Library[FileLR_1.value].name.substring(0, 3)) !== -1) {
                 let targetLib = document.getElementById('control-Library-' + toggle_LR);
                 targetLib.selectedIndex = i;
@@ -366,9 +347,9 @@ const fileHandleChange = async (toggle_LR = "Init", mode = false) => {
             }
         }
         //File
-        await pullDownCreate(toggle_LR,"Folder");
+        await pullDownCreate(toggle_LR, "Folder");
         await fileSelectSync_Process(reverse, FileLR_2.value, "Folder");
-        await pullDownCreate(toggle_LR,"File");
+        await pullDownCreate(toggle_LR, "File");
         await fileSelectSync_Process(reverse, FileLR_3.value, "File");
         await fileReadBoth();
     } else {
@@ -396,7 +377,7 @@ const pullDownCreate = async (target = 'All', part = "All") => {
         partA.push(part);
     }
 
-    for (let i = 0; i < targetA.length; i++){
+    for (let i = 0; i < targetA.length; i++) {
         const LibLeft = document.getElementById('control-Library-' + targetA[i]);
         if (partA.indexOf("Library") !== -1) {
             await monaco_pulldownCreate(LibLeft, targetA[i], UsingHandle[targetA[i]].handle, "Library");
@@ -460,6 +441,9 @@ async function monaco_pulldownCreate(create_target, L_R, readHandle, readKind) {
     }
     create_target.innerHTML = '';
     FileList[L_R][readKind] = {};
+    if (readKind === "Library") {
+        FileList[L_R].root = { handle: readHandle }
+    }
     for await (const handle of readHandle.values()) {
         let file_set = new monaco_file(handle, readHandle.name);
         let insert = document.createElement('option');
@@ -734,7 +718,7 @@ const readText_Model = async (lib, file, member, r_handle) => {
         return null; //end
     }
     //Found !!
-    let new_uri = monaco.Uri.parse(libHandle.name + '/' + file + '/' + filename_c);
+    let new_uri = monaco.Uri.parse("file://" + r_handle.name + "/" + libHandle.name + '/' + file + '/' + filename_c);
     let source_text = await file_read_text(memberHandle.name, memberHandle, false, "text", false);
     let lang = "js";
     if (file === 'QRPGSRC') {

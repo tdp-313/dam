@@ -9,28 +9,34 @@
 
 <body>
     <header>
-        <div>
-            <input type="radio" class="displayHide" id="control-EditorModeChange-code" name="control-EditorModeChange"
-                value="code" checked></input>
-            <label for="control-EditorModeChange-code" class="control-iconButton"><img class="refSize"
-                    src="./icon/code.svg"></label>
+        <div class="editorModeArea">
+            <div>
+                <input type="radio" class="displayHide" id="control-EditorModeChange-code"
+                    name="control-EditorModeChange" value="code" checked></input>
+                <label for="control-EditorModeChange-code" class="control-iconButton"><img class="refSize"
+                        src="./icon/code.svg"></label>
+            </div>
+            <div>
+                <input type="radio" class="displayHide" id="control-EditorModeChange-diff"
+                    name="control-EditorModeChange" value="diff"></input>
+                <label for="control-EditorModeChange-diff" class="control-iconButton"><img class="refSize"
+                        src="./icon/arrows-diff.svg"></label>
+            </div>
+            <div class="alignLine"></div>
+            <div>
+                <span id="control-Reload" class="control-iconButton"><img class="refSize"
+                        src="./icon/reload.svg"></span>
+            </div>
+            <div class="alignLine"></div>
         </div>
-        <div>
-            <input type="radio" class="displayHide" id="control-EditorModeChange-diff" name="control-EditorModeChange"
-                value="diff"></input>
-            <label for="control-EditorModeChange-diff" class="control-iconButton"><img class="refSize"
-                    src="./icon/arrows-diff.svg"></label>
-        </div>
-        <div class="alignLine"></div>
-        <div>
-            <span id="control-Reload" class="control-iconButton"><img class="refSize" src="./icon/reload.svg"></span>
-        </div>
-        <div class="alignLine"></div>
+        
         <div style="display:flex; width: 100%;position:relative;overflow: hidden;">
             <div class="control-FolderFileArea">
+                <span></span>
                 <input type="checkbox" class="displayHide" id="control-dynamic-Left"></input>
                 <label for="control-dynamic-Left" class="control-iconButton"><img class="refSize"
                         src="./icon/dynamic.svg"></label>
+                <span></span>
                 <select name="control-Folder-Left" id="control-Library-Left"
                     class="control-FileFolder-pulldown"></select>
                 <select name="control-Folder-Left" id="control-Folder-Left"
@@ -39,9 +45,11 @@
             </div>
 
             <div class="control-FolderFileArea">
+                <span></span>
                 <input type="checkbox" class="displayHide" id="control-dynamic-Right"></input>
                 <label for="control-dynamic-Right" class="control-iconButton"><img class="refSize"
                         src="./icon/dynamic.svg"></label>
+                <span></span>
                 <select name="control-Folder-Right" id="control-Library-Right"
                     class="control-FileFolder-pulldown"></select>
                 <select name="control-Folder-Right" id="control-Folder-Right"
@@ -111,8 +119,8 @@
                 <label for="rs-mode-def" class="control-iconButton"><img class="refSize"
                         src="./icon/code-asterix.svg">Definition</label>
                 <input type="radio" class="displayHide" id="rs-mode-setting" name="rs-mode" value="setting"></input>
-                <label for="rs-mode-setting" class="control-iconButton" style="width: 4rem;min-width: 0;"><img class="refSize"
-                        src="./icon/setting.svg"></label>
+                <label for="rs-mode-setting" class="control-iconButton" style="width: 4rem;min-width: 0;"><img
+                        class="refSize" src="./icon/setting.svg"></label>
             </div>
             <div class="verticalLine"></div>
             <div id="right-sideBar-contents">

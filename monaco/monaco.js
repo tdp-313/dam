@@ -36,8 +36,8 @@ const monacoStart = async () => {
       autoSurround: 'brackets',
       automaticLayout: true,
     });
-    
-    fileReadStart(false,"init");
+
+    fileReadStart(false, "init");
     diffEditor.updateOptions(editorOptionGeneral);
     var diff = {};
     diff.left = monaco.editor.createModel('function hello() {\n\talert("Hello world!");\n}', 'javascript');
@@ -170,7 +170,7 @@ const monacoStart = async () => {
     window.refDefStart = async (model) => {
       let refListFile = null;
       const libFileName = model.uri.path.split('/').filter(str => str !== '');
-
+      
       if (libFileName.length !== 3) {
         return null;
       }
@@ -192,48 +192,51 @@ const monacoStart = async () => {
       } else {
         return null;
       }
-      let rootFolderHandle = null;
-      let refOnly = false;
-      for await (const handle of mainRootHandle.values()) {
-        if (handle.name === rootLibName) {
-          rootFolderHandle = handle;
-          break;
+
+      let searchHandleCheck = { normal: false, ref: false }
+      if (mainRootHandle !== null) {
+        if (model.uri.authority === mainRootHandle.name) {
+          searchHandleCheck.normal = true;
         }
       }
-      if (rootFolderHandle === null) {
-        refOnly = true;
-        for await (const handle of refRootHandle.values()) {
-          if (handle.name === rootLibName) {
-            rootFolderHandle = handle;
-            break;
-          }
-        }
-        if (rootFolderHandle === null) {
-          return null; //end
-        }
+      if (refRootHandle !== null && Setting.getRefMaster) {
+        searchHandleCheck.ref = true;
       }
 
       normalRefDef.clear();
       additionalRefDef.clear();
       notExist_DSP.clear();
       notExist_DDS.clear();
-      normalRefDef = await refDefCreate('QDDSSRC', rootFolderHandle, normalRefDef, refListFile.dds);
-      normalRefDef = await refDefCreate('QDSPSRC', rootFolderHandle, normalRefDef, refListFile.dsp);
-      if (additionalRefDef.size > 0) {//PFILE
-        normalRefDef = await refDefCreate('QDDSSRC', rootFolderHandle, normalRefDef, [...additionalRefDef]);
+
+      let searchLibName = [rootLibName.substring(0, 3)];
+      if (Array.isArray(Setting.libraryList[searchLibName])) {
+        searchLibName = Setting.libraryList[searchLibName];
       }
 
-      if (Setting.getRefMaster && !refOnly) {
+      if (searchHandleCheck.normal) {
+        let folderHandle = [];
+        for await (const handle of mainRootHandle.values()) {
+          for (let i = 0; i < searchLibName.length; i++) {
+            if (handle.name.indexOf(searchLibName[i]) !== -1) {
+              folderHandle.push(handle);
+            }
+          }
+        }
+        for (let i = 0; i < folderHandle.length; i++) {
+          normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
+          normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
+          if (additionalRefDef.size > 0) {//PFILE
+            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, [...additionalRefDef], mainRootHandle.name);
+          }
+        }
+      }
+
+      if (searchHandleCheck.ref) {
         await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read');
 
-        let searchLibName = [rootLibName.substring(0, 3)];
-
-        if (Array.isArray(Setting.libraryList[searchLibName])) {
-          searchLibName = Setting.libraryList[searchLibName];
-        }
         let folderHandle = [];
         for await (const handle of refRootHandle.values()) {
-          for (let i = 0; i < searchLibName.length; i++){
+          for (let i = 0; i < searchLibName.length; i++) {
             if (handle.name.indexOf(searchLibName[i]) !== -1) {
               folderHandle.push(handle);
             }
@@ -243,15 +246,25 @@ const monacoStart = async () => {
         if (folderHandle.length === 0) {
           return null; //end
         }
+
         additionalRefDef.clear();
-        for (let i = 0; i < folderHandle.length; i++) {
-          normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, [...notExist_DDS]);
-          normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, [...notExist_DSP]);
-          if (additionalRefDef.size > 0) {//PFILE
-            normalRefDef = await refDefCreate('QDDSSRC', folderHandle, normalRefDef, [...additionalRefDef]);
+        if (searchHandleCheck.normal) {
+          for (let i = 0; i < folderHandle.length; i++) {
+            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, [...notExist_DDS], refRootHandle.name);
+            normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, [...notExist_DSP], refRootHandle.name);
+            if (additionalRefDef.size > 0) {//PFILE
+              normalRefDef = await refDefCreate('QDDSSRC', folderHandle, normalRefDef, [...additionalRefDef], refRootHandle.name);
+            }
+          }
+        } else {
+          for (let i = 0; i < folderHandle.length; i++) {
+            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
+            normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
+            if (additionalRefDef.size > 0) {//PFILE
+              normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, [...additionalRefDef], mainRootHandle.name);
+            }
           }
         }
-
       }
       //sidebar
       createUseFileList(normalRefDef);
@@ -286,10 +299,10 @@ const monacoStart = async () => {
       }
       return refDef;
     }
-    const refDefCreate = async (FileName, handle, refDef, reflist) => {
+    const refDefCreate = async (FileName, handle, refDef, reflist, rootHandleName) => {
       let current_SRC = await createFolderExistList(handle, FileName);
       for (let i = 0; i < reflist.length; i++) {
-        let uri = monaco.Uri.parse(handle.name + '/' + FileName + '/' + reflist[i]);
+        let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + FileName + '/' + reflist[i]);
         let textData = await getFolderExistList_Text(current_SRC, reflist[i]);
         if (textData !== null) {
           let model = await modelChange(textData.text, 'dds', uri);
