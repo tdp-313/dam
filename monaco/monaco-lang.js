@@ -161,7 +161,6 @@ const monacoLang = async () => {
                 return null;
             }
             let ranges = [];
-            console.log(position);
             let lineCount = model.getLineCount();
             for (let i = 1; i <= lineCount; i++) {
                 let row = model.getLineContent(i);
@@ -392,9 +391,17 @@ const dds_DefinitionList = async (model, map, refName, handle) => {
             } else {
                 let start_row_desc = "";
                 if (text_p !== -1) {
-                    start_row_desc = sp_op_full.substring(text_p + 6, sp_op_full.lastIndexOf("+"));
+                    if (sp_op_full.lastIndexOf("+") !== -1) {
+                        start_row_desc = sp_op_full.substring(text_p + 6, sp_op_full.lastIndexOf("+"));
+                    } else if (sp_op_full.lastIndexOf("-") !== -1) {
+                        start_row_desc = sp_op_full.substring(text_p + 6, sp_op_full.lastIndexOf("-"));
+                    }
                 } else if (colhdg_p !== -1) {
-                    start_row_desc = sp_op_full.substring(colhdg_p + 8, sp_op_full.lastIndexOf("+"));
+                    if (sp_op_full.lastIndexOf("+") !== -1) {
+                        start_row_desc = sp_op_full.substring(colhdg_p + 8, sp_op_full.lastIndexOf("+"));
+                    } else if (sp_op_full.lastIndexOf("-") !== -1) {
+                        start_row_desc = sp_op_full.substring(colhdg_p + 8, sp_op_full.lastIndexOf("-"));
+                    }
                 }
                 if (max === i) {
                     console.log('MAX');

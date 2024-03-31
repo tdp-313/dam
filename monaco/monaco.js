@@ -12,13 +12,14 @@ const monacoStart = async () => {
   require(["vs/editor/editor.main"], async function () {
     monacoLang();
 
-    monaco.editor.defineTheme('myTheme', theme_dark);
+    monaco.editor.defineTheme('myTheme', await fetchJSON_Read("./theme/dark_1.json"));
     const editorOptionGeneral = {
       language: 'vb',
       mouseWheelZoom: true,
       scrollBeyondLastLine: false,
       locale: 'ja',
       theme: "myTheme",
+      definitionLinkOpensInPeek: true,
       stickyScroll: {
         enabled: true,
       },
@@ -170,7 +171,7 @@ const monacoStart = async () => {
     window.refDefStart = async (model) => {
       let refListFile = null;
       const libFileName = model.uri.path.split('/').filter(str => str !== '');
-      
+
       if (libFileName.length !== 3) {
         return null;
       }
@@ -319,28 +320,16 @@ const monacoStart = async () => {
     }
     const extraThemeChange = document.getElementById('control-extraTheme');
     extraThemeChange.addEventListener('click', () => { themeApply((Setting.getTheme) + 1) });
-    const themeApply = (themeState) => {
+    const themeApply = async (themeState) => {
       switch (themeState) {
         case 1:
-          theme_blackSetting();
-          monaco.editor.defineTheme('myTheme', theme_dark2);
-          break;
-        case 2:
-          theme_blackSetting();
-          monaco.editor.defineTheme('myTheme', theme_dark3);
-          break;
-        case 3:
           //white
           theme_whiteSetting();
-          monaco.editor.defineTheme('myTheme', theme_white);
-          break;
-        case 4:
-          theme_blackSetting();
-          monaco.editor.defineTheme('myTheme', theme_dark4);
+          monaco.editor.defineTheme('myTheme', await fetchJSON_Read("./theme/white.json"));
           break;
         default:
           theme_blackSetting();
-          monaco.editor.defineTheme('myTheme', theme_dark);
+          monaco.editor.defineTheme('myTheme', await fetchJSON_Read("./theme/dark_1.json"));
           themeState = 0;
       }
       Setting.setTheme = themeState;
@@ -585,7 +574,15 @@ window.onload = async () => {
   await rightSidebarRead();
   readFileButtonCreate();
   await tabs_eventStart();
+  //Loading Close
+  loadingPopUpClose();
   //setting Load
+}
+
+const loadingPopUpClose = () => {
+  const dialog = document.getElementById('loadingPopUp');
+  dialog.close();
+  dialog.remove();
 }
 
 const rightSidebarRead = async () => {
@@ -684,5 +681,17 @@ class linkStatusClass {
   constructor() {
     this.handle = null;
     this.ishandle = false;
+  }
+}
+const fetchJSON_Read = async (path) => {
+  try {
+    const response = await fetch(path);
+    if (!response.ok) {
+      throw new Error("HTTP error " + response.status);
+    }
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    console.log("Fetch error: ", error);
   }
 }

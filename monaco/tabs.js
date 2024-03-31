@@ -114,7 +114,8 @@ const tabs_add = async (model, new_data = true) => {
     }
     await setNormalEditor_Model(model);
     const tabs_dom = document.getElementById('monaco-tab');
-    tabs_dom.appendChild(tabs_html(name, id, lang_icon, path,filter_style));
+    let dom_li = tabs_html(name, id, lang_icon, path, filter_style);
+    tabs_dom.appendChild(dom_li);
     tabs.set(id, { model: model ,view:setNormalEditor_View()});
 }
 
