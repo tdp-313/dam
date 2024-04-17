@@ -375,7 +375,7 @@ const monacoLang = async () => {
         }
     });
 }
-const dds_DefinitionList = async (model, map, refName, handle) => {
+const dds_DefinitionList = async (model, map, refName, handle, use) => {
     const createDescription = async (start_row, i, model, max, loopCheck = 0) => {
         let sp_op_full = start_row.substring(44, 80).trim();
         let text_p = sp_op_full.indexOf("TEXT('");
@@ -527,10 +527,10 @@ const dds_DefinitionList = async (model, map, refName, handle) => {
         }
     }
     //console.log(refName, fileDescription);
-    map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file", handle: handle });
+    map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file", handle: handle, use: use });
     if (R_file.length > 0) {
         for (let i = 0; i < R_file.length; i++) {
-            additionalRefDef.add(R_file[i]);
+            additionalRefDef.set(R_file[i],{ name: R_file[i], use: use });
         }
     }
     //console.log(map);
@@ -544,22 +544,49 @@ const createUseFileList = async (refDef) => {
     mode = selectedRadio.value;
     sidebar_contents.innerHTML = "";
     let filter_style = themeCSS_FilterStyle();
-    const get_template = (fileName, desc, library, langIcon, filter) => {
-        let temp = "";
-        temp += '<div id="sidebar-contents-' + fileName + ' " class="sidebar-contents hoverButton">';
-        temp += '<img  class="refSize control-iconButton" style="filter: ' + filter + ';" src="./icon/' + langIcon + '.svg">';
-        temp += '<span class="sidebar-filename">' + fileName + '</span>';
-        temp += '<span style="overflow: overlay; text-wrap: nowrap;">' + desc + '</span>';
-        temp += '<span style="font-size: 0.8rem; padding-left: 2rem;">' + library + '</span>';
-        temp += '</div>';
-        return (temp);
+    const get_template = (fileName, desc, library, langIcon, filter, use = "") => {
+        if (use === "") {
+            let temp = "";
+            temp += '<div id="sidebar-contents-' + fileName + ' " class="sidebar-contents hoverButton">';
+            temp += '<img  class="refSize control-iconButton" style="filter: ' + filter + ';" src="./icon/' + langIcon + '.svg">';
+            temp += '<span class="sidebar-filename">' + fileName + '</span>';
+            temp += '<span style="overflow: overlay; text-wrap: nowrap;">' + desc + '</span>';
+            temp += '<span style="font-size: 0.8rem; padding-left: 2rem;">' + library + '</span>';
+            temp += '</div>';
+            return (temp);
+        } else {
+            let border_class = "";
+            if (use.length > 1) {
+                border_class = "output_border";
+            } else {
+                if (use === "I") {
+                    border_class = "input_border";
+                } else if (use === "U") {
+                    border_class = "update_border";
+                } else if (use === "O") {
+                    border_class = "output_border";
+                }
+            }
+
+            let temp = "";
+            temp += '<div id="sidebar-contents-' + fileName + ' " class="sidebar-contents hoverButton ' + border_class + '">';
+            temp += '<img  class="refSize control-iconButton" style="filter: ' + filter + ';" src="./icon/' + langIcon + '.svg">';
+            temp += '<span class="sidebar-filename">' + fileName + '</span>';
+            temp += '<span style="overflow: overlay; text-wrap: nowrap;">' + desc + '</span>';
+            temp += '<span style="font-size: 0.8rem; justly-contents: center;">' + use + '</span>';
+            temp += '<span style="font-size: 0.8rem;">' + library + '</span>';
+            temp += '</div>';
+            return (temp);
+        }
     }
     if (mode === 'file') {
+        let existFile = [];
         refDef.forEach((value, key) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'file') {
                 if (value.location.uri.path.indexOf("DSP") !== -1) {
-                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
+                    existFile.push(key);
+                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style,value.use);
                 }
             }
         });
@@ -567,10 +594,17 @@ const createUseFileList = async (refDef) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'file') {
                 if (value.location.uri.path.indexOf("DSP") === -1) {
-                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
+                    existFile.push(key);
+                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style,value.use);
                 }
             }
         });
+        for (let value of notExist_DDS) {
+            if (!existFile.includes(value[0])) {
+                let notFoundFile = value[1];
+                html += get_template(notFoundFile.name, "Not Found", "", get_langIcon("QDDSSRC"), filter_style,notFoundFile.use);
+            }; 
+          }
     }
     if (mode === 'def') {
         refDef.forEach((value, key) => {
@@ -596,7 +630,7 @@ const createUseFileList = async (refDef) => {
     if (mode === 'setting') {
         html = "<h4>Library List Setting</h4>";
         html += "<div></div>";
-        html += '<textarea id="settingLibraryList"rows="15" cols="41">'+ JSON.stringify(Setting.libraryList) +'</textarea>';
+        html += '<textarea id="settingLibraryList"rows="15" cols="41">' + JSON.stringify(Setting.libraryList) + '</textarea>';
         html += "<button onclick='settingSaveProcess()'>Save</button>";
     }
     sidebar_contents.innerHTML = html;

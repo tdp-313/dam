@@ -11,7 +11,6 @@ let InitModel = null;
 const monacoStart = async () => {
   require(["vs/editor/editor.main"], async function () {
     monacoLang();
-
     monaco.editor.defineTheme('myTheme', await fetchJSON_Read("./theme/dark_1.json"));
     const editorOptionGeneral = {
       language: 'vb',
@@ -179,14 +178,13 @@ const monacoStart = async () => {
       let mainRootHandle = linkStatus[monaco_handleName].handle;
       let refRootHandle = linkStatus[monaco_handleName_RefMaster].handle;
       let rootLibName = libFileName[0];
-
       if (model.getLanguageId() === 'rpg-indent') {
         refListFile = await createRefList(model);
       } else if (model.getLanguageId() === 'dds') {
         if (libFileName[1].indexOf('DDS') !== -1) {
-          refListFile = { dds: [libFileName[2].substring(0, libFileName[2].indexOf('.'))], dsp: [] };
+          refListFile = { dds: [{ name: libFileName[2], use: "" }], dsp: [] };
         } else if (libFileName[1].indexOf('DSP') !== -1) {
-          refListFile = { dds: [], dsp: [libFileName[2].substring(0, libFileName[2].indexOf('.'))] };
+          refListFile = { dds: [], dsp: [{ name: libFileName[2], use: "" }] };
         } else {
           return null;
         }
@@ -213,7 +211,6 @@ const monacoStart = async () => {
       if (Array.isArray(Setting.libraryList[searchLibName])) {
         searchLibName = Setting.libraryList[searchLibName];
       }
-
       if (searchHandleCheck.normal) {
         let folderHandle = [];
         for await (const handle of mainRootHandle.values()) {
@@ -227,7 +224,7 @@ const monacoStart = async () => {
           normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
           normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
           if (additionalRefDef.size > 0) {//PFILE
-            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, [...additionalRefDef], mainRootHandle.name);
+            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name);
           }
         }
       }
@@ -248,13 +245,12 @@ const monacoStart = async () => {
           return null; //end
         }
 
-        additionalRefDef.clear();
         if (searchHandleCheck.normal) {
           for (let i = 0; i < folderHandle.length; i++) {
-            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, [...notExist_DDS], refRootHandle.name);
-            normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, [...notExist_DSP], refRootHandle.name);
+            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(notExist_DDS.values()), refRootHandle.name);
+            normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, map_valuesArray(notExist_DSP.values()), refRootHandle.name);
             if (additionalRefDef.size > 0) {//PFILE
-              normalRefDef = await refDefCreate('QDDSSRC', folderHandle, normalRefDef, [...additionalRefDef], refRootHandle.name);
+              normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), refRootHandle.name);
             }
           }
         } else {
@@ -262,7 +258,7 @@ const monacoStart = async () => {
             normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
             normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
             if (additionalRefDef.size > 0) {//PFILE
-              normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, [...additionalRefDef], mainRootHandle.name);
+              normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name);
             }
           }
         }
@@ -300,19 +296,26 @@ const monacoStart = async () => {
       }
       return refDef;
     }
+    const map_valuesArray = (values) => {
+      let rtn = [];
+      for (let value of values) {
+        rtn.push(value); // value1, value2
+      }
+      return rtn;
+    }
     const refDefCreate = async (FileName, handle, refDef, reflist, rootHandleName) => {
       let current_SRC = await createFolderExistList(handle, FileName);
       for (let i = 0; i < reflist.length; i++) {
-        let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + FileName + '/' + reflist[i]);
-        let textData = await getFolderExistList_Text(current_SRC, reflist[i]);
+        let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + FileName + '/' + reflist[i].name);
+        let textData = await getFolderExistList_Text(current_SRC, reflist[i].name);
         if (textData !== null) {
           let model = await modelChange(textData.text, 'dds', uri);
-          refDef = await dds_DefinitionList(model, refDef, reflist[i], textData.handle);
+          refDef = await dds_DefinitionList(model, refDef, reflist[i].name, textData.handle, reflist[i].use);
         } else {
           if (FileName === "QDDSSRC") {
-            notExist_DDS.add(reflist[i]);
+            notExist_DDS.set(reflist[i].name, reflist[i]);
           } else if (FileName === "QDSPSRC") {
-            notExist_DSP.add(reflist[i]);
+            notExist_DSP.set(reflist[i].name, reflist[i]);
           }
         }
       }
@@ -358,10 +361,32 @@ const monacoStart = async () => {
         if (lineText.substring(5, 6) === "F" && lineText.substring(6, 7) !== "*") {
           let type = lineText.substring(39, 46).trim();
           let file = lineText.substring(6, 14).trim();
+          let use = lineText.substring(14, 15).trim();
+          let add = lineText.substring(65, 66).trim();
+          let using = "";
+          if (add === "A") {
+            if (use === "I") {
+              using = "I/O";
+            } else if (use === "U") {
+              using = "U/O";
+            } else if (use === "O") {
+              using = "O";
+            }
+          } else {
+            if (use === "I") {
+              using = "I";
+            } else if (use === "U") {
+              using = "U";
+            } else if (use === "O") {
+              using = "O";
+            }
+          }
           if (type === "WORKSTN") {
-            dsp.push(file);
+            dsp.push({ name: file, use: "" });
           } else if (type === "DISK") {
-            dds.push(file);
+            dds.push({ name: file, use: using });
+          } else if (type === "PRINTER") {
+            dds.push({ name: file, use: using });
           }
         }
       }
@@ -527,29 +552,7 @@ const monacoStart = async () => {
                 title: "   DO : " + op_2,
               },
             });
-          }/*else if (lineText.substring(5, 6) === "F") {
-            if (lineText.substring(6, 14).trim() !== "" && lineText.substring(6, 7) !== "*") {
-              let fileID = lineText.substring(6, 14).trim();
-              let sourceDef = await sourceRefDef.get(fileID);
-              
-              if (typeof (sourceDef) !== 'undefined') {
-                fileID = sourceDef.description;
-              }
-              rtn.lenses.push({
-                range: {
-                  startLineNumber: lineNumber+1,
-                  startColumn: 6,
-                  endLineNumber: lineNumber+1,
-                  endColumn: 70,
-                },
-                id: "LINE-" + lineNumber,
-                command: {
-                  id: nowork,
-                  title: fileID,
-                },
-              });
-            }
-          }*/
+          }
         }
         return rtn;
       },
@@ -579,10 +582,12 @@ window.onload = async () => {
   //setting Load
 }
 
+const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
+
 const loadingPopUpClose = () => {
   const dialog = document.getElementById('loadingPopUp');
   dialog.close();
-  dialog.remove();
+  //dialog.remove();
 }
 
 const rightSidebarRead = async () => {
@@ -673,9 +678,9 @@ class localSetting {
 }
 var normalRefDef = new Map();
 var sourceRefDef = new Map();
-var additionalRefDef = new Set();
-var notExist_DDS = new Set();
-var notExist_DSP = new Set();
+var additionalRefDef = new Map();
+var notExist_DDS = new Map();
+var notExist_DSP = new Map();
 var linkStatus = {};
 class linkStatusClass {
   constructor() {

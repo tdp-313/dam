@@ -33,6 +33,7 @@ header {
     user-select: none;
     position: relative;
 }
+
 #loadingPopUp {
     top: 30%;
     display: flex;
@@ -41,11 +42,16 @@ header {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  .loader {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader {
     border: 0.5rem solid #f3f3f3;
     border-radius: 50%;
     border-top: 0.5rem solid #3498db;
@@ -53,9 +59,9 @@ header {
     height: 2rem;
     animation: spin 2s linear infinite;
     margin-left: 0.5rem;
-  }
+}
 
-  
+
 header .editorModeArea {
     display: grid;
     grid-template-columns: 3rem 3rem 1rem 2rem 1rem;
@@ -147,6 +153,7 @@ header input[type="radio"]:checked+label,
 .control-FolderFileArea input[type="checkbox"]:checked+label {
     background-color: rgba(255, 174, 0, 0.35)
 }
+
 .control-FolderFileArea input[type="checkbox"]:checked~select {
     border: solid;
     border-color: goldenrod;
@@ -175,9 +182,11 @@ header input[type="radio"]:checked+label,
     grid-template-columns: 0.4rem 2rem 0.4rem 0.35fr 0.3fr 0.35fr;
     justify-items: center;
 }
+
 .control-FolderFileArea select {
     width: 100%;
 }
+
 #control-subArea {
     position: absolute;
     background-color: var(--backgroundColor);
@@ -259,4 +268,16 @@ header input[type="radio"]:checked+label,
 
 .tabLayout {
     display: block;
+}
+
+.output_border {
+    border-color: brown !important;
+}
+
+.update_border {
+    border-color: yellowgreen !important;
+}
+
+.input_border {
+    border-color: skyblue !important;
 }
