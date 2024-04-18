@@ -150,6 +150,7 @@ header input[type="radio"]:checked+label,
 #control-subArea input[type="checkbox"]:checked+label,
 #right-sideBar input[type="radio"]:checked+label,
 #monaco-tab input[type="radio"]:checked+label,
+#sidebar-filter-root input[type="checkbox"]:checked+label,
 .control-FolderFileArea input[type="checkbox"]:checked+label {
     background-color: rgba(255, 174, 0, 0.35)
 }
@@ -280,4 +281,30 @@ header input[type="radio"]:checked+label,
 
 .input_border {
     border-color: skyblue !important;
+}
+
+#sidebar-filter-root {
+    display: flex;
+    flex-direction: row;
+    grid-template-columns: 0,3rem;
+    grid-template-rows: 1rem;
+}
+
+#sidebar-filter-root input[type="checkbox"] {
+    display: none;
+}
+
+#sidebar-filter-root label {
+    width: 3rem;
+    height: 1rem;
+    padding: 0.2rem;
+    border: #aeaeae 0.1rem solid;
+    margin: 0.2rem 0.3rem;
+    align-items: center;
+}
+#sidebar-filter-count {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: end;
 }

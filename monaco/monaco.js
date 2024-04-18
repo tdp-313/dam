@@ -240,7 +240,6 @@ const monacoStart = async () => {
             }
           }
         }
-
         if (folderHandle.length === 0) {
           return null; //end
         }
@@ -262,6 +261,10 @@ const monacoStart = async () => {
             }
           }
         }
+      }
+      if (!firstEditorLoading) {
+        loadingPopUpClose();
+        firstEditorLoading = true;
       }
       //sidebar
       createUseFileList(normalRefDef);
@@ -577,9 +580,6 @@ window.onload = async () => {
   await rightSidebarRead();
   readFileButtonCreate();
   await tabs_eventStart();
-  //Loading Close
-  loadingPopUpClose();
-  //setting Load
 }
 
 const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
@@ -587,13 +587,19 @@ const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
 const loadingPopUpClose = () => {
   const dialog = document.getElementById('loadingPopUp');
   dialog.close();
-  //dialog.remove();
+  dialog.remove();
 }
 
 const rightSidebarRead = async () => {
   const r_sidebar_contents = document.getElementById('right-sideBar-contents');
   r_sidebar_contents.addEventListener('click', async (e) => {
     const selectedRadio = document.querySelector('input[name="rs-mode"]:checked');
+    if (e.target.id.indexOf("sidebar-filter") !== -1) {
+      if (typeof (e.target.checked) !== 'undefined') {
+        filterSettingUpdate(e.target.id.substring(15, e.target.id.length), e.target.checked);
+      }
+      return null;
+    }
     if (e.target.id === 'right-sideBar-contents' || selectedRadio.value === "setting") {
       return null;
     }
@@ -682,6 +688,7 @@ var additionalRefDef = new Map();
 var notExist_DDS = new Map();
 var notExist_DSP = new Map();
 var linkStatus = {};
+let firstEditorLoading = false;
 class linkStatusClass {
   constructor() {
     this.handle = null;

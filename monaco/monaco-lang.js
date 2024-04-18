@@ -530,7 +530,7 @@ const dds_DefinitionList = async (model, map, refName, handle, use) => {
     map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file", handle: handle, use: use });
     if (R_file.length > 0) {
         for (let i = 0; i < R_file.length; i++) {
-            additionalRefDef.set(R_file[i],{ name: R_file[i], use: use });
+            additionalRefDef.set(R_file[i], { name: R_file[i], use: use });
         }
     }
     //console.log(map);
@@ -581,12 +581,34 @@ const createUseFileList = async (refDef) => {
     }
     if (mode === 'file') {
         let existFile = [];
+        //Filter Element Create
+        html += '<div id="sidebar-filter-root">';
+        if (filter.Input) {
+            html += '<span id="sidebar-filter"><input id="sidebar-filter-Input" type="checkbox" checked/><label id="sidebar-filter" class="control-iconButton" for="sidebar-filter-Input">I</label></span>';
+        } else {
+            html += '<span id="sidebar-filter"><input id="sidebar-filter-Input" type="checkbox"/><label id="sidebar-filter" class="control-iconButton" for="sidebar-filter-Input">I</label></span>';
+        }
+        if (filter.Update) {
+            html += '<span id="sidebar-filter"><input id="sidebar-filter-Update" type="checkbox" checked/><label id="sidebar-filter" class="control-iconButton" for="sidebar-filter-Update">U</label></span>';
+        } else {
+            html += '<span id="sidebar-filter"><input id="sidebar-filter-Update" type="checkbox"/><label id="sidebar-filter" class="control-iconButton" for="sidebar-filter-Update">U</label></span>';
+        }
+        if (filter.Output) {
+            html += '<span id="sidebar-filter"><input id="sidebar-filter-Output" type="checkbox" checked/><label id="sidebar-filter" class="control-iconButton" for="sidebar-filter-Output">O</label></span>';
+        } else {
+            html += '<span id="sidebar-filter"><input id="sidebar-filter-Output" type="checkbox"/><label id="sidebar-filter" class="control-iconButton" for="sidebar-filter-Output">O</label></span>';
+        }
+
+        let filterContents = [];
+
+        let maxFile = 0;
         refDef.forEach((value, key) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'file') {
                 if (value.location.uri.path.indexOf("DSP") !== -1) {
+                    maxFile++;
                     existFile.push(key);
-                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style,value.use);
+                    filterContents.push(get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, value.use));
                 }
             }
         });
@@ -594,17 +616,28 @@ const createUseFileList = async (refDef) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'file') {
                 if (value.location.uri.path.indexOf("DSP") === -1) {
+                    maxFile++;
                     existFile.push(key);
-                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style,value.use);
+                    if (isDisplayCheck(value.use)) {
+                        filterContents.push(get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, value.use));
+                    }
                 }
             }
         });
         for (let value of notExist_DDS) {
             if (!existFile.includes(value[0])) {
+                maxFile++;
                 let notFoundFile = value[1];
-                html += get_template(notFoundFile.name, "Not Found", "", get_langIcon("QDDSSRC"), filter_style,notFoundFile.use);
-            }; 
-          }
+                if (isDisplayCheck(notFoundFile.use)) {
+                    filterContents.push(get_template(notFoundFile.name, "Not Found", "", get_langIcon("QDDSSRC"), filter_style, notFoundFile.use));
+                }
+            };
+        }
+        html += '<span id="sidebar-filter-count">' + filterContents.length + '/' + maxFile + '</span>';
+        html += '</div>';
+        for (let i = 0; i < filterContents.length; i++) {
+            html += filterContents[i];
+        }
     }
     if (mode === 'def') {
         refDef.forEach((value, key) => {
@@ -636,6 +669,34 @@ const createUseFileList = async (refDef) => {
     sidebar_contents.innerHTML = html;
 }
 
+let filter = { Input: true, Update: true, Output: true };
+const filterSettingUpdate = (target, isFilter) => {
+    filter[target] = isFilter;
+    createUseFileList(normalRefDef);
+}
+
+const isDisplayCheck = (useType) => {
+    let is = false;
+
+    if (useType.length === 0) {
+        return false;
+    }
+
+    if (useType.length > 3) {
+        if (filter.Output) {
+            return true;
+        }
+    }
+
+    let ref = useType.substring(0, 1);
+    if (ref === "O" && filter.Output) {
+        return true;
+    } else if (ref === "U" && filter.Update) {
+        return true;
+    } else if (ref === "I" && filter.Input) {
+        return true;
+    }
+}
 const settingSaveProcess = () => {
     const settingLibraryList = document.getElementById('settingLibraryList');
     let inputText = settingLibraryList.value;
