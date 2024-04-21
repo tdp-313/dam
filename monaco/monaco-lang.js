@@ -297,7 +297,7 @@ const monacoLang = async () => {
             tooltip_text[0] = '**' + wordStr + '**';
             tooltip_text[1] = window[target].description;
         } else if (window[target].type === "simpleDetail") {
-            let tip = window[target].detail[text.text];
+            let tip = window[target].detail[text.text.trim()];
             if (typeof (tip) === "undefined") {
                 tooltip_text[0] = '**' + window[target].name + " : " + wordStr + '**';
                 tooltip_text[1] = window[target].description

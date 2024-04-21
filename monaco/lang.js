@@ -1129,6 +1129,155 @@ var tip_operation = {
             description: "既存レコードの変更",
             description2: "|X|*ファイル名|*データ構造|【 _ER EOF 】"
         },
+        IFEQ: {
+            name: "条件分岐命令",
+            description: "Operator1 = Operator2",
+        },
+        IFNE: {
+            name: "条件分岐命令",
+            description: "Operator1 <> Operator2",
+        },
+        IFLT: {
+            name: "条件分岐命令",
+            description: "Operator1 < Operator2",
+        },
+        IFGT: {
+            name: "条件分岐命令",
+            description: "Operator1 > Operator2",
+        },
+        IFLE: {
+            name: "条件分岐命令",
+            description: "Operator1 <= Operator2",
+        },
+        IFGE: {
+            name: "条件分岐命令",
+            description: "Operator1 >= Operator2",
+        },
+        WHEQ: {
+            name: "条件分岐命令",
+            description: "Operator1 = Operator2",
+        },
+        WHNE: {
+            name: "条件分岐命令",
+            description: "Operator1 <> Operator2",
+        },
+        WHLT: {
+            name: "条件分岐命令",
+            description: "Operator1 < Operator2",
+        },
+        WHGT: {
+            name: "条件分岐命令",
+            description: "Operator1 > Operator2",
+        },
+        WHLE: {
+            name: "条件分岐命令",
+            description: "Operator1 <= Operator2",
+        },
+        WHGE: {
+            name: "条件分岐命令",
+            description: "Operator1 >= Operator2",
+        },
+        CABEQ: {
+            name: "条件分岐命令",
+            description: "Operator1 = Operator2",
+        },
+        CABNE: {
+            name: "条件分岐命令",
+            description: "Operator1 <> Operator2",
+        },
+        CABLT: {
+            name: "条件分岐命令",
+            description: "Operator1 < Operator2",
+        },
+        CABGT: {
+            name: "条件分岐命令",
+            description: "Operator1 > Operator2",
+        },
+        CABLE: {
+            name: "条件分岐命令",
+            description: "Operator1 <= Operator2",
+        },
+        CABGE: {
+            name: "条件分岐命令",
+            description: "Operator1 >= Operator2",
+        },
+        OREQ: {
+            name: "条件分岐命令",
+            description: "Operator1 = Operator2",
+        },
+        ORNE: {
+            name: "条件分岐命令",
+            description: "Operator1 <> Operator2",
+        },
+        ORLT: {
+            name: "条件分岐命令",
+            description: "Operator1 < Operator2",
+        },
+        ORGT: {
+            name: "条件分岐命令",
+            description: "Operator1 > Operator2",
+        },
+        ORLE: {
+            name: "条件分岐命令",
+            description: "Operator1 <= Operator2",
+        },
+        ORGE: {
+            name: "条件分岐命令",
+            description: "Operator1 >= Operator2",
+        },
+        ANDEQ: {
+            name: "条件分岐命令",
+            description: "Operator1 = Operator2",
+        },
+        ANDNE: {
+            name: "条件分岐命令",
+            description: "Operator1 <> Operator2",
+        },
+        ANDLT: {
+            name: "条件分岐命令",
+            description: "Operator1 < Operator2",
+        },
+        ANDGT: {
+            name: "条件分岐命令",
+            description: "Operator1 > Operator2",
+        },
+        ANDLE: {
+            name: "条件分岐命令",
+            description: "Operator1 <= Operator2",
+        },
+        ANDGE: {
+            name: "条件分岐命令",
+            description: "Operator1 >= Operator2",
+        },
+        CASEQ: {
+            name: "条件分岐命令",
+            description: "Operator1 = Operator2",
+        },
+        CASNE: {
+            name: "条件分岐命令",
+            description: "Operator1 <> Operator2",
+        },
+        CASLT: {
+            name: "条件分岐命令",
+            description: "Operator1 < Operator2",
+        },
+        CASGT: {
+            name: "条件分岐命令",
+            description: "Operator1 > Operator2",
+        },
+        CASLE: {
+            name: "条件分岐命令",
+            description: "Operator1 <= Operator2",
+        },
+        CASGE: {
+            name: "条件分岐命令",
+            description: "Operator1 >= Operator2",
+        },
+        COMP: {
+            name: "比較命令",
+            description: "Operation1がOperation2よりも～",
+            description2: "【 HI LO EQ 】"
+        }
     }
 }
 var tip_result = {
