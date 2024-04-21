@@ -375,7 +375,7 @@ const monacoLang = async () => {
         }
     });
 }
-const dds_DefinitionList = async (model, map, refName, handle, use) => {
+const dds_DefinitionList = async (model, map, refName, handle, use, searchFrom) => {
     const createDescription = async (start_row, i, model, max, loopCheck = 0) => {
         let sp_op_full = start_row.substring(44, 80).trim();
         let text_p = sp_op_full.indexOf("TEXT('");
@@ -526,8 +526,13 @@ const dds_DefinitionList = async (model, map, refName, handle, use) => {
             }
         }
     }
-    //console.log(refName, fileDescription);
-    map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file", handle: handle, use: use });
+    clone = structuredClone(use);
+    if (searchFrom === "Original") {
+        clone.original = true;
+    } else {
+        clone.original = false;
+    }
+    map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file", handle: handle, use: clone });
     if (R_file.length > 0) {
         for (let i = 0; i < R_file.length; i++) {
             additionalRefDef.set(R_file[i], { name: R_file[i], use: use });
@@ -544,8 +549,8 @@ const createUseFileList = async (refDef) => {
     mode = selectedRadio.value;
     sidebar_contents.innerHTML = "";
     let filter_style = themeCSS_FilterStyle();
-    const get_template = (fileName, desc, library, langIcon, filter, use = "") => {
-        if (use === "") {
+    const get_template = (fileName, desc, library, langIcon, filter, use) => {
+        if (use.io.size === 0) {
             let temp = "";
             temp += '<div id="sidebar-contents-' + fileName + ' " class="sidebar-contents hoverButton">';
             temp += '<img  class="refSize control-iconButton" style="filter: ' + filter + ';" src="./icon/' + langIcon + '.svg">';
@@ -556,16 +561,23 @@ const createUseFileList = async (refDef) => {
             return (temp);
         } else {
             let border_class = "";
-            if (use.length > 1) {
+            let useStr = "";
+
+            if (use.io.has("I") && use.io.has("O")) {
+                useStr = "I/O";
                 border_class = "output_border";
-            } else {
-                if (use === "I") {
-                    border_class = "input_border";
-                } else if (use === "U") {
-                    border_class = "update_border";
-                } else if (use === "O") {
-                    border_class = "output_border";
-                }
+            } else if (use.io.has("U") && use.io.has("O")) {
+                useStr = "U/O";
+                border_class = "output_border";
+            } else if (use.io.has("O")) {
+                useStr = "O";
+                border_class = "output_border";
+            } else if (use.io.has("U")) {
+                useStr = "U";
+                border_class = "update_border";
+            } else if (use.io.has("I")) {
+                useStr = "I";
+                border_class = "input_border";
             }
 
             let temp = "";
@@ -573,7 +585,7 @@ const createUseFileList = async (refDef) => {
             temp += '<img  class="refSize control-iconButton" style="filter: ' + filter + ';" src="./icon/' + langIcon + '.svg">';
             temp += '<span class="sidebar-filename">' + fileName + '</span>';
             temp += '<span style="overflow: overlay; text-wrap: nowrap;">' + desc + '</span>';
-            temp += '<span style="font-size: 0.8rem; justly-contents: center;">' + use + '</span>';
+            temp += '<span style="font-size: 0.8rem; justly-contents: center;">' + useStr + '</span>';
             temp += '<span style="font-size: 0.8rem;">' + library + '</span>';
             temp += '</div>';
             return (temp);
@@ -583,6 +595,11 @@ const createUseFileList = async (refDef) => {
         let existFile = [];
         //Filter Element Create
         html += '<div id="sidebar-filter-root">';
+        if (filter.Ref) {
+            html += '<span id="sidebar-filter"><input id="sidebar-filter-Ref" type="checkbox" checked/><label id="sidebar-filter" class="control-iconButton" for="sidebar-filter-Ref"><img id="sidebar-filter-svg" class="refSize control-iconButton" style="filter: ' + filter_style + ';" src="./icon/database-search.svg" ></label></span>';
+        } else {
+            html += '<span id="sidebar-filter"><input id="sidebar-filter-Ref" type="checkbox"/><label id="sidebar-filter" class="control-iconButton" for="sidebar-filter-Ref"><img id="sidebar-filter-svg" class="refSize control-iconButton" style="filter: ' + filter_style + ';" src="./icon/database-search.svg" ></label></span>';
+        }
         if (filter.Input) {
             html += '<span id="sidebar-filter"><input id="sidebar-filter-Input" type="checkbox" checked/><label id="sidebar-filter" class="control-iconButton" for="sidebar-filter-Input">I</label></span>';
         } else {
@@ -619,7 +636,7 @@ const createUseFileList = async (refDef) => {
                     maxFile++;
                     existFile.push(key);
                     if (isDisplayCheck(value.use)) {
-                        filterContents.push(get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, value.use));
+                        filterContents.push(get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path, value.use.original, value.use.device), filter_style, value.use));
                     }
                 }
             }
@@ -629,7 +646,7 @@ const createUseFileList = async (refDef) => {
                 maxFile++;
                 let notFoundFile = value[1];
                 if (isDisplayCheck(notFoundFile.use)) {
-                    filterContents.push(get_template(notFoundFile.name, "Not Found", "", get_langIcon("QDDSSRC"), filter_style, notFoundFile.use));
+                    filterContents.push(get_template(notFoundFile.name, "Not Found", "", get_langIcon("QDDSSRC", notFoundFile.use.original, notFoundFile.use.device), filter_style, notFoundFile.use));
                 }
             };
         }
@@ -644,7 +661,7 @@ const createUseFileList = async (refDef) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'definition') {
                 if (value.location.uri.path.indexOf("DSP") !== -1) {
-                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
+                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, new UseIO_Layout);
                 }
             }
         });
@@ -652,7 +669,7 @@ const createUseFileList = async (refDef) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'definition') {
                 if (value.location.uri.path.indexOf("DSP") === -1) {
-                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style);
+                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, new UseIO_Layout);
                 }
             }
         });
@@ -669,33 +686,28 @@ const createUseFileList = async (refDef) => {
     sidebar_contents.innerHTML = html;
 }
 
-let filter = { Input: true, Update: true, Output: true };
+let filter = { Input: true, Update: true, Output: true, Ref: true };
 const filterSettingUpdate = (target, isFilter) => {
     filter[target] = isFilter;
     createUseFileList(normalRefDef);
 }
 
 const isDisplayCheck = (useType) => {
-    let is = false;
-
-    if (useType.length === 0) {
-        return false;
-    }
-
-    if (useType.length > 3) {
-        if (filter.Output) {
-            return true;
+    if (!filter.Ref) {
+        if (!useType.original) {
+            return false;
         }
     }
-
-    let ref = useType.substring(0, 1);
-    if (ref === "O" && filter.Output) {
-        return true;
-    } else if (ref === "U" && filter.Update) {
-        return true;
-    } else if (ref === "I" && filter.Input) {
+    if (useType.io.has("I") && filter.Input) {
         return true;
     }
+    if (useType.io.has("U") && filter.Update) {
+        return true;
+    }
+    if (useType.io.has("O") && filter.Output) {
+        return true;
+    }
+    return false;
 }
 const settingSaveProcess = () => {
     const settingLibraryList = document.getElementById('settingLibraryList');
@@ -711,5 +723,13 @@ const isJSON = (str) => {
     } catch (e) {
         window.alert(e);
         return;
+    }
+}
+
+class UseIO_Layout {
+    constructor() {
+        this.io = new Set();
+        this.original = true;
+        this.device = "";
     }
 }

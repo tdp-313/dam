@@ -182,9 +182,9 @@ const monacoStart = async () => {
         refListFile = await createRefList(model);
       } else if (model.getLanguageId() === 'dds') {
         if (libFileName[1].indexOf('DDS') !== -1) {
-          refListFile = { dds: [{ name: libFileName[2], use: "" }], dsp: [] };
+          refListFile = { dds: [{ name: libFileName[2], use: new UseIO_Layout() }], dsp: [] };
         } else if (libFileName[1].indexOf('DSP') !== -1) {
-          refListFile = { dds: [], dsp: [{ name: libFileName[2], use: "" }] };
+          refListFile = { dds: [], dsp: [{ name: libFileName[2], use: new UseIO_Layout() }] };
         } else {
           return null;
         }
@@ -221,10 +221,10 @@ const monacoStart = async () => {
           }
         }
         for (let i = 0; i < folderHandle.length; i++) {
-          normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
-          normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
+          normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name, "Original");
+          normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name, "Original");
           if (additionalRefDef.size > 0) {//PFILE
-            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name);
+            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name, "Reference");
           }
         }
       }
@@ -246,18 +246,18 @@ const monacoStart = async () => {
 
         if (searchHandleCheck.normal) {
           for (let i = 0; i < folderHandle.length; i++) {
-            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(notExist_DDS.values()), refRootHandle.name);
-            normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, map_valuesArray(notExist_DSP.values()), refRootHandle.name);
+            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(notExist_DDS.values()), refRootHandle.name, "Original");
+            normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, map_valuesArray(notExist_DSP.values()), refRootHandle.name, "Original");
             if (additionalRefDef.size > 0) {//PFILE
-              normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), refRootHandle.name);
+              normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), refRootHandle.name, "Reference");
             }
           }
         } else {
           for (let i = 0; i < folderHandle.length; i++) {
-            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
-            normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
+            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name, "Original");
+            normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name, "Original");
             if (additionalRefDef.size > 0) {//PFILE
-              normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name);
+              normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name, "Reference");
             }
           }
         }
@@ -306,14 +306,14 @@ const monacoStart = async () => {
       }
       return rtn;
     }
-    const refDefCreate = async (FileName, handle, refDef, reflist, rootHandleName) => {
+    const refDefCreate = async (FileName, handle, refDef, reflist, rootHandleName, FileSearchFrom) => {
       let current_SRC = await createFolderExistList(handle, FileName);
       for (let i = 0; i < reflist.length; i++) {
         let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + FileName + '/' + reflist[i].name);
         let textData = await getFolderExistList_Text(current_SRC, reflist[i].name);
         if (textData !== null) {
           let model = await modelChange(textData.text, 'dds', uri);
-          refDef = await dds_DefinitionList(model, refDef, reflist[i].name, textData.handle, reflist[i].use);
+          refDef = await dds_DefinitionList(model, refDef, reflist[i].name, textData.handle, reflist[i].use, FileSearchFrom);
         } else {
           if (FileName === "QDDSSRC") {
             notExist_DDS.set(reflist[i].name, reflist[i]);
@@ -366,26 +366,20 @@ const monacoStart = async () => {
           let file = lineText.substring(6, 14).trim();
           let use = lineText.substring(14, 15).trim();
           let add = lineText.substring(65, 66).trim();
-          let using = "";
+          let using = new UseIO_Layout();
+          using.device = type;
           if (add === "A") {
-            if (use === "I") {
-              using = "I/O";
-            } else if (use === "U") {
-              using = "U/O";
-            } else if (use === "O") {
-              using = "O";
-            }
-          } else {
-            if (use === "I") {
-              using = "I";
-            } else if (use === "U") {
-              using = "U";
-            } else if (use === "O") {
-              using = "O";
-            }
+            using.io.add('O');
+          }
+          if (use === "I") {
+            using.io.add('I');
+          } else if (use === "U") {
+            using.io.add('U');
+          } else if (use === "O") {
+            using.io.add('O');
           }
           if (type === "WORKSTN") {
-            dsp.push({ name: file, use: "" });
+            dsp.push({ name: file, use: using });
           } else if (type === "DISK") {
             dds.push({ name: file, use: using });
           } else if (type === "PRINTER") {

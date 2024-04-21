@@ -295,7 +295,7 @@ header input[type="radio"]:checked+label,
 }
 
 #sidebar-filter-root label {
-    width: 3rem;
+    width: 2.5rem;
     height: 1rem;
     padding: 0.2rem;
     border: #aeaeae 0.1rem solid;

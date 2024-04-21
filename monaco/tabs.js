@@ -67,7 +67,7 @@ const tabs_add = async (model, new_data = true) => {
     let path = model.uri.path;
     let name = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf(".") === -1 ? path.length : path.lastIndexOf("."));
     let lang_icon = "";
-    
+
     if (new_data) {
         id = model.id;
         lang_icon = get_langIcon(path);
@@ -90,7 +90,7 @@ const tabs_add = async (model, new_data = true) => {
             pathArea.textContent = path;
             pathArea.classList.add("tab-libnameText");
             libnameArea.appendChild(pathArea);
-            tabs.set(id, { model: model ,view:await setNormalEditor_View()});
+            tabs.set(id, { model: model, view: await setNormalEditor_View() });
         }
         input_dom.checked = true;
         return null;
@@ -116,13 +116,22 @@ const tabs_add = async (model, new_data = true) => {
     const tabs_dom = document.getElementById('monaco-tab');
     let dom_li = tabs_html(name, id, lang_icon, path, filter_style);
     tabs_dom.appendChild(dom_li);
-    tabs.set(id, { model: model ,view:setNormalEditor_View()});
+    tabs.set(id, { model: model, view: setNormalEditor_View() });
 }
 
-const get_langIcon = (path) => {
+const get_langIcon = (path, original = true , device = "") => {
     let lang_icon = "";
     if (path.indexOf("DDS") !== -1) {
-        lang_icon = 'database';
+        if (device === "PRINTER") {
+            lang_icon = 'print';
+        } else {
+            if (original) {
+                lang_icon = 'database';
+            } else {
+                lang_icon = 'database-search';
+            }
+        }
+
     } else if (path.indexOf("DSP") !== -1) {
         lang_icon = 'terminal-2';
     } else if (path.indexOf("RPG") !== -1) {
