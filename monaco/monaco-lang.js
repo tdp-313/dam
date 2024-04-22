@@ -375,7 +375,7 @@ const monacoLang = async () => {
         }
     });
 }
-const dds_DefinitionList = async (model, map, refName, handle, use, searchFrom) => {
+const dds_DefinitionList = async (model, map, refName, handle, use) => {
     const createDescription = async (start_row, i, model, max, loopCheck = 0) => {
         let sp_op_full = start_row.substring(44, 80).trim();
         let text_p = sp_op_full.indexOf("TEXT('");
@@ -527,14 +527,17 @@ const dds_DefinitionList = async (model, map, refName, handle, use, searchFrom) 
         }
     }
     clone = structuredClone(use);
-    if (searchFrom === "Original") {
-        clone.original = true;
-    } else {
-        clone.original = false;
+    if (map.has(refName)) {
+        let before = clone.get(refName);
+        clone.io = new Set([...clone.io, ...before.use.io]);
     }
     map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file", handle: handle, use: clone });
     if (R_file.length > 0) {
         for (let i = 0; i < R_file.length; i++) {
+            if (additionalRefDef.has(R_file[i])) {
+                let before = additionalRefDef.get(R_file[i]);
+                use.io = new Set([...use.io, ...before.use.io]);
+            }
             additionalRefDef.set(R_file[i], { name: R_file[i], use: use });
         }
     }
@@ -563,11 +566,11 @@ const createUseFileList = async (refDef) => {
             let border_class = "";
             let useStr = "";
 
-            if (use.io.has("I") && use.io.has("O")) {
-                useStr = "I/O";
-                border_class = "output_border";
-            } else if (use.io.has("U") && use.io.has("O")) {
+            if (use.io.has("U") && use.io.has("O")) {
                 useStr = "U/O";
+                border_class = "output_border";
+            } else if (use.io.has("I") && use.io.has("O")) {
+                useStr = "I/O";
                 border_class = "output_border";
             } else if (use.io.has("O")) {
                 useStr = "O";
@@ -646,6 +649,7 @@ const createUseFileList = async (refDef) => {
                 maxFile++;
                 let notFoundFile = value[1];
                 if (isDisplayCheck(notFoundFile.use)) {
+                    notFoundFile.use.original = true;
                     filterContents.push(get_template(notFoundFile.name, "Not Found", "", get_langIcon("QDDSSRC", notFoundFile.use.original, notFoundFile.use.device), filter_style, notFoundFile.use));
                 }
             };
@@ -661,7 +665,7 @@ const createUseFileList = async (refDef) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'definition') {
                 if (value.location.uri.path.indexOf("DSP") !== -1) {
-                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, new UseIO_Layout);
+                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, new UseIO_Layout(true));
                 }
             }
         });
@@ -669,7 +673,7 @@ const createUseFileList = async (refDef) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'definition') {
                 if (value.location.uri.path.indexOf("DSP") === -1) {
-                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, new UseIO_Layout);
+                    html += get_template(key, value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, new UseIO_Layout(true));
                 }
             }
         });
@@ -727,9 +731,9 @@ const isJSON = (str) => {
 }
 
 class UseIO_Layout {
-    constructor() {
+    constructor(original) {
         this.io = new Set();
-        this.original = true;
+        this.original = typeof (original) === 'boolean' ? original : false;
         this.device = "";
     }
 }
