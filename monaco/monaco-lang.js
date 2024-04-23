@@ -526,9 +526,9 @@ const dds_DefinitionList = async (model, map, refName, handle, use) => {
             }
         }
     }
-    clone = structuredClone(use);
+    let clone = structuredClone(use);
     if (map.has(refName)) {
-        let before = clone.get(refName);
+        let before = map.get(refName);
         clone.io = new Set([...clone.io, ...before.use.io]);
     }
     map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file", handle: handle, use: clone });

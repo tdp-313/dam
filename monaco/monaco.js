@@ -326,7 +326,7 @@ const monacoStart = async () => {
     const refDefCreate = async (FileName, handle, refDef, reflist, rootHandleName) => {
       let current_SRC = await createFolderExistList(handle, FileName);
       for (let i = 0; i < reflist.length; i++) {
-        
+
         let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + FileName + '/' + reflist[i].name);
         let textData = await getFolderExistList_Text(current_SRC, reflist[i].name);
         if (textData !== null) {
@@ -376,6 +376,7 @@ const monacoStart = async () => {
       var lineCount = await refModel.getLineCount();
       let dds = new Map();
       let dsp = new Map();
+      let pgm = new Map();
       for (let i = 1; i <= lineCount; i++) {
         // 行のテキストを取得
         let lineText = refModel.getLineContent(i);
@@ -399,23 +400,29 @@ const monacoStart = async () => {
           if (type === "WORKSTN") {
             if (dsp.has(file)) {
               using.io = new Set([...using.io, ...dsp.get(file).use.io]);
-            } 
+            }
             dsp.set(file, { name: file, use: using });
           } else if (type === "DISK") {
             if (dds.has(file)) {
               using.io = new Set([...using.io, ...dds.get(file).use.io]);
-            } 
+            }
             dds.set(file, { name: file, use: using });
           } else if (type === "PRINTER") {
             if (dds.has(file)) {
               using.io = new Set([...using.io, ...dds.get(file).use.io]);
-            } 
+            }
             dds.set(file, { name: file, use: using });
+          }
+        } else if (lineText.substring(5, 6) === "C" && lineText.substring(6, 7) !== "*") {
+          let op_m = lineText.substring(45, 50).trim();
+          let op_2 = lineText.substring(50, 60).trim();
+          if (op_m === "CALL") {
+            pgm.set(op_2, { name: op_2 });
           }
         }
       }
 
-      return { dds: map_valuesObject(dds), dsp: map_valuesObject(dsp) }
+      return { dds: map_valuesObject(dds), dsp: map_valuesObject(dsp), pgm: map_valuesObject(pgm) }
     }
 
     const reIndentProcess = () => {
