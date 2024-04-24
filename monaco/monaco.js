@@ -637,7 +637,7 @@ const rightSidebarRead = async () => {
     let selectMap = await normalRefDef.get(filename);
     if (typeof (selectMap) !== 'undefined') {
       let model = await getNormalEditor_Model_URI(selectMap.location.uri);
-      await tabs_add(model);
+      await tabs_add(model,true);
     }
   });
 

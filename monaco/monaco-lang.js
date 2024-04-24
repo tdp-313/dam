@@ -711,6 +711,9 @@ const isDisplayCheck = (useType) => {
     if (useType.io.has("O") && filter.Output) {
         return true;
     }
+    if (useType.io.size === 0) {
+        return true;
+    }
     return false;
 }
 const settingSaveProcess = () => {

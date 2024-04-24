@@ -44,7 +44,8 @@ const fileReadStart = async (isNew = false, init = "reSync") => {
 const readFileButtonCreate = () => {
     const otherTabOpen = document.getElementById('control-otherTab');
     otherTabOpen.addEventListener('click', async () => {
-        tabs_add(await getNormalEditor_Model());
+        let model = await getNormalEditor_Model();
+        tabs_add(model, true);
     });
     otherTabOpen.addEventListener('contextmenu', async (event) => {
         event.preventDefault();
@@ -229,9 +230,9 @@ const fileReadBoth = async () => {
     let RightText = await file_read_text(Right.fullname, Right.handle, false, "text", false);
     let LeftFileName = FileLeft.value.indexOf('.') !== -1 ? FileLeft.value.substring(0, FileLeft.value.indexOf('.')) : FileLeft.value;
     let RightFileName = FileRight.value.indexOf('.') !== -1 ? FileRight.value.substring(0, FileRight.value.indexOf('.')) : FileRight.value;
-    let NormalUri = monaco.Uri.parse("file://" + FileList.Left.root.handle.name + "/" + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
-    let LeftUri = monaco.Uri.parse("file://" + FileList.Left.root.handle.name + "/" + 'DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName);
-    let RightUri = monaco.Uri.parse("file://" + FileList.Right.root.handle.name + "/" + 'DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + RightFileName);
+    let NormalUri = monaco.Uri.parse("file://" + FileList.Left.root.handle.name + "/" + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName + '#pulldown');
+    let LeftUri = monaco.Uri.parse("file://" + FileList.Left.root.handle.name + "/" + 'DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName + '#pulldown');
+    let RightUri = monaco.Uri.parse("file://" + FileList.Right.root.handle.name + "/" + 'DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + RightFileName + '#pulldown');
 
     let lang = ['', '', ''];//normal original modified
     if (FolderLeft.value === 'QRPGSRC') {

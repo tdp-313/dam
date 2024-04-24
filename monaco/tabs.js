@@ -1,17 +1,31 @@
 var tabs = new Map();
 
 const tabs_eventStart = async () => {
-
     document.getElementById('monaco-tab').addEventListener('click', async (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'radio') {
             let now_model = await getNormalEditor_Model();
             let now_view = await getNormalEditor_View();
             let id = now_model.id;
+            /*
             tabs.set(id, { model: now_model, view: now_view });
             let select_tabs_general = await tabs.get("*");
             if (typeof (select_tabs_general) !== 'undefined') {
                 if (select_tabs_general.model.id === id) {
                     tabs.set("*", { model: now_model, view: now_view });
+                }
+            }*/
+        
+            let select_tabs_general = await tabs.get("*");
+            if (typeof (select_tabs_general) !== 'undefined') {
+                if (select_tabs_general.model.id === now_model.id) {
+                    tabs.set("*", { model: now_model, view: now_view });
+                    if (tabs.has(now_model.id)) {
+                        tabs.set(now_model.id, { model: now_model, view: now_view });
+                    }
+                } else {
+                    if (tabs.has(now_model.id)) {
+                        tabs.set(now_model.id, { model: now_model, view: now_view });
+                    }
                 }
             }
             let select_tabs_MAP = await tabs.get(e.target.value);
@@ -57,25 +71,39 @@ const tabs_eventStart = async () => {
             tabs.delete(li.getElementsByClassName('tab-item')[0].innerText)
             li.remove();
         }
-
     });
 }
 
-const tabs_add = async (model, new_data = true) => {
+const tabs_add = async (model, new_data) => {
     await refDefStart(model);
     let id = "";
     let path = model.uri.path;
     let name = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf(".") === -1 ? path.length : path.lastIndexOf("."));
     let lang_icon = "";
 
-    if (new_data) {
+    if (new_data) {//その他
         id = model.id;
         lang_icon = get_langIcon(path);
     }
-    else {
+    else {//*の更新
         id = "*"
         lang_icon = "code-asterix";
     }
+    //Prev Save
+    let now_model = await getNormalEditor_Model();
+    let now_view = await getNormalEditor_View();
+
+    let select_tabs_general = await tabs.get("*");
+    if (typeof (select_tabs_general) !== 'undefined') {
+        if (select_tabs_general.model.id === now_model.id) {
+            tabs.set("*", { model: now_model, view: now_view });
+        } else {
+            if (tabs.has(now_model.id)) {
+                tabs.set(now_model.id, { model: now_model, view: now_view });
+            }
+        }
+    }
+
     let tab_check = await tabs.get(id);
     const input_dom = document.getElementById('monaco-tab-' + id);
     if (typeof (tab_check) !== 'undefined' && input_dom !== null) {
@@ -116,10 +144,10 @@ const tabs_add = async (model, new_data = true) => {
     const tabs_dom = document.getElementById('monaco-tab');
     let dom_li = tabs_html(name, id, lang_icon, path, filter_style);
     tabs_dom.appendChild(dom_li);
-    tabs.set(id, { model: model, view: setNormalEditor_View() });
+    tabs.set(id, { model: model, view: await setNormalEditor_View() });
 }
 
-const get_langIcon = (path, original = true , device = "") => {
+const get_langIcon = (path, original = true, device = "") => {
     let lang_icon = "";
     if (path.indexOf("DDS") !== -1) {
         if (device === "PRINTER") {
