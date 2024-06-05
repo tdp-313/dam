@@ -36,8 +36,9 @@ const monacoStart = async () => {
       autoSurround: 'brackets',
       automaticLayout: true,
     });
-
-    fileReadStart(false, "init");
+    if (Setting.getInitRead) {
+      fileReadStart(false, "init");
+    }
     diffEditor.updateOptions(editorOptionGeneral);
     var diff = {};
     diff.left = monaco.editor.createModel('function hello() {\n\talert("Hello world!");\n}', 'javascript');
@@ -157,14 +158,6 @@ const monacoStart = async () => {
     const extraRulerChange = document.getElementById('control-extraRuler');
     extraRulerChange.addEventListener('click', (e) => {
       rulerChange(e.target.checked);
-    });
-
-    const extraTerminal = document.getElementById('control-extraTerminal');
-    extraTerminal.addEventListener('click', async (e) => {
-      //monaco.editor.showCommands();
-      //await refDefStart();
-      //const model = await normalEditor.getModel();
-      //console.log(await createUML(model));
     });
 
     window.refDefStart = async (model) => {
@@ -669,6 +662,9 @@ class localSetting {
     this.refMaster = typeof (data.refMaster) === 'undefined' ? false : data.refMaster;
     this.diffTheme = typeof (data.diffTheme) === 'undefined' ? 0 : data.diffTheme;
     this.libraryList = typeof (data.libraryList) === 'undefined' ? {} : data.libraryList;
+    this.initRead = typeof (data.initRead) === 'undefined' ? true : data.initRead;
+    const initRead_DOM = document.getElementById('control-initRead');
+    initRead_DOM.checked = this.initRead;
   }
   get getAll() {
     return this;
@@ -691,6 +687,9 @@ class localSetting {
   get getRefMaster() {
     return this.refMaster;
   }
+  get getInitRead() {
+    return this.initRead;
+  }
   set setTheme(theme) {
     this.theme = theme;
     this.save();
@@ -705,6 +704,10 @@ class localSetting {
   }
   set setLibList(LibList) {
     this.libraryList = LibList;
+    this.save();
+  }
+  set setInitRead(init) {
+    this.initRead = init;
     this.save();
   }
   save() {

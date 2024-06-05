@@ -57,8 +57,19 @@ const readFileButtonCreate = () => {
         fileReadStart(true);
     });
 
+    const initReadButton = document.getElementById('control-initRead');
+    initReadButton.addEventListener('click', async (event) => {
+        Setting.setInitRead = initReadButton.checked;
+    });
+
     modeChangeSync.addEventListener('click', async (event) => {
-        fileReadStart(false)
+        console.log(Object.keys(linkStatus).length)
+        if (Object.keys(linkStatus).length === 0) {
+            fileReadStart(false, "init")
+        }
+        else {
+            fileReadStart(false)
+        }
     });
     const fileSelectSync = document.getElementById('control-FileSelectSync');
     fileSelectSync.addEventListener('click', async (e) => {
