@@ -25,15 +25,12 @@ const fileNameExt = 'txt';
 let useFileList_Open = false;
 let isFileSelectSync = true;
 
-const extraRefButton = document.getElementById('control-extraRef');
 
 const fileReadStart = async (isNew = false, init = "reSync") => {
 
     console.log(await Directory_Handle_RegisterV2(monaco_handleName, isNew));
 
-    if (extraRefButton.checked) {
-        console.log(await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read'));
-    }
+    console.log(await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read'));
 
     fileHandleChange(init);
 
@@ -84,9 +81,6 @@ const readFileButtonCreate = () => {
             e.target.src = "./icon/link.svg";
         }
     });
-
-    extraRefButton.addEventListener('click', async (event) => Setting.setRefMaster = event.target.checked);
-    extraRefButton.checked = Setting.getRefMaster;
 
     const control_extraArea = document.getElementById('control-extraButton');
     control_extraArea.addEventListener('click', () => {

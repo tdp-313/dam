@@ -191,7 +191,7 @@ const monacoStart = async () => {
           searchHandleCheck.normal = true;
         }
       }
-      if (refRootHandle !== null && Setting.getRefMaster) {
+      if (refRootHandle !== null) {
         searchHandleCheck.ref = true;
       }
 
@@ -659,7 +659,6 @@ const setModeChange = (mode) => {
 class localSetting {
   constructor(data) {
     this.theme = typeof (data.theme) === 'undefined' ? 0 : data.theme;
-    this.refMaster = typeof (data.refMaster) === 'undefined' ? false : data.refMaster;
     this.diffTheme = typeof (data.diffTheme) === 'undefined' ? 0 : data.diffTheme;
     this.libraryList = typeof (data.libraryList) === 'undefined' ? {} : data.libraryList;
     this.initRead = typeof (data.initRead) === 'undefined' ? true : data.initRead;
@@ -677,16 +676,14 @@ class localSetting {
     return this.diffTheme;
   }
   get getThemeType() {
-    if (this.theme === 3) {
+    if (this.theme === 1) {
       return 'white';
     }
     else {
       return 'black';
     }
   }
-  get getRefMaster() {
-    return this.refMaster;
-  }
+
   get getInitRead() {
     return this.initRead;
   }
@@ -698,10 +695,7 @@ class localSetting {
     this.diffTheme = theme;
     this.save();
   }
-  set setRefMaster(isMaster) {
-    this.refMaster = isMaster;
-    this.save();
-  }
+
   set setLibList(LibList) {
     this.libraryList = LibList;
     this.save();

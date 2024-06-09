@@ -1,6 +1,9 @@
 //https://github.com/brijeshb42/monaco-themes/
-  
+
+let $metaColor = document.querySelector('meta[name="theme-color"]');
+
 const theme_blackSetting = () => {
+  $metaColor.setAttribute('content', '#2D2D2D');
   document.documentElement.style.setProperty('--backgroundColor', '#2D2D2D');
   document.documentElement.style.setProperty('--font-color', '#EFF5F5');
   document.documentElement.style.setProperty('color-scheme', 'dark');
@@ -11,6 +14,7 @@ const theme_blackSetting = () => {
 }
 
 const theme_whiteSetting = () => {
+  $metaColor.setAttribute('content', '#EFF5F5');
   document.documentElement.style.setProperty('--backgroundColor', '#EFF5F5');
   document.documentElement.style.setProperty('--font-color', 'black');
   document.documentElement.style.setProperty('color-scheme', 'normal');

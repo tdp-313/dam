@@ -16,6 +16,8 @@ body {
     overflow: hidden;
     color: var(--font-color);
     transition: 0.3s;
+    height: calc(100vh - 8px);
+    margin: 0 8px 8px 8px;
 }
 
 #main {
@@ -28,12 +30,19 @@ header {
     height: var(--headerHeight);
     display: grid;
     grid-template-columns: 10rem 1fr 2rem;
-
+    width: env(titlebar-area-width, 100%);
     margin-bottom: 0.5rem;
     user-select: none;
     position: relative;
+    left: env(titlebar-area-x, 0);
+    top: env(titlebar-area-y, 0);
+    -webkit-app-region: drag;
+    padding-top: 8px;
 }
 
+header input ,header label ,header select{
+    -webkit-app-region: no-drag;
+} 
 #loadingPopUp {
     top: 30%;
     display: flex;
@@ -60,7 +69,6 @@ header {
     animation: spin 2s linear infinite;
     margin-left: 0.5rem;
 }
-
 
 header .editorModeArea {
     display: grid;
@@ -178,7 +186,7 @@ header input[type="radio"]:checked+label,
 }
 
 .control-FolderFileArea {
-    width: calc(50vw - 10rem - 16px);
+    width: 50%;
     display: grid;
     grid-template-columns: 0.4rem 2rem 0.4rem 0.35fr 0.3fr 0.35fr;
     justify-items: center;
@@ -193,9 +201,9 @@ header input[type="radio"]:checked+label,
     background-color: var(--backgroundColor);
     right: 0;
     top: 0;
-    width: calc(50vw - 1.2rem - 16px);
+    width: 50%;
     display: grid;
-    grid-template-columns: 0.5rem 2rem 2rem 2rem 0.5rem 2rem 2rem 2rem 0.5rem 2rem 1fr 2rem 0.5rem 2rem;
+    grid-template-columns: 0.5rem 2rem 2rem 2rem 0.5rem 2rem 2rem 2rem 0.5rem 2rem 1fr 2rem 0.5rem;
     transition: 0.3s ease;
 }
 

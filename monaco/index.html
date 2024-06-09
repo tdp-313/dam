@@ -1,9 +1,11 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="ja">
+<meta name="theme-color" content="#2D2D2D" />
 <head>
     <title>DAM(Monaco)</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8;color-scheme=dark;" />
     <link rel="stylesheet" href="./monaco.css" />
+    <link rel="manifest" href="manifest.json" />
 </head>
 
 <body>
@@ -27,13 +29,13 @@
             </div>
             <div class="alignLine"></div>
             <div>
-                <span id="control-Reload" class="control-iconButton"><img class="refSize"
-                        src="./icon/reload.svg"></span>
+                <span id="control-Reload" class="control-iconButton" style="-webkit-app-region: no-drag"><img
+                        class="refSize" src="./icon/reload.svg"></span>
             </div>
             <div class="alignLine"></div>
         </div>
 
-        <div style="display:flex; width: 100%;position:relative;overflow: hidden;">
+        <div style="display:flex;position:relative;overflow: hidden;width: 100%;">
             <div class="control-FolderFileArea">
                 <span></span>
                 <input type="checkbox" class="displayHide" id="control-dynamic-Left"></input>
@@ -89,22 +91,16 @@
                 <div class="alignLine"></div>
                 <span id="control-extraLinkFile" class="control-iconButton hoverButton"><img class="refSize"
                         src="./icon/file-symlink.svg"></span>
-                <span></span>
-                <div>
-                    <input type="checkbox" class="displayHide" id="control-extraRef"></input>
-                    <label for="control-extraRef" class="control-iconButton"><img class="refSize"
-                            src="./icon/certificate.svg"></label>
-                </div>
-                <div class="alignLine"></div>
+                <span style="-webkit-app-region: drag;"></span>
                 <span id="control-otherTab" class="control-iconButton hoverButton">
                     <img class="refSize" src="./icon/navigation.svg"></img>
                 </span>
-
+                <div class="alignLine"></div>
             </div>
         </div>
         <div>
-            <span id="control-extraButton" class="control-iconButton"><img class="refSize"
-                    src="./icon/caret-down.svg"></span>
+            <span id="control-extraButton" class="control-iconButton" style="-webkit-app-region: no-drag"><img
+                    class="refSize" src="./icon/caret-down.svg"></span>
         </div>
     </header>
     <div id="main">
