@@ -595,6 +595,7 @@ const createUseFileList = async (refDef) => {
         }
     }
     if (mode === 'file') {
+        console.log()
         let existFile = [];
         //Filter Element Create
         html += '<div id="sidebar-filter-root">';
@@ -620,8 +621,16 @@ const createUseFileList = async (refDef) => {
         }
 
         let filterContents = [];
-
         let maxFile = 0;
+        refDef.forEach((value, key) => {
+            // 第一引数にキーが、第二引数に値が渡される
+            if (value.sourceType === 'PGM') {
+                maxFile++;
+                existFile.push(key);
+                filterContents.push(get_template(key.replace(/'/g, ""), value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, value.use));
+            }
+        });
+        
         refDef.forEach((value, key) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'file') {

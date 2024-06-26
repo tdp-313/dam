@@ -1,11 +1,12 @@
 class monaco_file {
-    constructor(handle, parent) {
+    constructor(handle, parent, file) {
         this.fullname = handle.name;
         this.prefix = this.fullname.indexOf('_') === -1 ? '' : this.fullname.substring(this.fullname.indexOf('_'), this.fullname.indexOf('.'));
         this.ext = this.fullname.substring(this.fullname.indexOf('.'), this.fullname.length);
         this.extFormat = this.fullname.substring(this.fullname.indexOf('.') + 1, this.fullname.length);
         this.handle = handle;
         this.parent = parent;
+        this.file = file;
         if (this.prefix.length === 0) {
             this.name = this.fullname.substring(0, this.fullname.indexOf('.'));
             if (this.name.length === 0) {
@@ -51,7 +52,15 @@ const readFileButtonCreate = () => {
     const modeChangeSync = document.getElementById('control-Reload');
     modeChangeSync.addEventListener('contextmenu', async (event) => {
         event.preventDefault();
-        fileReadStart(true);
+        if (window.confirm('Update? FileSystemHandler(main)')) {
+            await Directory_Handle_RegisterV2(monaco_handleName, true);
+        }
+        if (window.confirm('Update? FileSystemHandler(RefMaster)')) {
+            await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, true, 'read');
+        }
+        window.alert('If there is something wrong with the version update, reload with Shift + F5');
+        window.location.reload();
+        //fileReadStart(true);
     });
 
     const initReadButton = document.getElementById('control-initRead');
@@ -451,7 +460,7 @@ async function monaco_pulldownCreate(create_target, L_R, readHandle, readKind) {
         FileList[L_R].root = { handle: readHandle }
     }
     for await (const handle of readHandle.values()) {
-        let file_set = new monaco_file(handle, readHandle.name);
+        let file_set = new monaco_file(handle, readHandle.name, readHandle.name);
         let insert = document.createElement('option');
         insert.value = file_set.name;
         insert.text = file_set.name;
@@ -471,7 +480,7 @@ const createFolderExistList = async (libHandle, folder) => {
         if (handle.kind === 'directory' && handle.name === folder) {
             for await (const fileHandle of handle.values()) {
                 if (fileHandle.kind === 'file') {
-                    rtn.push(new monaco_file(fileHandle, libHandle.name));
+                    rtn.push(new monaco_file(fileHandle, libHandle.name, folder));
                 }
             }
             break;
@@ -480,12 +489,12 @@ const createFolderExistList = async (libHandle, folder) => {
     return rtn;
 }
 
-const getFolderExistList_Text = async (List, target) => {
+const getFolderExistList_Text = async (List, target, file) => {
     for (let i = 0; i < List.length; i++) {
         if (List[i].name === target) {
             let text = await file_read_text(List[i].fullname, List[i].handle, false, 'text', false, false);
             return {
-                text: await addSpaces(text), handle: List[i].handle
+                text:text, list: List[i]
             };
         }
     }

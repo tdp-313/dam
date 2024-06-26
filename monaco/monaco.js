@@ -175,16 +175,15 @@ const monacoStart = async () => {
         refListFile = await createRefList(model);
       } else if (model.getLanguageId() === 'dds') {
         if (libFileName[1].indexOf('DDS') !== -1) {
-          refListFile = { dds: [{ name: libFileName[2], use: new UseIO_Layout(false) }], dsp: [] };
+          refListFile = { dds: [{ name: libFileName[2], use: new UseIO_Layout(false) }], dsp: [], pgm: [] };
         } else if (libFileName[1].indexOf('DSP') !== -1) {
-          refListFile = { dds: [], dsp: [{ name: libFileName[2], use: new UseIO_Layout(false) }] };
+          refListFile = { dds: [], dsp: [{ name: libFileName[2], use: new UseIO_Layout(false) }], pgm: [] };
         } else {
           return null;
         }
       } else {
         return null;
       }
-
       let searchHandleCheck = { normal: false, ref: false }
       if (mainRootHandle !== null) {
         if (model.uri.authority === mainRootHandle.name) {
@@ -199,6 +198,7 @@ const monacoStart = async () => {
       additionalRefDef.clear();
       notExist_DSP.clear();
       notExist_DDS.clear();
+      notExist_PGM.clear();
 
       let searchLibName = [rootLibName.substring(0, 3)];
       if (Array.isArray(Setting.libraryList[searchLibName])) {
@@ -214,11 +214,12 @@ const monacoStart = async () => {
           }
         }
         for (let i = 0; i < folderHandle.length; i++) {
-          normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
-          normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
+          normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
+          normalRefDef = await refDefCreate(['QDSPSRC'], folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
           if (additionalRefDef.size > 0) {//PFILE
-            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name);
+            normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name);
           }
+          normalRefDef = await refDefCreate(['QRPGSRC', 'QRPGLESRC', 'QCLSRC'], folderHandle[i], normalRefDef, refListFile.pgm, mainRootHandle.name);
         }
       }
 
@@ -239,19 +240,21 @@ const monacoStart = async () => {
 
         if (searchHandleCheck.normal) {
           for (let i = 0; i < folderHandle.length; i++) {
-            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(notExist_DDS.values()), refRootHandle.name);
-            normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, map_valuesArray(notExist_DSP.values()), refRootHandle.name);
+            normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, map_valuesArray(notExist_DDS.values()), refRootHandle.name);
+            normalRefDef = await refDefCreate(['QDSPSRC'], folderHandle[i], normalRefDef, map_valuesArray(notExist_DSP.values()), refRootHandle.name);
             if (additionalRefDef.size > 0) {//PFILE
-              normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), refRootHandle.name);
+              normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), refRootHandle.name);
             }
+            normalRefDef = await refDefCreate(['QRPGSRC', 'QRPGLESRC', 'QCLSRC'], folderHandle[i], normalRefDef, map_valuesArray(notExist_PGM.values()), refRootHandle.name);
           }
         } else {
           for (let i = 0; i < folderHandle.length; i++) {
-            normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
-            normalRefDef = await refDefCreate('QDSPSRC', folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
+            normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
+            normalRefDef = await refDefCreate(['QDSPSRC'], folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
             if (additionalRefDef.size > 0) {//PFILE
-              normalRefDef = await refDefCreate('QDDSSRC', folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name);
+              normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name);
             }
+            normalRefDef = await refDefCreate(['QRPGSRC', 'QRPGLESRC', 'QCLSRC'], folderHandle[i], normalRefDef, refListFile.pgm, mainRootHandle.name);
           }
         }
       }
@@ -316,22 +319,49 @@ const monacoStart = async () => {
       }
       return rtn;
     }
-    const refDefCreate = async (FileName, handle, refDef, reflist, rootHandleName) => {
-      let current_SRC = await createFolderExistList(handle, FileName);
-      for (let i = 0; i < reflist.length; i++) {
+    const refDefCreate = async (FileArray, handle, refDef, reflist, rootHandleName) => {
+      let FileName = "";
+      let current_SRC = [];
+      if (FileArray.length === 1) {
+        //DDS,DSPF
+        FileName = FileArray[0];
+      } else {
+        //RPG,RPGLE,CL
+        FileName = "PGM";
+      }
+      for (let i = 0; i < FileArray.length; i++) {
+        current_SRC = current_SRC.concat(await createFolderExistList(handle, FileArray[i]));
+      }
 
-        let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + FileName + '/' + reflist[i].name);
+      for (let i = 0; i < reflist.length; i++) {
         let textData = await getFolderExistList_Text(current_SRC, reflist[i].name);
+
         if (textData !== null) {
-          let model = await modelChange(textData.text, 'dds', uri);
-          refDef = await dds_DefinitionList(model, refDef, reflist[i].name, textData.handle, reflist[i].use);
+          let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + textData.list.file + '/' + reflist[i].name);
+          if (FileName === "PGM") {
+            let model = null;
+            if (textData.list.file === "QRPGSRC") {
+              model = await modelChange(await addIndent(textData.text), 'rpg-indent', uri);
+            } else if (textData.list.file === "QCLSRC") {
+              model = await modelChange(await addSpaces(textData.text), 'cl', uri);
+            } else {
+              model = await modelChange(await addSpaces(textData.text), 'rpg', uri);
+            }
+            refDef.set("'" + reflist[i].name + "'", { location: { range: new monaco.Range(1, 5, await model.getLineCount(), Number.MAX_VALUE), uri: uri }, description: reflist[i].name, s_description: "CALL PGM", sourceType: "PGM", handle: textData.list.handle, use: reflist[i].use });
+          } else {
+            let model = await modelChange(await addSpaces(textData.text), 'dds', uri);
+            refDef = await dds_DefinitionList(model, refDef, reflist[i].name, textData.list.handle, reflist[i].use);
+          }
         } else {
           if (FileName === "QDDSSRC") {
             notExist_DDS.set(reflist[i].name, reflist[i]);
           } else if (FileName === "QDSPSRC") {
             notExist_DSP.set(reflist[i].name, reflist[i]);
+          } else if (FileName === "PGM") {
+            notExist_PGM.set(reflist[i].name, reflist[i]);
           }
         }
+
       }
       return refDef;
     }
@@ -409,8 +439,12 @@ const monacoStart = async () => {
         } else if (lineText.substring(5, 6) === "C" && lineText.substring(6, 7) !== "*") {
           let op_m = lineText.substring(45, 50).trim();
           let op_2 = lineText.substring(50, 60).trim();
+          let op_2_ex = op_2.replace(/'/g, "");
           if (op_m === "CALL") {
-            pgm.set(op_2, { name: op_2 });
+            let using = new UseIO_Layout(false);
+            using.device = "PGM";
+            using.io = new Set(["-", "-"]);
+            pgm.set(op_2_ex, { name: op_2_ex, use: using });
           }
         }
       }
@@ -627,10 +661,14 @@ const rightSidebarRead = async () => {
     }
     let click_node = e.target.parentNode;
     let filename = click_node.getElementsByClassName('sidebar-filename')[0].innerText;
+    
     let selectMap = await normalRefDef.get(filename);
+    if (typeof (selectMap) === 'undefined') {
+      selectMap = await normalRefDef.get("'" + filename + "'");
+    }
     if (typeof (selectMap) !== 'undefined') {
       let model = await getNormalEditor_Model_URI(selectMap.location.uri);
-      await tabs_add(model,true);
+      await tabs_add(model, true);
     }
   });
 
@@ -713,6 +751,8 @@ var sourceRefDef = new Map();
 var additionalRefDef = new Map();
 var notExist_DDS = new Map();
 var notExist_DSP = new Map();
+var notExist_PGM = new Map();
+
 var linkStatus = {};
 let firstEditorLoading = false;
 class linkStatusClass {
