@@ -47,7 +47,7 @@ const readFileButtonCreate = () => {
     });
     otherTabOpen.addEventListener('contextmenu', async (event) => {
         event.preventDefault();
-        window.open('/monaco', Math.random(), "popup");
+        window.open(window.location.href, Math.random(), "popup");
     });
     const modeChangeSync = document.getElementById('control-Reload');
     modeChangeSync.addEventListener('contextmenu', async (event) => {

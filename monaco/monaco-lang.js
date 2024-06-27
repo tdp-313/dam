@@ -59,12 +59,12 @@ const monacoLang = async () => {
         provideDefinition: async function (model, position) {
             let row = model.getLineContent(position.lineNumber);
             let text = getRow_Text(row, position.column);
-            const wordStr = text.text.trim();
+            let wordStr = text.text.trim();
             if (wordStr === "") {
                 return null;
             }
             let ranges = [];
-
+            let rename_bk = [];
             let lineCount = model.getLineCount();
             for (let i = 1; i <= lineCount; i++) {
                 let row = model.getLineContent(i);
@@ -131,7 +131,8 @@ const monacoLang = async () => {
                         for (let ri = i; ri > 0; ri--) {
                             row = model.getLineContent(ri);
                             if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "F" && row.substring(52, 53) !== "K") {
-                                ranges.push({ range: new monaco.Range(ri, 7, ri, 16), uri: model.uri });
+                                wordStr = row.substring(6, 14).trim();
+                                rename_bk.push({ range: new monaco.Range(ri, 7, ri, 16), uri: model.uri });
                                 break;
                             }
                         }
@@ -148,6 +149,9 @@ const monacoLang = async () => {
                 if (typeof (sourceDef) !== 'undefined') {
                     ranges.push(sourceDef.location);
                 }
+            }
+            if (rename_bk.length > 0 && ranges.length === 0) {
+                ranges = rename_bk;
             }
             return ranges;
         }
@@ -374,6 +378,35 @@ const monacoLang = async () => {
             return ranges;
         }
     });
+}
+const pgm_nameGet = async (model, map, refName, handle, use) => { 
+    let lineCount = model.getLineCount();
+    let fileDescription = "CALL PGM";
+    for (let i = 1; i <= lineCount; i++) {
+        if (i > 10) {//大体ここまでになかったら無い
+            break;
+        }
+        let row = model.getLineContent(i);
+        let isPGM = row.indexOf("PROGRAM") !== -1 ? true : false;
+        if (!isPGM) {
+            isPGM = row.indexOf("PGM") !== -1 ? true : false;
+        }
+        let isName = row.indexOf("NAME") !== -1 ? true : false;
+        if (isPGM && isName) {
+            let pgm_name = row;
+            pgm_name = pgm_name.substring(7);
+            pgm_name = pgm_name.replace("PROGRAM", "");
+            pgm_name = pgm_name.replace("PGM", "");
+            pgm_name = pgm_name.replace("NAME", "");
+            pgm_name = pgm_name.replace(":", " ");
+            pgm_name = pgm_name.replaceAll("*", " ");
+            pgm_name = pgm_name.trim();
+            fileDescription = pgm_name;
+            break;
+        }
+    }
+    map.set("'" + refName + "'", { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "PGM", handle: handle, use: use });
+    return map;
 }
 const dds_DefinitionList = async (model, map, refName, handle, use) => {
     const createDescription = async (start_row, i, model, max, loopCheck = 0) => {

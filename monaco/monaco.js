@@ -347,7 +347,8 @@ const monacoStart = async () => {
             } else {
               model = await modelChange(await addSpaces(textData.text), 'rpg', uri);
             }
-            refDef.set("'" + reflist[i].name + "'", { location: { range: new monaco.Range(1, 5, await model.getLineCount(), Number.MAX_VALUE), uri: uri }, description: reflist[i].name, s_description: "CALL PGM", sourceType: "PGM", handle: textData.list.handle, use: reflist[i].use });
+            refDef = await pgm_nameGet(model, refDef, reflist[i].name, textData.list.handle, reflist[i].use);
+            //refDef.set("'" + reflist[i].name + "'", { location: { range: new monaco.Range(1, 5, await model.getLineCount(), Number.MAX_VALUE), uri: uri }, description: reflist[i].name, s_description: "CALL PGM", sourceType: "PGM", handle: textData.list.handle, use: reflist[i].use });
           } else {
             let model = await modelChange(await addSpaces(textData.text), 'dds', uri);
             refDef = await dds_DefinitionList(model, refDef, reflist[i].name, textData.list.handle, reflist[i].use);
