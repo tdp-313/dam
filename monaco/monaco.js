@@ -161,7 +161,8 @@ const monacoStart = async () => {
     });
 
     window.refDefStart = async (model) => {
-      let refListFile = null;
+      normalRefDef.clear();
+      
       const libFileName = model.uri.path.split('/').filter(str => str !== '');
 
       if (libFileName.length !== 3) {
@@ -174,16 +175,18 @@ const monacoStart = async () => {
       if (model.getLanguageId() === 'rpg-indent') {
         refListFile = await createRefList(model);
       } else if (model.getLanguageId() === 'dds') {
+        refListFile = { dds: new Map(), dsp: new Map(), pgm: new Map() };
         if (libFileName[1].indexOf('DDS') !== -1) {
-          refListFile = { dds: [{ name: libFileName[2], use: new UseIO_Layout(false) }], dsp: [], pgm: [] };
+          refListFile.dds.set(libFileName[2], { name: libFileName[2], use: new UseIO_Layout(false) });
         } else if (libFileName[1].indexOf('DSP') !== -1) {
-          refListFile = { dds: [], dsp: [{ name: libFileName[2], use: new UseIO_Layout(false) }], pgm: [] };
+          refListFile.dsp.set(libFileName[2], { name: libFileName[2], use: new UseIO_Layout(false) });
         } else {
           return null;
         }
       } else {
         return null;
       }
+
       let searchHandleCheck = { normal: false, ref: false }
       if (mainRootHandle !== null) {
         if (model.uri.authority === mainRootHandle.name) {
@@ -194,35 +197,32 @@ const monacoStart = async () => {
         searchHandleCheck.ref = true;
       }
 
-      normalRefDef.clear();
-      additionalRefDef.clear();
-      notExist_DSP.clear();
-      notExist_DDS.clear();
-      notExist_PGM.clear();
-
       let searchLibName = [rootLibName.substring(0, 3)];
+
       if (Array.isArray(Setting.libraryList[searchLibName])) {
         searchLibName = Setting.libraryList[searchLibName];
       }
+      //Normal FileSystemHandler Check
+      let folderHandle_normal = [];
       if (searchHandleCheck.normal) {
-        let folderHandle = [];
         for await (const handle of mainRootHandle.values()) {
           for (let i = 0; i < searchLibName.length; i++) {
             if (handle.name.indexOf(searchLibName[i]) !== -1) {
-              folderHandle.push(handle);
+              folderHandle_normal.push(handle);
+            } else if(handle.name === rootLibName){
+              folderHandle_normal.push(handle);
             }
           }
         }
-        for (let i = 0; i < folderHandle.length; i++) {
-          normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
-          normalRefDef = await refDefCreate(['QDSPSRC'], folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
-          if (additionalRefDef.size > 0) {//PFILE
-            normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name);
-          }
-          normalRefDef = await refDefCreate(['QRPGSRC', 'QRPGLESRC', 'QCLSRC'], folderHandle[i], normalRefDef, refListFile.pgm, mainRootHandle.name);
+        for (let i = 0; i < folderHandle_normal.length; i++) {
+          normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle_normal[i], normalRefDef, refListFile.dds, mainRootHandle.name);
+          normalRefDef = await refDefCreate(['QDSPSRC'], folderHandle_normal[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
+          //PFILE
+          normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle_normal[i], normalRefDef, refListFile.dds, mainRootHandle.name);
+          normalRefDef = await refDefCreate(['QRPGSRC', 'QRPGLESRC', 'QCLSRC'], folderHandle_normal[i], normalRefDef, refListFile.pgm, mainRootHandle.name);
         }
       }
-
+      //RefDef FileSystemHandler Check
       if (searchHandleCheck.ref) {
         await Directory_Handle_RegisterV2(monaco_handleName_RefMaster, false, 'read');
 
@@ -238,36 +238,29 @@ const monacoStart = async () => {
           return null; //end
         }
 
+        //With Normal FileSystemHandler
         if (searchHandleCheck.normal) {
           for (let i = 0; i < folderHandle.length; i++) {
-            normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, map_valuesArray(notExist_DDS.values()), refRootHandle.name);
-            normalRefDef = await refDefCreate(['QDSPSRC'], folderHandle[i], normalRefDef, map_valuesArray(notExist_DSP.values()), refRootHandle.name);
-            if (additionalRefDef.size > 0) {//PFILE
-              normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), refRootHandle.name);
+            normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, refListFile.dds, refRootHandle.name);
+            normalRefDef = await refDefCreate(['QDSPSRC'], folderHandle[i], normalRefDef, refListFile.dsp, refRootHandle.name);
+            //PFILE
+            for (let p = 0; p < folderHandle_normal.length; p++) {
+              normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle_normal[p], normalRefDef, refListFile.dds, mainRootHandle.name);
             }
-            normalRefDef = await refDefCreate(['QRPGSRC', 'QRPGLESRC', 'QCLSRC'], folderHandle[i], normalRefDef, map_valuesArray(notExist_PGM.values()), refRootHandle.name);
+            normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, refListFile.dds, refRootHandle.name);
+            
+            normalRefDef = await refDefCreate(['QRPGSRC', 'QRPGLESRC', 'QCLSRC'], folderHandle[i], normalRefDef, refListFile.pgm, refRootHandle.name);
           }
         } else {
           for (let i = 0; i < folderHandle.length; i++) {
             normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
             normalRefDef = await refDefCreate(['QDSPSRC'], folderHandle[i], normalRefDef, refListFile.dsp, mainRootHandle.name);
-            if (additionalRefDef.size > 0) {//PFILE
-              normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, map_valuesArray(additionalRefDef.values()), mainRootHandle.name);
-            }
+            //PFILE
+            normalRefDef = await refDefCreate(['QDDSSRC'], folderHandle[i], normalRefDef, refListFile.dds, mainRootHandle.name);
             normalRefDef = await refDefCreate(['QRPGSRC', 'QRPGLESRC', 'QCLSRC'], folderHandle[i], normalRefDef, refListFile.pgm, mainRootHandle.name);
           }
         }
       }
-      //original Check
-      let originalFile = refListFile.dds.concat(refListFile.dsp);
-      for (let i = 0; i < originalFile.length; i++) {
-        if (normalRefDef.has(originalFile[i].name)) {
-          let temp = normalRefDef.get(originalFile[i].name);
-          temp.use.original = true;
-          normalRefDef.set(originalFile[i].name, temp);
-        }
-      }
-
       if (!firstEditorLoading) {
         loadingPopUpClose();
         firstEditorLoading = true;
@@ -322,6 +315,7 @@ const monacoStart = async () => {
     const refDefCreate = async (FileArray, handle, refDef, reflist, rootHandleName) => {
       let FileName = "";
       let current_SRC = [];
+      P_FILE.clear();
       if (FileArray.length === 1) {
         //DDS,DSPF
         FileName = FileArray[0];
@@ -332,37 +326,37 @@ const monacoStart = async () => {
       for (let i = 0; i < FileArray.length; i++) {
         current_SRC = current_SRC.concat(await createFolderExistList(handle, FileArray[i]));
       }
+      
 
-      for (let i = 0; i < reflist.length; i++) {
-        let textData = await getFolderExistList_Text(current_SRC, reflist[i].name);
-
+      for (const [key, value] of reflist.entries()) {
+        let textData = await getFolderExistList_Text(current_SRC, value.name);
         if (textData !== null) {
-          let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + textData.list.file + '/' + reflist[i].name);
+          let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + textData.list.file + '/' + value.name);
           if (FileName === "PGM") {
             let model = null;
             if (textData.list.file === "QRPGSRC") {
               model = await modelChange(await addIndent(textData.text), 'rpg-indent', uri);
             } else if (textData.list.file === "QCLSRC") {
-              model = await modelChange(await addSpaces(textData.text), 'cl', uri);
+              model = await modelChange(addSpaces(textData.text), 'cl', uri);
             } else {
-              model = await modelChange(await addSpaces(textData.text), 'rpg', uri);
+              model = await modelChange(addSpaces(textData.text), 'rpg', uri);
             }
-            refDef = await pgm_nameGet(model, refDef, reflist[i].name, textData.list.handle, reflist[i].use);
+            refDef = await pgm_nameGet(model, refDef, value.name, textData.list.handle, value.use);
             //refDef.set("'" + reflist[i].name + "'", { location: { range: new monaco.Range(1, 5, await model.getLineCount(), Number.MAX_VALUE), uri: uri }, description: reflist[i].name, s_description: "CALL PGM", sourceType: "PGM", handle: textData.list.handle, use: reflist[i].use });
           } else {
-            let model = await modelChange(await addSpaces(textData.text), 'dds', uri);
-            refDef = await dds_DefinitionList(model, refDef, reflist[i].name, textData.list.handle, reflist[i].use);
+            let model = await modelChange(addSpaces(textData.text), 'dds', uri);
+            refDef = await dds_DefinitionList(model, refDef, value.name, textData.list.handle, value.use, P_FILE);
           }
-        } else {
-          if (FileName === "QDDSSRC") {
-            notExist_DDS.set(reflist[i].name, reflist[i]);
-          } else if (FileName === "QDSPSRC") {
-            notExist_DSP.set(reflist[i].name, reflist[i]);
-          } else if (FileName === "PGM") {
-            notExist_PGM.set(reflist[i].name, reflist[i]);
-          }
+          //見つかったので削除
+          reflist.delete(key);
         }
-
+      };
+      for (const [key, value] of P_FILE.entries()){
+        if (await reflist.has(key)) {
+          let before = await reflist.get(key);
+          value.use.io = new Set([...value.use.io, ...before.use.io]);
+        }
+        reflist.set(key, { name: key, use: value.use });
       }
       return refDef;
     }
@@ -409,7 +403,7 @@ const monacoStart = async () => {
           let file = lineText.substring(6, 14).trim();
           let use = lineText.substring(14, 15).trim();
           let add = lineText.substring(65, 66).trim();
-          let using = new UseIO_Layout(false);
+          let using = new UseIO_Layout(true);
           using.device = type;
           if (add === "A") {
             using.io.add('O');
@@ -442,15 +436,14 @@ const monacoStart = async () => {
           let op_2 = lineText.substring(50, 60).trim();
           let op_2_ex = op_2.replace(/'/g, "");
           if (op_m === "CALL") {
-            let using = new UseIO_Layout(false);
+            let using = new UseIO_Layout(true);
             using.device = "PGM";
             using.io = new Set(["-", "-"]);
             pgm.set(op_2_ex, { name: op_2_ex, use: using });
           }
         }
       }
-
-      return { dds: map_valuesObject(dds), dsp: map_valuesObject(dsp), pgm: map_valuesObject(pgm) }
+      return { dds: dds, dsp: dsp, pgm: pgm }
     }
 
     const reIndentProcess = () => {
@@ -662,7 +655,7 @@ const rightSidebarRead = async () => {
     }
     let click_node = e.target.parentNode;
     let filename = click_node.getElementsByClassName('sidebar-filename')[0].innerText;
-    
+
     let selectMap = await normalRefDef.get(filename);
     if (typeof (selectMap) === 'undefined') {
       selectMap = await normalRefDef.get("'" + filename + "'");
@@ -749,10 +742,8 @@ class localSetting {
 }
 var normalRefDef = new Map();
 var sourceRefDef = new Map();
-var additionalRefDef = new Map();
-var notExist_DDS = new Map();
-var notExist_DSP = new Map();
-var notExist_PGM = new Map();
+var refListFile = {};
+var P_FILE = new Map();
 
 var linkStatus = {};
 let firstEditorLoading = false;

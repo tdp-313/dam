@@ -379,7 +379,7 @@ const monacoLang = async () => {
         }
     });
 }
-const pgm_nameGet = async (model, map, refName, handle, use) => { 
+const pgm_nameGet = async (model, map, refName, handle, use) => {
     let lineCount = model.getLineCount();
     let fileDescription = "CALL PGM";
     for (let i = 1; i <= lineCount; i++) {
@@ -408,7 +408,7 @@ const pgm_nameGet = async (model, map, refName, handle, use) => {
     map.set("'" + refName + "'", { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "PGM", handle: handle, use: use });
     return map;
 }
-const dds_DefinitionList = async (model, map, refName, handle, use) => {
+const dds_DefinitionList = async (model, map, refName, handle, use, reflist) => {
     const createDescription = async (start_row, i, model, max, loopCheck = 0) => {
         let sp_op_full = start_row.substring(44, 80).trim();
         let text_p = sp_op_full.indexOf("TEXT('");
@@ -567,14 +567,14 @@ const dds_DefinitionList = async (model, map, refName, handle, use) => {
     map.set(refName, { location: { range: new monaco.Range(1, 5, lineCount, Number.MAX_VALUE), uri: model.uri }, description: refName + ' : ' + fileDescription, s_description: fileDescription, sourceType: "file", handle: handle, use: clone });
     if (R_file.length > 0) {
         for (let i = 0; i < R_file.length; i++) {
-            if (additionalRefDef.has(R_file[i])) {
-                let before = additionalRefDef.get(R_file[i]);
+            if (await reflist.has(R_file[i])) {
+                let before = reflist.get(R_file[i]);
                 use.io = new Set([...use.io, ...before.use.io]);
+                use.original = false;
             }
-            additionalRefDef.set(R_file[i], { name: R_file[i], use: use });
+            await reflist.set(R_file[i], { name: R_file[i], use: use });
         }
     }
-    //console.log(map);
     return map;
 }
 
@@ -628,7 +628,6 @@ const createUseFileList = async (refDef) => {
         }
     }
     if (mode === 'file') {
-        console.log()
         let existFile = [];
         //Filter Element Create
         html += '<div id="sidebar-filter-root">';
@@ -663,7 +662,7 @@ const createUseFileList = async (refDef) => {
                 filterContents.push(get_template(key.replace(/'/g, ""), value.s_description, value.location.uri.path, get_langIcon(value.location.uri.path), filter_style, value.use));
             }
         });
-        
+
         refDef.forEach((value, key) => {
             // 第一引数にキーが、第二引数に値が渡される
             if (value.sourceType === 'file') {
@@ -686,7 +685,7 @@ const createUseFileList = async (refDef) => {
                 }
             }
         });
-        for (let value of notExist_DDS) {
+        for (let value of refListFile.dds) {
             if (!existFile.includes(value[0])) {
                 maxFile++;
                 let notFoundFile = value[1];
