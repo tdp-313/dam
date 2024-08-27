@@ -298,20 +298,6 @@ const monacoStart = async () => {
       }
       return refDef;
     }
-    const map_valuesArray = (values) => {
-      let rtn = [];
-      for (let value of values) {
-        rtn.push(value); // value1, value2
-      }
-      return rtn;
-    }
-    const map_valuesObject = (values) => {
-      let rtn = [];
-      for (let value of values) {
-        rtn.push(value[1]); // value1, value2
-      }
-      return rtn;
-    }
     const refDefCreate = async (FileArray, handle, refDef, reflist, rootHandleName) => {
       let FileName = "";
       let current_SRC = [];
@@ -331,7 +317,7 @@ const monacoStart = async () => {
       for (const [key, value] of reflist.entries()) {
         let textData = await getFolderExistList_Text(current_SRC, value.name);
         if (textData !== null) {
-          let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + textData.list.file + '/' + value.name);
+          let uri = monaco.Uri.parse("file://" + rootHandleName + "/" + handle.name + '/' + textData.list.file + '/' + encodeURIComponent(value.name));
           if (FileName === "PGM") {
             let model = null;
             if (textData.list.file === "QRPGSRC") {

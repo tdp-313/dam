@@ -244,9 +244,9 @@ const fileReadBoth = async () => {
     let RightText = await file_read_text(Right.fullname, Right.handle, false, "text", false);
     let LeftFileName = FileLeft.value.indexOf('.') !== -1 ? FileLeft.value.substring(0, FileLeft.value.indexOf('.')) : FileLeft.value;
     let RightFileName = FileRight.value.indexOf('.') !== -1 ? FileRight.value.substring(0, FileRight.value.indexOf('.')) : FileRight.value;
-    let NormalUri = monaco.Uri.parse("file://" + FileList.Left.root.handle.name + "/" + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName + '#pulldown');
-    let LeftUri = monaco.Uri.parse("file://" + FileList.Left.root.handle.name + "/" + 'DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + LeftFileName + '#pulldown');
-    let RightUri = monaco.Uri.parse("file://" + FileList.Right.root.handle.name + "/" + 'DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + RightFileName + '#pulldown');
+    let NormalUri = monaco.Uri.parse("file://" + FileList.Left.root.handle.name + "/" + control_LibLeft.value + '/' + FolderLeft.value + '/' + encodeURIComponent(LeftFileName) + '#pulldown');
+    let LeftUri = monaco.Uri.parse("file://" + FileList.Left.root.handle.name + "/" + 'DIFF/' + control_LibLeft.value + '/' + FolderLeft.value + '/' + encodeURIComponent(LeftFileName) + '#pulldown');
+    let RightUri = monaco.Uri.parse("file://" + FileList.Right.root.handle.name + "/" + 'DIFF/' + control_LibRight.value + '/' + FolderRight.value + '/' + encodeURIComponent(RightFileName) + '#pulldown');
 
     let lang = ['', '', ''];//normal original modified
     if (FolderLeft.value === 'QRPGSRC') {
@@ -733,7 +733,7 @@ const readText_Model = async (lib, file, member, r_handle) => {
         return null; //end
     }
     //Found !!
-    let new_uri = monaco.Uri.parse("file://" + r_handle.name + "/" + libHandle.name + '/' + file + '/' + filename_c);
+    let new_uri = monaco.Uri.parse("file://" + r_handle.name + "/" + libHandle.name + '/' + file + '/' + encodeURIComponent(filename_c));
     let source_text = await file_read_text(memberHandle.name, memberHandle, false, "text", false);
     let lang = "js";
     if (file === 'QRPGSRC') {
