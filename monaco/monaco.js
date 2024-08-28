@@ -184,6 +184,8 @@ const monacoStart = async () => {
           return null;
         }
       } else {
+        refListFile = { dds: new Map(), dsp: new Map(), pgm: new Map() };
+        await createUseFileList(normalRefDef);
         return null;
       }
 
