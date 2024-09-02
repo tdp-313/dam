@@ -107,17 +107,13 @@ const monacoLang = async () => {
                     }
                     if (text.type === 'flag' || text.type === 'flag1' || text.type === 'flag2' || text.type === 'flag3') {
                         let wordStr_flag = "*IN" + wordStr;
+                        let flagR = [row.substring(71, 73).trim(), row.substring(73, 75).trim(), row.substring(75, 77).trim()];
                         if (wordStr_flag === result) {
                             ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
-                        }
-                    }
-                    if (flag_regex.test(wordStr)) {
-                        let flag = [];
-                        flag.push(row.substring(71, 73));
-                        flag.push(row.substring(73, 75));
-                        flag.push(row.substring(75, 77));
-                        if (flag.includes(wordStr.substring(3, 5))) {
-                            ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
+                        } else {
+                            if (flagR.includes(wordStr)) {
+                                ranges.push({ range: new monaco.Range(i, 5, i, 77), uri: model.uri });
+                            }
                         }
                     }
                 } else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "I") {
@@ -180,9 +176,15 @@ const monacoLang = async () => {
                     }
                     if (text.type === 'flag' || text.type === 'flag1' || text.type === 'flag2' || text.type === 'flag3') {
                         let wordStr_flag = "*IN" + wordStr;
+                        let flagL = [row.substring(9, 11).trim(), row.substring(12, 14).trim(), row.substring(15, 17).trim()];
                         if (wordStr_flag === op_1 || wordStr_flag === op_2) {
                             ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr_flag) + 1, i, row.lastIndexOf(wordStr_flag) + wordStr_flag.length + 1), uri: model.uri });
+                        } else {
+                            if (flagL.includes(wordStr)) {
+                                ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr_flag) + 1, i, row.lastIndexOf(wordStr_flag) + wordStr_flag.length + 1), uri: model.uri });
+                            }
                         }
+
                     }
                     if (flag_regex.test(wordStr)) {
                         let flag = [];
@@ -212,6 +214,11 @@ const monacoLang = async () => {
                     let field_2 = row.substring(59, 67).trim();
                     if (wordStr === field_2) {
                         ranges.push({ range: new monaco.Range(i, row.indexOf(wordStr), i, row.indexOf(wordStr) + wordStr.length), uri: model.uri });
+                    }
+                } else if (row.substring(6, 7) !== "*" && row.substring(5, 6) === "O") {
+                    let field_1 = row.substring(31, 37).trim();
+                    if (wordStr === field_1) {
+                        ranges.push({ range: new monaco.Range(i, 31, i, 37), uri: model.uri });
                     }
                 }
             }

@@ -156,6 +156,7 @@ header .editorModeArea {
 header input[type="radio"]:checked+label,
 .hoverButton:hover,
 #control-subArea input[type="checkbox"]:checked+label,
+#control-diffArea input[type="checkbox"]:checked+label,
 #right-sideBar input[type="radio"]:checked+label,
 #monaco-tab input[type="radio"]:checked+label,
 #sidebar-filter-root input[type="checkbox"]:checked+label,
@@ -186,7 +187,7 @@ header input[type="radio"]:checked+label,
 }
 
 .control-FolderFileArea {
-    width: 50%;
+    width: 45%;
     display: grid;
     grid-template-columns: 0.4rem 2rem 0.4rem 0.35fr 0.3fr 0.35fr;
     justify-items: center;
@@ -201,7 +202,7 @@ header input[type="radio"]:checked+label,
     background-color: var(--backgroundColor);
     right: 0;
     top: 0;
-    width: 50%;
+    width: 55%;
     display: grid;
     grid-template-columns: 0.5rem 2rem 2rem 2rem 0.5rem 2rem 2rem 2rem 0.5rem 2rem 1fr 2rem 0.5rem;
     transition: 0.3s ease;

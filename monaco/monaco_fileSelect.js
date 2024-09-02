@@ -18,6 +18,7 @@ class monaco_file {
         }
     }
 }
+
 const monaco_handleName = "monaco";
 const monaco_handleName_Sub = "monaco-sub";
 const monaco_handleName_RefMaster = "monaco-ref";
@@ -39,6 +40,14 @@ const fileReadStart = async (isNew = false, init = "reSync") => {
     await fileReadBoth();
 }
 
+const reload_Process = () => {
+    if (Object.keys(linkStatus).length === 0) {
+        fileReadStart(false, "init")
+    }
+    else {
+        fileReadStart(false)
+    }
+}
 const readFileButtonCreate = () => {
     const otherTabOpen = document.getElementById('control-otherTab');
     otherTabOpen.addEventListener('click', async () => {
@@ -68,14 +77,14 @@ const readFileButtonCreate = () => {
         Setting.setInitRead = initReadButton.checked;
     });
 
+    const diffIndentButton = document.getElementById('control-diffExtension');
+    diffIndentButton.addEventListener('click', async (event) => {
+        Setting.setdiffIndent = diffIndentButton.checked;
+        reload_Process();
+    });
+
     modeChangeSync.addEventListener('click', async (event) => {
-        console.log(Object.keys(linkStatus).length)
-        if (Object.keys(linkStatus).length === 0) {
-            fileReadStart(false, "init")
-        }
-        else {
-            fileReadStart(false)
-        }
+        reload_Process();
     });
     const fileSelectSync = document.getElementById('control-FileSelectSync');
     fileSelectSync.addEventListener('click', async (e) => {
@@ -250,11 +259,17 @@ const fileReadBoth = async () => {
 
     let lang = ['', '', ''];//normal original modified
     if (FolderLeft.value === 'QRPGSRC') {
-        lang = ['rpg-indent', 'rpg', 'rpg'];
-        leftIndentText = await addIndent(LeftText);
-        LeftText = await addSpaces(LeftText);
-        RightText = await addSpaces(RightText);
-
+        if (Setting.diffIndent) {
+            lang = ['rpg-indent', 'rpg-indent', 'rpg-indent'];
+            leftIndentText = await addIndent(LeftText);
+            LeftText = leftIndentText
+            RightText = await addIndent(RightText);
+        } else {
+            lang = ['rpg-indent', 'rpg', 'rpg'];
+            leftIndentText = await addIndent(LeftText);
+            LeftText = await addSpaces(LeftText);
+            RightText = await addSpaces(RightText);
+        }
     } else if (FolderLeft.value === 'QDSPSRC' || FolderLeft.value === 'QDDSSRC') {
         lang = ['dds', 'dds', 'dds'];
         leftIndentText = await addSpaces(LeftText);
@@ -271,7 +286,7 @@ const fileReadBoth = async () => {
     let diffEditorModel_Original = await modelChange(LeftText, lang[1], LeftUri);
     let normalEditorModel_Modified = await modelChange(RightText, lang[2], RightUri);
     await monacoRead2(normalEditorModel, diffEditorModel_Original, normalEditorModel_Modified);
-
+    rulerChange(document.getElementById('control-extraRuler').checked);
     await tabs_add(normalEditorModel, false);
 }
 

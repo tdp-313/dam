@@ -808,6 +808,14 @@ const getRow_Text = (row, columns) => {
             }
         }
     }
+    if (row.substring(5, 6) === "O") {
+        if (columns <= 32) {
+            return { text: "", startColumn: columns, endColumn: columns, type: 'none' };
+        }
+        else if (columns <= 37) {
+            return { text: row.substring(31, 37), startColumn:31, endColumn: 37, type: 'outputFileld' };
+        }
+    }
     console.log("nomatch");
     return { text: "", startColumn: columns, endColumn: columns };
 }
@@ -1529,5 +1537,10 @@ var tip_memberName = {
 var tip_recordID = {
     type: 'auto-fixed',
     description: "レコード様式の外部名",
+    detail: {}
+}
+var tip_outputFileld = {
+    type: 'auto-fixed',
+    description: "出力されるフィールド名",
     detail: {}
 }

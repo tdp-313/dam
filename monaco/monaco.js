@@ -80,18 +80,22 @@ const monacoStart = async () => {
       }
       insertChange.checked = isInsert;
     }
-    const rulerChange = (isDisp) => {
+    window.rulerChange = (isDisp) => {
       if (isDisp) {
         normalEditor.updateOptions({ rulers: [5, 6, 17, 27, 45, 50, 60, 66, 69, 71, 77] });
-        diffEditor.updateOptions({ rulers: [5, 6, 17, 27, 32, 42, 48, 51, 53, 59] });
+        if (Setting.diffIndent) {
+          diffEditor.updateOptions({ rulers: [5, 6, 17, 27, 45, 50, 60, 66, 69, 71, 77] });
+        } else {
+          diffEditor.updateOptions({ rulers: [5, 6, 17, 27, 32, 42, 48, 51, 53, 59] });
+        }
       } else {
         normalEditor.updateOptions({ rulers: [] });
         diffEditor.updateOptions({ rulers: [] });
       }
-      const extraRulerChange = document.getElementById('control-extraRuler');
+      const extraRulerChange = document.getElementById('control-extraRuler').checked;
       extraRulerChange.checked = isDisp;
     }
-
+    
     const readOnlyChange = (isWrite) => {
       if (isWrite) {
         normalEditor.updateOptions({ readOnly: false });
@@ -143,8 +147,6 @@ const monacoStart = async () => {
         original: diffModel_original,
         modified: diffModel_modified,
       });
-      ruler_State = true;
-      rulerChange(ruler_State);
       //anytime
       normalEditor.updateOptions(rpgEditorOption());
       diffEditor.updateOptions(rpgEditorOption());
@@ -152,7 +154,6 @@ const monacoStart = async () => {
     const extraReadOnlyChange = document.getElementById('control-extraReadOnly');
     extraReadOnlyChange.addEventListener('click', (e) => {
       readOnlyChange(e.target.checked);
-      console.log(e.target.checked);
     });
 
     const extraRulerChange = document.getElementById('control-extraRuler');
@@ -607,6 +608,7 @@ const modelChange = async (text, lang, uri) => {
   let model = monaco.editor.getModel(uri);
   if (model) {
     model.setValue(text);
+    monaco.editor.setModelLanguage(model,lang);
   } else {
     model = monaco.editor.createModel(text, lang, uri);
   }
@@ -682,8 +684,11 @@ class localSetting {
     this.diffTheme = typeof (data.diffTheme) === 'undefined' ? 0 : data.diffTheme;
     this.libraryList = typeof (data.libraryList) === 'undefined' ? {} : data.libraryList;
     this.initRead = typeof (data.initRead) === 'undefined' ? true : data.initRead;
+    this.diffIndent = typeof (data.diffIndent) === 'undefined' ? true : data.diffIndent;
     const initRead_DOM = document.getElementById('control-initRead');
     initRead_DOM.checked = this.initRead;
+    const initRead_diffIndent = document.getElementById('control-diffExtension');
+    initRead_diffIndent.checked = this.diffIndent;
   }
   get getAll() {
     return this;
@@ -722,6 +727,11 @@ class localSetting {
   }
   set setInitRead(init) {
     this.initRead = init;
+    this.save();
+  }
+
+  set setdiffIndent(init) {
+    this.diffIndent = init;
     this.save();
   }
   save() {
